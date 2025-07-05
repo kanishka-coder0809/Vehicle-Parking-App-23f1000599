@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FindMySpot - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #92a3fd, #9dceff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Segoe UI", sans-serif;
+            position: relative;
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-weight: 700;
+        }
+
+        .home-button:hover {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-container:hover {
+            transform: scale(1.01);
+            transition: ease-in-out 0.5s;
+        }
+
+        .login-container h2 {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .login-container p {
+            color: #6c757d;
+            margin-bottom: 30px;
+        }
+
+        .form-control {
+            border-radius: 10px;
+        }
+
+        .btn-primary {
+            background-color: #5b6dff;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .btn-primary:hover {
+            background-color: #3e52f3;
+        }
+
+        .form-check-label {
+            margin-left: 5px;
+        }
+
+        .small-links {
+            font-size: 0.9rem;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .form-footer a {
+            text-decoration: none;
+            color: #5b6dff;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Home Button -->
+    <a href="/" class="btn btn- home-button">
+        &lt; Home Page
+    </a>
+
+    <div class="login-container text-center">
+        <h2>Welcome</h2>
+        <p>We missed you! Please enter your details.</p>
+
+        <form>
+            <div class="mb-3 text-start">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" placeholder="Enter your email" required />
+            </div>
+
+            <div class="mb-3 text-start">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" id="password" placeholder="Enter password" required />
+                </div>
+            </div>
+
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary">Sign in</button>
+            </div>
+        </form>
+
+        <div class="form-footer">
+            Don’t have an account? <a href="/register">Sign up</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap Icons (optional for eye icon) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+</body>
+
+</html>
