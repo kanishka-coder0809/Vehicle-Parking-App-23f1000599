@@ -105,16 +105,16 @@
         <h2>Welcome</h2>
         <p>We missed you! Please enter your details.</p>
 
-        <form>
+        <form action="/login" method="POST">
             <div class="mb-3 text-start">
                 <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" placeholder="Enter your email" required />
+                <input type="email" class="form-control" id="email" placeholder="Enter your email" name="email" required />
             </div>
 
             <div class="mb-3 text-start">
                 <label for="password" class="form-label">Password</label>
                 <div class="input-group">
-                    <input type="password" class="form-control" id="password" placeholder="Enter password" required />
+                    <input type="password" class="form-control" id="password" placeholder="Enter password" name="password" required />
                 </div>
             </div>
 
