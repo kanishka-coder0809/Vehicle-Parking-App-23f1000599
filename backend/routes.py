@@ -1,6 +1,6 @@
 from app import app
 from flask import render_template, request, redirect
-from .models import db, Admin, User, ParkingLot
+from .models import db, Admin, User
 
 @app.route("/")
 def index():
@@ -47,8 +47,12 @@ def login():
 
 @app.route("/admin/dashboard")
 def admin_dash():
-    return render_template("/admin/dashboard.html")
+    if request.args.get("login_id"):
+        admin = db.session.query(Admin).filter_by(id= request.args.get("login_id")).first()
+        return render_template("/admin/dashboard.html", curr_admin = admin)
 
 @app.route("/user/dashboard")
 def user_dash():
-    return render_template("/user/dashboard.html")
+    if request.args.get("login_id"):
+        user = db.session.query(User).filter_by(id= request.args.get("login_id")).first()
+        return render_template("/user/dashboard.html", curr_user = user)
