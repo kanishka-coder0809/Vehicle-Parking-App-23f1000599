@@ -56,5 +56,9 @@ def admin_dash():
 @app.route("/user/dashboard")
 @login_required
 def user_dash():
-    
     return render_template("/user/dashboard.html", curr_user = current_user)
+
+@app.route("/user/stats")
+@login_required
+def user_stats():
+    return f"Welcome to {current_user.name} stats."

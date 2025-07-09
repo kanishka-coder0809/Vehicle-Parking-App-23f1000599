@@ -9,6 +9,8 @@ class Admin(db.Model, UserMixin):
     name = db.Column(db.String, nullable = False)
     email = db.Column(db.String, nullable = False)
     password = db.Column(db.String, nullable = False)
+    def get_id(self):
+        return self.email
 
 class User(db.Model, UserMixin):
     __tablename__ = "user"
@@ -18,6 +20,8 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String , nullable= False)
     phone = db.Column(db.String , nullable = False)
     reserved_parking_spots = db.relationship("ReservedParkingSpot" , backref="user")
+    def get_id(self):
+        return self.email
 
 class ParkingLot(db.Model):
     __tablename__ = "Parking_Lot"

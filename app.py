@@ -11,8 +11,8 @@ def create_app():
     db.init_app(app)
     login_manager = LoginManager(app)
     @login_manager.user_loader
-    def load_user(id): #taking the id from cookies
-        return db.session.query(User).filter_by(id = id).first() or db.session.query(Admin).filter_by(id = id).first()
+    def load_user(email): #taking the id from cookies
+        return db.session.query(User).filter_by(email = email).first() or db.session.query(Admin).filter_by(email = email).first()
 
     app.app_context().push()
     db.create_all()
