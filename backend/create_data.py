@@ -1,8 +1,27 @@
-from .models import db, Admin, ParkingLot
+from .models import db, Admin, ParkingLot, User
 
 if db.session.query(Admin).count() == 0:
     A = Admin(name = "admin" , email="admin@myapp.com" , password = "pass")
     db.session.add(A)
+    db.session.commit()
+
+if db.session.query(User).count() == 0:
+    U1 = User(name="Rohan Mehta", email="rohan.mehta01@gmail.com", password="rohan123", phone="9876543210")
+    db.session.add(U1)
+    U2 = User(name="Ananya Sharma", email="ananya.sharma22@yahoo.com", password="ananya123", phone="9123456780")
+    db.session.add(U2)
+    U3 = User(name="Aarav Kapoor", email="aarav.kapoor@outlook.com", password="aarav123", phone="9988776655")
+    db.session.add(U3)
+    U4 = User(name="Sneha Iyer", email="sneha.iyer@gmail.com", password="sneha123", phone="9812345678")
+    db.session.add(U4)
+    U5 = User(name="Aditya Rao", email="aditya.rao94@gmail.com", password="aditya123", phone="9090909090")
+    db.session.add(U5)
+    U6 = User(name="Pooja Verma", email="pooja.v@rediffmail.com", password="pooja123", phone="9611223344")
+    db.session.add(U6)
+    U7 = User(name="Kabir Bansal", email="kabir.bansal1998@gmail.com", password="kabir123", phone="9988123456")
+    db.session.add(U7)
+    U8 = User(name="Tanya Singh", email="tanya.singh@mail.com", password="tanya123", phone="9765432109")
+    db.session.add(U8)
     db.session.commit()
 
 if db.session.query(ParkingLot).count() == 0:
@@ -14,4 +33,12 @@ if db.session.query(ParkingLot).count() == 0:
     db.session.add(P3)
     P4 = ParkingLot(prime_location_name="Sanjay Palace", price=100, address="Civil Lines, Agra", pin_code=282002, maximum_number_of_spots=150)
     db.session.add(P4)
+    P5 = ParkingLot(prime_location_name="Phoenix Palassio Mall", price=750, address="Amar Shaheed Path, Lucknow", pin_code=226002, maximum_number_of_spots=300)
+    db.session.add(P5)
+    P6 = ParkingLot(prime_location_name="MG Road Metro Station", price=500, address="Near Sikanderpur, Gurugram", pin_code=122001, maximum_number_of_spots=120)
+    db.session.add(P6)
+    P7 = ParkingLot(prime_location_name="Kashi Vishwanath Corridor", price=300, address="Vishwanath Gali, Varanasi", pin_code=221001, maximum_number_of_spots=200)
+    db.session.add(P7)
+    P8 = ParkingLot(prime_location_name="Hinjewadi IT Park", price=150, address="Phase 2 Road, Pune",pin_code=411057, maximum_number_of_spots=180)
+    db.session.add(P8)
     db.session.commit()

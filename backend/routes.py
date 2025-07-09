@@ -1,6 +1,7 @@
 from app import app
 from flask import render_template, request, redirect
 from .models import db, Admin, User
+from flask_login import login_user, login_required, current_user
 
 @app.route("/")
 def index():
@@ -37,8 +38,10 @@ def login():
         if login:
             if login.password == l_password:
                 if isinstance(login, Admin):
+                    login_user(login)
                     return redirect(f"/admin/dashboard?login_id={login.id}")
                 elif isinstance(login, User):
+                    login_user(login)
                     return redirect(f"/user/dashboard?login_id={login.id}")
             else:
                 return "Incorrect Password"
@@ -46,13 +49,12 @@ def login():
             return "E-mail doesn't exist"
 
 @app.route("/admin/dashboard")
+@login_required  
 def admin_dash():
-    if request.args.get("login_id"):
-        admin = db.session.query(Admin).filter_by(id= request.args.get("login_id")).first()
-        return render_template("/admin/dashboard.html", curr_admin = admin)
+    return render_template("/admin/dashboard.html")
 
 @app.route("/user/dashboard")
+@login_required
 def user_dash():
-    if request.args.get("login_id"):
-        user = db.session.query(User).filter_by(id= request.args.get("login_id")).first()
-        return render_template("/user/dashboard.html", curr_user = user)
+    
+    return render_template("/user/dashboard.html", curr_user = current_user)
