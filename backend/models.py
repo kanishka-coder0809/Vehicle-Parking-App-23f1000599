@@ -19,6 +19,8 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String , unique =True , nullable=False)
     password = db.Column(db.String , nullable= False)
     phone = db.Column(db.String , nullable = False)
+    city = db.Column(db.String , nullable = False)
+    pincode = db.Column(db.Integer, nullable = False)
     reserved_parking_spots = db.relationship("ReservedParkingSpot" , backref="user")
     def get_id(self):
         return self.email

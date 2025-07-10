@@ -39,10 +39,10 @@ def login():
             if login.password == l_password:
                 if isinstance(login, Admin):
                     login_user(login)
-                    return redirect(f"/admin/dashboard?login_id={login.id}")
+                    return redirect(f"/admin/dashboard")
                 elif isinstance(login, User):
                     login_user(login)
-                    return redirect(f"/user/dashboard?login_id={login.id}")
+                    return redirect(f"/user/dashboard")
             else:
                 return "Incorrect Password"
         else:
