@@ -1,6 +1,6 @@
 from app import app
 from flask import render_template, request, redirect
-from .models import db, Admin, User
+from .models import db, Admin, User, ParkingLot
 from flask_login import login_user, login_required, current_user
 
 @app.route("/")
@@ -51,7 +51,8 @@ def login():
 @app.route("/admin/dashboard")
 @login_required  
 def admin_dash():
-    return render_template("/admin/dashboard.html")
+    all_par = db.session.query(ParkingLot).all()
+    return render_template("/admin/dashboard.html", all_par = all_par)
 
 @app.route("/user/dashboard")
 @login_required
@@ -62,3 +63,40 @@ def user_dash():
 @login_required
 def user_stats():
     return f"Welcome to {current_user.name} stats."
+
+@app.route("/parkingLots", methods=["POST"])
+def parkingLot():
+    if request.args.get("task") == "create":
+        par_name = request.form.get("name")
+        par_price = request.form.get("price")
+        par_add = request.form.get("address")
+        par_city = request.form.get("city")
+        par_pin = request.form.get("pincode")
+        par_max = request.form.get("maximum_number_of_spots")
+        parking = db.session.query(ParkingLot).filter_by(prime_location_name=par_name).first()
+        if parking:
+            return "Parking Lot Already Exist"
+        else:
+            new_par = ParkingLot(prime_location_name = par_name, price = par_price, address = par_add, city = par_city, pin_code = par_pin, maximum_number_of_spots = par_max)
+            db.session.add(new_par)
+            db.session.commit()
+            return redirect("/admin/dashboard")
+    elif request.args.get("task") == "edit":
+        par_name = request.form.get("name")
+        par_price = request.form.get("price")
+        par_add = request.form.get("address")
+        par_city = request.form.get("city")
+        par_pin = request.form.get("pincode")
+        par_max = request.form.get("maximum_number_of_spots")
+        parking = db.session.query(ParkingLot).filter_by(prime_location_name=par_name).first()
+        if parking:
+            parking.prime_location_name = par_name
+            parking.price = par_price
+            parking.address = par_add
+            parking.city = par_city
+            parking.pin_code = par_pin
+            parking.maximum_number_of_spots = par_max
+            db.session.commit()
+            return redirect("/admin/dashboard")
+        else:
+            return "Category doesn't exist"

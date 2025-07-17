@@ -31,6 +31,7 @@ class ParkingLot(db.Model):
     prime_location_name = db.Column(db.String, nullable = False)
     price = db.Column(db.Integer, nullable = False) #####
     address = db.Column(db.String, nullable = False)
+    city = db.Column(db.String , nullable = False)
     pin_code = db.Column(db.Integer, nullable = False)
     maximum_number_of_spots = db.Column(db.Integer, nullable = False)
     spots = db.relationship("ParkingSpot", backref = "Parking_Lot")

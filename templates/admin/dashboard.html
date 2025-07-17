@@ -45,12 +45,150 @@
     </nav>
 
     <!-- Parking Lots and Users -->
-    <div class="card mx-auto my-5 text-center" style="width:50%">
+    <div class="card shadow-lg mx-auto my-5" style="width:80%">
         <div class="card-body">
-            <h5 class="card-title text-center">Parking Lots</h5>
-            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s
-                content.</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
+            <div class="card-header d-flex">
+                <h5 class="card-title">Parking Lots</h5>
+
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-warning ms-auto" class="btn btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#createParking">+ Create</button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="createParking" tabindex="-1" aria-labelledby="exampleModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Create Parking Lot</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="/parkingLots?task=create" method="POST">
+
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="name" placeholder="Name" name="name"
+                                            required>
+                                        <label for="fullname">Name</label>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <input type="number" class="form-control" id="price" placeholder="Price"
+                                            name="price" required>
+                                        <label for="price">Price</label>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="address" placeholder="Address"
+                                            name="address" required>
+                                        <label for="address">Address</label>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="address" placeholder="city"
+                                            name="city" required>
+                                        <label for="city">City</label>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <input type="number" class="form-control" id="pincode" placeholder="Pincode"
+                                            name="pincode" required>
+                                        <label for="pincode">Pincode</label>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <input type="number" class="form-control" id="maximum_number_of_spots"
+                                            placeholder="Maximum number of spots" name="maximum_number_of_spots"
+                                            required>
+                                        <label for="maximum_number_of_spots">Maximum number of Spots</label>
+                                    </div>
+
+                                    <div class="d-grid mb-2">
+                                        <button type="submit" class="btn btn-primary">Create</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-2 g-3 text-center">
+                {% for lot in all_par %}
+                <div class="col-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <p>{{lot.prime_location_name}}</p>
+                            <p>(Occupied: 0/{{lot.maximum_number_of_spots}})</p>
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Basic outlined example">
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                    data-bs-target="#editParking-{{lot.id}}">Edit</button>
+                                <button type="button" class="btn btn-outline-primary">View</button>
+                            </div>
+                            <!-- Modal for Edit -->
+                            <div class="modal fade" id="editParking-{{lot.id}}" tabindex="-1" aria-labelledby="exampleModalLabel"
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Parking Lot</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="/parkingLots?task=edit" method="POST">
+
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="name" placeholder="Name"
+                                                        name="name" value="{{lot.prime_location_name}}" required>
+                                                    <label for="fullname">Name</label>
+                                                </div>
+
+                                                <div class="form-floating mb-3">
+                                                    <input type="number" class="form-control" id="price"
+                                                        placeholder="Price" name="price" value="{{lot.price}}" required>
+                                                    <label for="price">Price</label>
+                                                </div>
+
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="address"
+                                                        placeholder="Address" value="{{lot.address}}" name="address" required>
+                                                    <label for="address">Address</label>
+                                                </div>
+
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="address"
+                                                        placeholder="city" name="city" value="{{lot.city}}" required>
+                                                    <label for="city">City</label>
+                                                </div>
+
+                                                <div class="form-floating mb-3">
+                                                    <input type="number" class="form-control" id="pincode"
+                                                        placeholder="Pincode" name="pincode" value="{{lot.pin_code}}" required>
+                                                    <label for="pincode">Pincode</label>
+                                                </div>
+
+                                                <div class="form-floating mb-3">
+                                                    <input type="number" class="form-control"
+                                                        id="maximum_number_of_spots"
+                                                        placeholder="Maximum number of spots"
+                                                        name="maximum_number_of_spots" value="{{lot.maximum_number_of_spots}}" required>
+                                                    <label for="maximum_number_of_spots">Maximum number of Spots</label>
+                                                </div>
+
+                                                <div class="d-grid mb-2">
+                                                    <button type="submit" class="btn btn-primary">Edit</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
