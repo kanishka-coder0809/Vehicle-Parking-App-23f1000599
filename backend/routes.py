@@ -1,6 +1,6 @@
 from app import app
 from flask import render_template, request, redirect
-from .models import db, Admin, User, ParkingLot
+from .models import db, Admin, User, ParkingLot, ParkingSpot
 from flask_login import login_user, login_required, current_user
 
 @app.route("/")
@@ -52,7 +52,8 @@ def login():
 @login_required  
 def admin_dash():
     all_par = db.session.query(ParkingLot).all()
-    return render_template("/admin/dashboard.html", all_par = all_par)
+    all_users = db.session.query(User).all()
+    return render_template("/admin/dashboard.html", all_par = all_par, all_users = all_users)
 
 @app.route("/user/dashboard")
 @login_required
