@@ -53,6 +53,15 @@ def login():
 def admin_dash():
     all_par = db.session.query(ParkingLot).all()
     all_users = db.session.query(User).all()
+
+    # Check and create missing parking spots for each lot
+    for lot in all_par:
+        existing_spots = db.session.query(ParkingSpot).filter_by(lot_id=lot.id).count()
+        if existing_spots < lot.maximum_number_of_spots:
+            for _ in range(existing_spots + 1, lot.maximum_number_of_spots + 1):
+                new_spot = ParkingSpot(lot_id=lot.id, status="A")  # A = Available
+                db.session.add(new_spot)
+            db.session.commit()
     return render_template("/admin/dashboard.html", all_par = all_par, all_users = all_users)
 
 @app.route("/user/dashboard")
@@ -88,16 +97,33 @@ def parkingLot():
         par_add = request.form.get("address")
         par_city = request.form.get("city")
         par_pin = request.form.get("pincode")
-        par_max = request.form.get("maximum_number_of_spots")
+        par_max = int(request.form.get("maximum_number_of_spots")) #ensure that it is a integer
         parking = db.session.query(ParkingLot).filter_by(prime_location_name=par_name).first()
         if parking:
+            # Get current number of ParkingSpots
+            current_spots = db.session.query(ParkingSpot).filter_by(lot_id=parking.id).all()
+            current_count = len(current_spots)
+
+            # Update ParkingLot fields
             parking.prime_location_name = par_name
             parking.price = par_price
             parking.address = par_add
             parking.city = par_city
             parking.pin_code = par_pin
             parking.maximum_number_of_spots = par_max
+            
+            # Handle difference in spot count
+            if par_max > current_count:
+                # Add new spots
+                for _ in range(current_count + 1, par_max + 1):
+                    new_spot = ParkingSpot(lot_id=parking.id, status='A')
+                    db.session.add(new_spot)
+            elif par_max < current_count:
+                # Remove extra spots (Only remove available ones to avoid deleting reserved)
+                removable_spots = [spot for spot in current_spots if spot.status == 'A']
+                for spot in removable_spots[:current_count - par_max]:
+                    db.session.delete(spot)
             db.session.commit()
             return redirect("/admin/dashboard")
         else:
-            return "Category doesn't exist"
+            return "Parking Lot doesn't exist"
