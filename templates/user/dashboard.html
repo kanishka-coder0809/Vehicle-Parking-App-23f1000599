@@ -1,14 +1,211 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
+
 <body>
-    <a href="/user/stats">Go to user statistics</a>
-    <h1>Welcome to User Dasboard</h1>
-    Name: {{curr_user.name}} <br>
-    E-mail: {{curr_user.email}}
+    <nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid ms-5">
+            <a class="navbar-brand" href="#">FindMySpot</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto me-5">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/user/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Search</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Summary</a>
+                    </li>
+                    <div class="dropdown">
+                        <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="bi bi-person fs-5"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#">Logout</a></li>
+                        </ul>
+                    </div>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toggle Between Available Spots and Parking History -->
+    <ul class="nav nav-pills mb-3 d-flex justify-content-center mt-3" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home"
+                type="button" role="tab" aria-controls="pills-home" aria-selected="true">Available Parking Lots</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"
+                type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Your Parking History</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab"
+            tabindex="0">
+            <!-- Parking Lots -->
+            <div class="card shadow-lg mx-auto" style="width:80%">
+                <div class="card-body">
+                    <div class="card-header d-flex align-items-center justify-content-center">
+                        <h5 class="card-title">Available Parking Lots</h5>
+                    </div>
+                    <div class="card mx-auto my-4" style="width: 95%">
+                        <div class="card-body">
+                            <h5 class="card-title text-center">Search by</h5>
+                            
+                        </div>
+                    </div>
+                    <div class="row my-2 g-3 text-center">
+                        <!-- {% for lot in all_par %} -->
+                        <div class="col-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <p></p>
+                                    <p></p>
+                                    <div class="btn-group btn-group-sm" role="group"
+                                        aria-label="Basic outlined example">
+                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#editParking-{{lot.id}}">Book</button>
+                                    </div>
+
+                                    <!-- Modal for Book -->
+                                    <div class="modal fade" id="editParking-{{lot.id}}" tabindex="-1"
+                                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Parking Lot
+                                                    </h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="/booking" method="POST">
+
+                                                        <div class="form-floating mb-3">
+                                                            <input type="text" class="form-control" id="name"
+                                                                placeholder="Name" name="name"
+                                                                value="{{lot.prime_location_name}}" required>
+                                                            <label for="fullname">Name</label>
+                                                        </div>
+
+                                                        <div class="form-floating mb-3">
+                                                            <input type="number" class="form-control" id="price"
+                                                                placeholder="Price" name="price" value="{{lot.price}}"
+                                                                required>
+                                                            <label for="price">Price</label>
+                                                        </div>
+
+                                                        <div class="form-floating mb-3">
+                                                            <input type="text" class="form-control" id="address"
+                                                                placeholder="Address" value="{{lot.address}}"
+                                                                name="address" required>
+                                                            <label for="address">Address</label>
+                                                        </div>
+
+                                                        <div class="form-floating mb-3">
+                                                            <input type="text" class="form-control" id="address"
+                                                                placeholder="city" name="city" value="{{lot.city}}"
+                                                                required>
+                                                            <label for="city">City</label>
+                                                        </div>
+
+                                                        <div class="form-floating mb-3">
+                                                            <input type="number" class="form-control" id="pincode"
+                                                                placeholder="Pincode" name="pincode"
+                                                                value="{{lot.pin_code}}" required>
+                                                            <label for="pincode">Pincode</label>
+                                                        </div>
+
+                                                        <div class="form-floating mb-3">
+                                                            <input type="number" class="form-control"
+                                                                id="maximum_number_of_spots"
+                                                                placeholder="Maximum number of spots"
+                                                                name="maximum_number_of_spots"
+                                                                value="{{lot.maximum_number_of_spots}}" required>
+                                                            <label for="maximum_number_of_spots">Maximum number of
+                                                                Spots</label>
+                                                        </div>
+
+                                                        <div class="d-grid mb-2">
+                                                            <button type="submit" class="btn btn-primary">Edit</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- {% endfor %} -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+            <!-- Registered Users -->
+            <div class="card shadow-lg mx-auto" style="width:80%">
+                <div class="card-body">
+                    <div class="card-header text-center">
+                        <h5 class="card-title">History</h5>
+                    </div>
+                    <div>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Lot Name</th>
+                                    <th scope="col">Spot ID</th>
+                                    <th scope="col">City</th>
+                                    <th scope="col">Pincode</th>
+                                    <th scope="col">Timestamp</th>
+                                    <th scope="col">Vehicle Number</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in all_users %}
+                                <tr>
+                                    <th scope="row">{{user.id}}</th>
+                                    <td>{{user.name}}</td>
+                                    <td>{{user.email}}</td>
+                                    <td>{{user.phone}}</td>
+                                    <td>{{user.city}}</td>
+                                    <td>{{user.pincode}}</td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-outline-dark"><i
+                                                class="bi bi-hourglass"></i></button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
+
 </html>
