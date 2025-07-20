@@ -1,7 +1,10 @@
 from app import app
-from flask import render_template, request, redirect
-from .models import db, Admin, User, ParkingLot, ParkingSpot
+from flask import render_template, request, redirect, flash
+from .models import db, Admin, User, ParkingLot, ParkingSpot, ReservedParkingSpot
 from flask_login import login_user, login_required, current_user
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import and_
+from datetime import datetime
 
 @app.route("/")
 def index():
@@ -67,7 +70,9 @@ def admin_dash():
 @app.route("/user/dashboard")
 @login_required
 def user_dash():
-    return render_template("/user/dashboard.html", curr_user = current_user)
+    # Fetch all lots with at least one available spot
+    all_par = db.session.query(ParkingLot).join(ParkingSpot).filter(ParkingSpot.status == 'A').distinct().all()
+    return render_template("/user/dashboard.html", curr_user=current_user, all_par=all_par)
 
 @app.route("/user/stats")
 @login_required
@@ -127,3 +132,30 @@ def parkingLot():
             return redirect("/admin/dashboard")
         else:
             return "Parking Lot doesn't exist"
+
+@app.route("/booking", methods=["POST"])
+@login_required
+def booking():
+    lot_id = request.form.get("lot_id")
+    lot = db.session.query(ParkingLot).filter_by(id=lot_id).first()
+
+    if not lot:
+        return "Invalid Parking Lot", 400
+
+    # Find first available spot in the lot
+    available_spot = db.session.query(ParkingSpot).filter_by(lot_id=lot_id, status='A').first()
+
+    if not available_spot:
+        flash("No available parking spots in this lot.", "danger")
+        return redirect("/user/dashboard")
+
+    # Mark spot as occupied
+    available_spot.status = 'O'
+
+    # Create reservation
+    now = datetime.now()
+    reservation = ReservedParkingSpot(spot_id=available_spot.id, lot_id=lot.id, user_id=current_user.id, parking_timestamp=now.strftime('%Y-%m-%d %H:%M:%S'), leaving_timestamp="Not yet left",  parkingCost_unitTime=lot.price)
+    db.session.add(reservation)
+    db.session.commit()
+    flash("Parking Spot Booked Successfully!", "success")
+    return redirect("/user/dashboard")

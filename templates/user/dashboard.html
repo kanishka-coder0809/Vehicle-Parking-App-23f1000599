@@ -52,7 +52,8 @@
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"
-                type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Your Parking History</button>
+                type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Your Parking
+                History</button>
         </li>
     </ul>
     <div class="tab-content" id="pills-tabContent">
@@ -65,87 +66,115 @@
                         <h5 class="card-title">Available Parking Lots</h5>
                     </div>
                     <div class="card mx-auto my-4" style="width: 95%">
-                        <div class="card-body">
+                        <div class="card-body text-center">
                             <h5 class="card-title text-center">Search by</h5>
-                            
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="searchby" id="name" value="name">
+                                <label class="form-check-label" for="name">Location Name</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="searchby" id="city" value="city">
+                                <label class="form-check-label" for="city">City</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="searchby" id="pincode"
+                                    value="pincode">
+                                <label class="form-check-label" for="pincode">Pincode</label>
+                            </div>
+                            <form class="d-flex my-2" role="search">
+                                <input class="form-control me-2" type="search" placeholder="Search"
+                                    aria-label="Search" />
+                                <button class="btn btn-outline-success" type="submit">Search</button>
+                            </form>
                         </div>
                     </div>
+
                     <div class="row my-2 g-3 text-center">
-                        <!-- {% for lot in all_par %} -->
+                        {% for lot in all_par %}
                         <div class="col-4">
                             <div class="card">
                                 <div class="card-body">
-                                    <p></p>
-                                    <p></p>
+                                    <p><strong>{{ lot.prime_location_name }}</strong></p>
+                                    <p>Available Spots: {{ lot.spots | selectattr('status', 'equalto', 'A') | list |
+                                        length }}</p>
                                     <div class="btn-group btn-group-sm" role="group"
                                         aria-label="Basic outlined example">
                                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
-                                            data-bs-target="#editParking-{{lot.id}}">Book</button>
+                                            data-bs-target="#bookParking-{{ lot.id }}">Book</button>
                                     </div>
 
                                     <!-- Modal for Book -->
-                                    <div class="modal fade" id="editParking-{{lot.id}}" tabindex="-1"
+                                    <div class="modal fade" id="bookParking-{{ lot.id }}" tabindex="-1"
                                         aria-labelledby="exampleModalLabel" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Parking Lot
-                                                    </h1>
+                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Book Parking
+                                                        Spot</h1>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                         aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
                                                     <form action="/booking" method="POST">
+                                                        <!-- Hidden Inputs -->
+                                                        <input type="hidden" name="lot_id" value="{{ lot.id }}">
+                                                        <input type="hidden" name="user_id"
+                                                            value="{{ current_user.id }}">
+                                                        {% set available_spot = lot.spots | selectattr('status',
+                                                        'equalto', 'A') | list | first %}
+                                                        <input type="hidden" name="spot_id"
+                                                            value="{{ available_spot.id if available_spot else '' }}">
 
-                                                        <div class="form-floating mb-3">
-                                                            <input type="text" class="form-control" id="name"
-                                                                placeholder="Name" name="name"
-                                                                value="{{lot.prime_location_name}}" required>
-                                                            <label for="fullname">Name</label>
+                                                        <!-- Readonly Display Info -->
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Lot ID</label>
+                                                            <input type="text" class="form-control" value="{{ lot.id }}"
+                                                                readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">User ID</label>
+                                                            <input type="text" class="form-control"
+                                                                value="{{ current_user.id }}" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Spot ID</label>
+                                                            <input type="text" class="form-control"
+                                                                value="{{ available_spot.id if available_spot else 'No spots available' }}"
+                                                                readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Location</label>
+                                                            <input type="text" class="form-control"
+                                                                value="{{ lot.address }}" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">City</label>
+                                                            <input type="text" class="form-control"
+                                                                value="{{ lot.city }}" readonly>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Price per hour</label>
+                                                            <input type="text" class="form-control"
+                                                                value="₹{{ lot.price }}" readonly>
                                                         </div>
 
-                                                        <div class="form-floating mb-3">
-                                                            <input type="number" class="form-control" id="price"
-                                                                placeholder="Price" name="price" value="{{lot.price}}"
-                                                                required>
-                                                            <label for="price">Price</label>
+                                                        <!-- Vehicle Number Input -->
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Vehicle Number</label>
+                                                            <input type="text" name="vehicle_number"
+                                                                class="form-control"
+                                                                placeholder="Enter your vehicle number" required>
                                                         </div>
 
-                                                        <div class="form-floating mb-3">
-                                                            <input type="text" class="form-control" id="address"
-                                                                placeholder="Address" value="{{lot.address}}"
-                                                                name="address" required>
-                                                            <label for="address">Address</label>
-                                                        </div>
-
-                                                        <div class="form-floating mb-3">
-                                                            <input type="text" class="form-control" id="address"
-                                                                placeholder="city" name="city" value="{{lot.city}}"
-                                                                required>
-                                                            <label for="city">City</label>
-                                                        </div>
-
-                                                        <div class="form-floating mb-3">
-                                                            <input type="number" class="form-control" id="pincode"
-                                                                placeholder="Pincode" name="pincode"
-                                                                value="{{lot.pin_code}}" required>
-                                                            <label for="pincode">Pincode</label>
-                                                        </div>
-
-                                                        <div class="form-floating mb-3">
-                                                            <input type="number" class="form-control"
-                                                                id="maximum_number_of_spots"
-                                                                placeholder="Maximum number of spots"
-                                                                name="maximum_number_of_spots"
-                                                                value="{{lot.maximum_number_of_spots}}" required>
-                                                            <label for="maximum_number_of_spots">Maximum number of
-                                                                Spots</label>
-                                                        </div>
-
-                                                        <div class="d-grid mb-2">
-                                                            <button type="submit" class="btn btn-primary">Edit</button>
+                                                        <div class="d-grid">
+                                                            <button type="submit" class="btn btn-success" {% if not
+                                                                available_spot %} disabled {% endif %}>
+                                                                Confirm Booking
+                                                            </button>
                                                         </div>
                                                     </form>
+
+
                                                 </div>
                                             </div>
                                         </div>
@@ -153,7 +182,8 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- {% endfor %} -->
+                        {% endfor %}
+
                     </div>
                 </div>
             </div>
