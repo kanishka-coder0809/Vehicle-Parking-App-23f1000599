@@ -132,7 +132,7 @@
                             <div class="card">
                                 <div class="card-body">
                                     <p>{{lot.prime_location_name}}</p>
-                                    <p>(Occupied: 0/{{lot.maximum_number_of_spots}})</p>
+                                    <p>(Occupied: {{ lot.spots | selectattr('status', 'equalto', 'O') | list | length }}/{{lot.maximum_number_of_spots}})</p>
                                     <div class="btn-group btn-group-sm" role="group"
                                         aria-label="Basic outlined example">
                                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
