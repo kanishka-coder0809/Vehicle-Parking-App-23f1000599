@@ -116,7 +116,7 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <form action="/booking" method="POST">
-                                                        <!-- Hidden Inputs -->
+                                                        <!-- Hidden Inputs to send to backend -->
                                                         <input type="hidden" name="lot_id" value="{{ lot.id }}">
                                                         <input type="hidden" name="user_id"
                                                             value="{{ current_user.id }}">
@@ -125,7 +125,7 @@
                                                         <input type="hidden" name="spot_id"
                                                             value="{{ available_spot.id if available_spot else '' }}">
 
-                                                        <!-- Readonly Display Info -->
+                                                        <!-- Readonly Display Info for the user -->
                                                         <div class="mb-3">
                                                             <label class="form-label">Lot ID</label>
                                                             <input type="text" class="form-control" value="{{ lot.id }}"
@@ -158,7 +158,7 @@
                                                                 value="₹{{ lot.price }}" readonly>
                                                         </div>
 
-                                                        <!-- Vehicle Number Input -->
+                                                        <!-- Vehicle Number Input from the user -->
                                                         <div class="mb-3">
                                                             <label class="form-label">Vehicle Number</label>
                                                             <input type="text" name="vehicle_number"
@@ -173,8 +173,6 @@
                                                             </button>
                                                         </div>
                                                     </form>
-
-
                                                 </div>
                                             </div>
                                         </div>
@@ -203,20 +201,23 @@
                                     <th scope="col">Spot ID</th>
                                     <th scope="col">City</th>
                                     <th scope="col">Pincode</th>
-                                    <th scope="col">Timestamp</th>
+                                    <th scope="col">Booked at</th>
+                                    <th scope="col">Released at</th>
                                     <th scope="col">Vehicle Number</th>
                                     <th scope="col">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for user in all_users %}
+                                {% for ru in all_users %}
                                 <tr>
-                                    <th scope="row">{{user.id}}</th>
-                                    <td>{{user.name}}</td>
-                                    <td>{{user.email}}</td>
-                                    <td>{{user.phone}}</td>
-                                    <td>{{user.city}}</td>
-                                    <td>{{user.pincode}}</td>
+                                    <th scope="row">{{ru.}}</th>
+                                    <td>{{ru.}}</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
                                     <td class="text-center">
                                         <button type="button" class="btn btn-outline-dark"><i
                                                 class="bi bi-hourglass"></i></button>
