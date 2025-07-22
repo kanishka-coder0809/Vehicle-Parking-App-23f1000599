@@ -72,7 +72,9 @@ def admin_dash():
 def user_dash():
     # Fetch all lots with at least one available spot
     all_par = db.session.query(ParkingLot).join(ParkingSpot).filter(ParkingSpot.status == 'A').distinct().all()
-    return render_template("/user/dashboard.html", curr_user=current_user, all_par=all_par)
+    #fetch registered users
+    booking_history = db.session.query(ReservedParkingSpot).filter_by(user_id=current_user.id).all()
+    return render_template("/user/dashboard.html", curr_user=current_user, all_par=all_par, booking_history = booking_history)
 
 @app.route("/user/stats")
 @login_required
@@ -138,6 +140,7 @@ def parkingLot():
 def booking():
     lot_id = request.form.get("lot_id")
     lot = db.session.query(ParkingLot).filter_by(id=lot_id).first()
+    vehicle_no = request.form.get("vehicle_number")
 
     if not lot:
         return "Invalid Parking Lot", 400
@@ -154,7 +157,7 @@ def booking():
 
     # Create reservation
     now = datetime.now()
-    reservation = ReservedParkingSpot(spot_id=available_spot.id, lot_id=lot.id, user_id=current_user.id, parking_timestamp=now.strftime('%Y-%m-%d %H:%M:%S'), leaving_timestamp="Not yet left",  parkingCost_unitTime=lot.price)
+    reservation = ReservedParkingSpot(spot_id=available_spot.id, lot_id=lot.id, user_id=current_user.id, parking_timestamp=now.strftime('%Y-%m-%d %H:%M:%S'), leaving_timestamp="Not yet left",  parkingCost_unitTime=lot.price, vehicle_number=vehicle_no)
     db.session.add(reservation)
     db.session.commit()
     flash("Parking Spot Booked Successfully!", "success")

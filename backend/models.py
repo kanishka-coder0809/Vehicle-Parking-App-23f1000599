@@ -52,4 +52,5 @@ class ReservedParkingSpot(db.Model):
     lot_id = db.Column(db.Integer, db.ForeignKey('Parking_Lot.id'), nullable=False)
     parking_timestamp = db.Column(db.String, nullable = False)
     leaving_timestamp = db.Column(db.String, nullable = False)
+    vehicle_number = db.Column(db.String, nullable = False)
     parkingCost_unitTime = db.Column(db.Integer, nullable = False) ####

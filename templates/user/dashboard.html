@@ -208,16 +208,15 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for ru in all_users %}
+                                {% for ru in booking_history %}
                                 <tr>
-                                    <th scope="row">{{ru.}}</th>
-                                    <td>{{ru.}}</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <th scope="row">{{ru.Parking_Lot.prime_location_name}}</th>
+                                    <td>{{ru.spot_id}}</td>
+                                    <td>{{ru.Parking_Lot.city}}</td>
+                                    <td>{{ru.Parking_Lot.pin_code}}</td>
+                                    <td>{{ru.parking_timestamp}}</td>
+                                    <td>{{ru.leaving_timestamp}}</td>
+                                    <td>{{ru.vehicle_number}}</td>
                                     <td class="text-center">
                                         <button type="button" class="btn btn-outline-dark"><i
                                                 class="bi bi-hourglass"></i></button>
