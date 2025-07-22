@@ -57,6 +57,11 @@ def admin_dash():
     all_par = db.session.query(ParkingLot).all()
     all_users = db.session.query(User).all()
 
+    user_histories = {
+        user.id: ReservedParkingSpot.query.filter_by(user_id=user.id).all()
+        for user in all_users
+    }
+
     # Check and create missing parking spots for each lot
     for lot in all_par:
         existing_spots = db.session.query(ParkingSpot).filter_by(lot_id=lot.id).count()
@@ -65,7 +70,7 @@ def admin_dash():
                 new_spot = ParkingSpot(lot_id=lot.id, status="A")  # A = Available
                 db.session.add(new_spot)
             db.session.commit()
-    return render_template("/admin/dashboard.html", all_par = all_par, all_users = all_users)
+    return render_template("/admin/dashboard.html", all_par = all_par, all_users = all_users, user_histories= user_histories)
 
 @app.route("/user/dashboard")
 @login_required

@@ -132,7 +132,8 @@
                             <div class="card">
                                 <div class="card-body">
                                     <p>{{lot.prime_location_name}}</p>
-                                    <p>(Occupied: {{ lot.spots | selectattr('status', 'equalto', 'O') | list | length }}/{{lot.maximum_number_of_spots}})</p>
+                                    <p>(Occupied: {{ lot.spots | selectattr('status', 'equalto', 'O') | list | length
+                                        }}/{{lot.maximum_number_of_spots}})</p>
                                     <div class="btn-group btn-group-sm" role="group"
                                         aria-label="Basic outlined example">
                                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
@@ -338,8 +339,67 @@
                                     <td>{{user.city}}</td>
                                     <td>{{user.pincode}}</td>
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-outline-dark"><i
-                                                class="bi bi-hourglass"></i></button>
+                                        <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal"
+                                            data-bs-target="#historyModal-{{ user.id }}">
+                                            <i class="bi bi-hourglass"></i>
+                                        </button>
+
+                                        <!-- modal for each user history-->
+                                        <div class="modal fade" id="historyModal-{{ user.id }}" tabindex="-1"
+                                            aria-labelledby="historyModalLabel-{{ user.id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="historyModalLabel-{{ user.id }}">
+                                                            Parking History - {{ user.name }}
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        {% if user_histories[user.id] %}
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Lot</th>
+                                                                    <th>Spot</th>
+                                                                    <th>City</th>
+                                                                    <th>Start</th>
+                                                                    <th>End</th>
+                                                                    <th>Vehicle</th>
+                                                                    <th>Status</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for booking in user_histories[user.id] %}
+                                                                <tr>
+                                                                    <td>{{ booking.Parking_Lot.prime_location_name }}
+                                                                    </td>
+                                                                    <td>{{ booking.Parking_Spot.id }}</td>
+                                                                    <td>{{ booking.Parking_Lot.city }}</td>
+                                                                    <td>{{ booking.parking_timestamp }}</td>
+                                                                    <td>{{ booking.leaving_timestamp }}</td>
+                                                                    <td>{{ booking.vehicle_number }}</td>
+                                                                    <td>
+                                                                        {% if booking.leaving_timestamp == 'Not yet left' %}
+                                                                        <span class="badge bg-warning">Active</span>
+                                                                        {% else %}
+                                                                        <span class="badge bg-success">Completed</span>
+                                                                        {% endif %}
+                                                                    </td>
+                                                                </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                        {% else %}
+                                                        <p>No history found for this user.</p>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+
                                     </td>
                                 </tr>
                                 {% endfor %}
