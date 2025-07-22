@@ -65,7 +65,7 @@
                     <div class="card-header d-flex align-items-center justify-content-center">
                         <h5 class="card-title">Available Parking Lots</h5>
                     </div>
-                    <div class="card mx-auto my-4" >
+                    <div class="card mx-auto my-4">
                         <div class="card-body d-flex align-items-center">
                             <h5 class="card-title me-2">Search by</h5>
                             <div class="form-check form-check-inline">
@@ -204,7 +204,7 @@
                                     <th scope="col">Booked at</th>
                                     <th scope="col">Released at</th>
                                     <th scope="col">Vehicle Number</th>
-                                    <th scope="col">Actions</th>
+                                    <th scope="col" class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -218,8 +218,16 @@
                                     <td>{{ru.leaving_timestamp}}</td>
                                     <td>{{ru.vehicle_number}}</td>
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-outline-dark"><i
-                                                class="bi bi-hourglass"></i></button>
+                                        {% if ru.leaving_timestamp == 'Not yet left' %}
+                                        <form action="/release/{{ ru.id }}" method="POST">
+                                            <button class="btn btn-warning btn-sm"
+                                                onclick="return confirm('Release this spot?');">
+                                                Release Spot
+                                            </button>
+                                        </form>
+                                        {% else %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}

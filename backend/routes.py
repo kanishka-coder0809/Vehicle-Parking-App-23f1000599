@@ -162,3 +162,23 @@ def booking():
     db.session.commit()
     flash("Parking Spot Booked Successfully!", "success")
     return redirect("/user/dashboard")
+
+@app.route("/release/<int:booking_id>", methods=["POST"])
+@login_required
+def release_spot(booking_id):
+    reservation = db.session.query(ReservedParkingSpot).filter_by(id=booking_id, user_id=current_user.id).first()
+    
+    if reservation and reservation.leaving_timestamp == "Not yet left":
+        reservation.leaving_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        # Make the spot available again
+        spot = db.session.query(ParkingSpot).filter_by(id=reservation.spot_id).first()
+        if spot:
+            spot.status = 'A'
+        
+        db.session.commit()
+        flash("Spot released successfully.", "success")
+    else:
+        flash("Invalid or already released booking.", "danger")
+    
+    return redirect("/user/dashboard")
