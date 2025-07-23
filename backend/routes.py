@@ -72,6 +72,13 @@ def admin_dash():
             db.session.commit()
     return render_template("/admin/dashboard.html", all_par = all_par, all_users = all_users, user_histories= user_histories)
 
+
+@app.route("/admin/search", methods = ["GET", "POST"])
+def admin_search():
+    if request.method == "GET":
+        return render_template("/admin/search.html")
+
+
 @app.route("/user/dashboard")
 @login_required
 def user_dash():
@@ -80,6 +87,11 @@ def user_dash():
     #fetch registered users
     booking_history = db.session.query(ReservedParkingSpot).filter_by(user_id=current_user.id).all()
     return render_template("/user/dashboard.html", curr_user=current_user, all_par=all_par, booking_history = booking_history)
+
+@app.route("/user/search", methods = ["GET", "POST"])
+def admin_search():
+    if request.method == "GET":
+        return render_template("/user/search.html")
 
 @app.route("/user/stats")
 @login_required
