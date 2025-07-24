@@ -65,30 +65,7 @@
                     <div class="card-header d-flex align-items-center justify-content-center">
                         <h5 class="card-title">Available Parking Lots</h5>
                     </div>
-                    <div class="card mx-auto my-4">
-                        <div class="card-body d-flex align-items-center">
-                            <h5 class="card-title me-2">Search by</h5>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="searchby" id="name" value="name">
-                                <label class="form-check-label" for="name">Location Name</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="searchby" id="city" value="city">
-                                <label class="form-check-label" for="city">City</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="searchby" id="pincode"
-                                    value="pincode">
-                                <label class="form-check-label" for="pincode">Pincode</label>
-                            </div>
-                            <form class="d-flex ms-auto" role="search">
-                                <input class="form-control me-2" type="search" placeholder="Search"
-                                    aria-label="Search" />
-                                <button class="btn btn-outline-success" type="submit">Search</button>
-                            </form>
-                        </div>
-                    </div>
-
+                    
                     <div class="row g-3 text-center">
                         {% for lot in all_par %}
                         <div class="col-4">

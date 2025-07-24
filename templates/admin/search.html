@@ -11,7 +11,247 @@
 </head>
 
 <body>
-    
+    <nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid ms-5">
+            <a class="navbar-brand" href="#">FindMySpot</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto me-5">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/admin/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/admin/search">Search</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Summary</a>
+                    </li>
+                    <div class="dropdown">
+                        <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="bi bi-person fs-5"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#">Logout</a></li>
+                        </ul>
+                    </div>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="card mx-auto my-4 d-flex" style="width:90%">
+        <form action="/admin/search" class="d-flex my-3 align-items-center mx-4" method="POST">
+            <h5 class="card-title me-5">Search for</h5>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="searchby" id="user" value="user">
+                <label class="form-check-label" for="user">Registered User</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="searchby" id="parking" value="parking">
+                <label class="form-check-label" for="parking">Parking Lot</label>
+            </div>
+            <div class="d-flex ms-auto">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="query"
+                    name="search_query" />
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Search Results -->
+
+    <div class="card mx-auto text-center" style="width:90%">
+        <div class="card-header">
+            <h5 class="card-title">Search Results</h5>
+        </div>
+        <div class="card-body">
+            <p class="card-text">No text to display. Kindly search for either parking lots or registered users.</p>
+        </div>
+        <div class="card-body">
+            <div class="row my-2 g-3 text-center">
+                {% for lot in results %}
+                <div class="col-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <p>{{lot.prime_location_name}}</p>
+                            <p>(Occupied: {{ lot.spots | selectattr('status', 'equalto', 'O') | list | length
+                                }}/{{lot.maximum_number_of_spots}})</p>
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Basic outlined example">
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                    data-bs-target="#editParking-{{lot.id}}">Edit</button>
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                    data-bs-target="#viewParking-{{lot.id}}">View</button>
+                            </div>
+
+                            <!-- Modal for Edit -->
+                            <div class="modal fade" id="editParking-{{lot.id}}" tabindex="-1"
+                                aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Parking Lot
+                                            </h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="/parkingLots?task=edit" method="POST">
+
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="name" placeholder="Name"
+                                                        name="name" value="{{lot.prime_location_name}}" required>
+                                                    <label for="fullname">Name</label>
+                                                </div>
+
+                                                <div class="form-floating mb-3">
+                                                    <input type="number" class="form-control" id="price"
+                                                        placeholder="Price" name="price" value="{{lot.price}}" required>
+                                                    <label for="price">Price</label>
+                                                </div>
+
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="address"
+                                                        placeholder="Address" value="{{lot.address}}" name="address"
+                                                        required>
+                                                    <label for="address">Address</label>
+                                                </div>
+
+                                                <div class="form-floating mb-3">
+                                                    <input type="text" class="form-control" id="address"
+                                                        placeholder="city" name="city" value="{{lot.city}}" required>
+                                                    <label for="city">City</label>
+                                                </div>
+
+                                                <div class="form-floating mb-3">
+                                                    <input type="number" class="form-control" id="pincode"
+                                                        placeholder="Pincode" name="pincode" value="{{lot.pin_code}}"
+                                                        required>
+                                                    <label for="pincode">Pincode</label>
+                                                </div>
+
+                                                <div class="form-floating mb-3">
+                                                    <input type="number" class="form-control"
+                                                        id="maximum_number_of_spots"
+                                                        placeholder="Maximum number of spots"
+                                                        name="maximum_number_of_spots"
+                                                        value="{{lot.maximum_number_of_spots}}" required>
+                                                    <label for="maximum_number_of_spots">Maximum number of
+                                                        Spots</label>
+                                                </div>
+
+                                                <div class="d-grid mb-2">
+                                                    <button type="submit" class="btn btn-primary">Edit</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Model for View -->
+                            <div class="modal fade" id="viewParking-{{lot.id}}" aria-hidden="true"
+                                aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+                                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-4" id="viewParkingLabel-{{lot.id}}">
+                                                {{lot.prime_location_name}}</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-6 d-flex mb-1">
+                                                    <div class="fw-semibold">Price:&nbsp</div>
+                                                    <div>{{lot.price}}</div>
+                                                </div>
+                                                <div class="col-6 d-flex mb-1">
+                                                    <div class="fw-semibold">Location:&nbsp</div>
+                                                    <div>{{lot.address}}</div>
+                                                </div>
+                                                <div class="col-6 d-flex mb-1">
+                                                    <div class="fw-semibold">City:&nbsp</div>
+                                                    <div>{{lot.city}}</div>
+                                                </div>
+                                                <div class="col-6 d-flex mb-1">
+                                                    <div class="fw-semibold">Pincode:&nbsp</div>
+                                                    <div>{{lot.pin_code}}</div>
+                                                </div>
+                                                <div class="col-12 d-flex mb-3">
+                                                    <div class="fw-semibold">Maximum Number of Spots:&nbsp</div>
+                                                    <div>{{lot.maximum_number_of_spots}}</div>
+                                                </div>
+                                            </div>
+                                            <div class="card mx-auto mb-4" style="width:90%">
+                                                <div class="card-body">
+                                                    <h5 class="mb-3">Parking Spots</h5>
+                                                    <div class=" row g-2">
+                                                        {% for spot in lot.spots %}
+                                                        <div class="col">
+                                                            <button
+                                                                class="btn {% if spot.status == 'A' %}btn-success{% else %}btn-danger{% endif %}"
+                                                                data-bs-target="#spotModal-{{ lot.id }}-{{ spot.id }}"
+                                                                data-bs-toggle="modal">
+                                                                {{ spot.status }}
+                                                            </button>
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% for spot in lot.spots %}
+                            <div class="modal fade" id="spotModal-{{ lot.id }}-{{ spot.id }}" tabindex="-1"
+                                aria-labelledby="spotModalLabel-{{ lot.id }}-{{ spot.id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="spotModalLabel-{{ lot.id }}-{{ spot.id }}">Spot
+                                                #{{ spot.id
+                                                }}</h5>
+                                            <!-- <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button> -->
+                                            <button type="button" class="btn-close"
+                                                onclick="closeBothModals('{{ lot.id }}', '{{ spot.id }}')">
+                                            </button>
+
+                                        </div>
+
+                                        <div class="modal-body">
+                                            <p><strong>Status:</strong> {{ spot.status }}</p>
+                                            {% if spot.reserved_parking_spot %}
+                                            {% set res = spot.reserved_parking_spot[0] %}
+                                            <p><strong>Reserved By:</strong> {{ res.user.name }}</p>
+                                            <p><strong>From:</strong> {{ res.parking_timestamp }}</p>
+                                            <p><strong>To:</strong> {{ res.leaving_timestamp }}</p>
+                                            <p><strong>Cost Rate:</strong> ₹{{ res.parkingCost_unitTime }}</p>
+                                            {% else %}
+                                            <p>This spot is currently available.</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"

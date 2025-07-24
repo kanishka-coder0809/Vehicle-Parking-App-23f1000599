@@ -77,6 +77,16 @@ def admin_dash():
 def admin_search():
     if request.method == "GET":
         return render_template("/admin/search.html")
+    elif request.method == "POST":
+        type = request.form.get("search_by")
+        query = request.form.get("search_query")
+
+        if type == "user":
+            result = db.session.query(User).filter_by(User.name.ilike(f"%{query}%")).all()
+            return render_template("/admin/search.html", result = result)
+        elif type == "parking":
+            result = db.session.query(ParkingLot).filter_by(ParkingLot.prime_location_name.ilike(f"%{query}%")).all()
+            return render_template("/admin/search.html", result = result)
 
 
 @app.route("/user/dashboard")
@@ -89,7 +99,7 @@ def user_dash():
     return render_template("/user/dashboard.html", curr_user=current_user, all_par=all_par, booking_history = booking_history)
 
 @app.route("/user/search", methods = ["GET", "POST"])
-def admin_search():
+def user_search():
     if request.method == "GET":
         return render_template("/user/search.html")
 
