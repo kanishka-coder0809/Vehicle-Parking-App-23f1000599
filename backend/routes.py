@@ -93,6 +93,11 @@ def admin_search():
         elif type == "parking":
             result = db.session.query(ParkingLot).filter(ParkingLot.prime_location_name.ilike(f"%{query}%")).all()
         return render_template("/admin/search.html", results = result, type = type, user_histories= user_histories, request = request)
+    
+@app.route("/admin/summary")
+def admin_summary():
+    if request.method == "GET":
+        return render_template("/admin/summary.html")
 
 @app.route("/user/dashboard")
 @login_required
@@ -137,10 +142,10 @@ def user_search():
             result = db.session.query(ParkingLot).filter(ParkingLot.pin_code.ilike(f"%{query}%")).all()
         return render_template("/user/search.html", results = result, type = type, user_histories= user_histories, request = request)
 
-@app.route("/user/stats")
-@login_required
-def user_stats():
-    return f"Welcome to {current_user.name} stats."
+@app.route("/user/summary")
+def user_summary():
+    if request.method == "GET":
+        return render_template("/user/summary.html")
 
 @app.route("/parkingLots", methods=["POST"])
 def parkingLot():
