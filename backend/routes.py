@@ -142,10 +142,35 @@ def user_search():
             result = db.session.query(ParkingLot).filter(ParkingLot.pin_code.ilike(f"%{query}%")).all()
         return render_template("/user/search.html", results = result, type = type, user_histories= user_histories, request = request)
 
-@app.route("/user/summary")
+@app.route('/user/summary')
+@login_required
 def user_summary():
-    if request.method == "GET":
-        return render_template("/user/summary.html")
+    from datetime import datetime
+
+    # Fetch only released bookings
+    bookings = ReservedParkingSpot.query.filter_by(user_id=current_user.id).all()
+
+    summary_data = []
+    for booking in bookings:
+        if booking.leaving_timestamp != "Not yet left":
+            in_time = datetime.strptime(booking.parking_timestamp, "%Y-%m-%d %H:%M:%S")
+            out_time = datetime.strptime(booking.leaving_timestamp, "%Y-%m-%d %H:%M:%S")
+            duration = out_time - in_time
+
+            total_cost = booking.total_cost or round((duration.total_seconds() / 3600) * booking.parkingCost_unitTime, 2)
+
+            summary_data.append({
+                'spot_id': booking.spot_id,
+                'lot_name': booking.Parking_Lot.prime_location_name,
+                'in_time': booking.parking_timestamp,
+                'out_time': booking.leaving_timestamp,
+                'duration': str(duration),
+                'vehicle_number': booking.vehicle_number,
+                'cost': f"₹{total_cost:.2f}"
+            })
+
+    return render_template('/user/summary.html', summary_data=summary_data)
+
 
 @app.route("/parkingLots", methods=["POST"])
 def parkingLot():

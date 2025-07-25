@@ -54,3 +54,4 @@ class ReservedParkingSpot(db.Model):
     leaving_timestamp = db.Column(db.String, nullable = False)
     vehicle_number = db.Column(db.String, nullable = False)
     parkingCost_unitTime = db.Column(db.Integer, nullable = False) ####
+    total_cost = db.Column(db.Float, nullable=True)
