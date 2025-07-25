@@ -106,8 +106,28 @@ def user_dash():
 
 @app.route("/user/search", methods = ["GET", "POST"])
 def user_search():
+    all_users = db.session.query(User).all()
+
+    user_histories = {
+        user.id: ReservedParkingSpot.query.filter_by(user_id=user.id).all()
+        for user in all_users
+    }
+
     if request.method == "GET":
         return render_template("/user/search.html")
+    elif request.method == "POST":
+        type = request.form.get("searchby")
+        query = request.form.get("search_query")
+        result = []
+        if type == "name":
+            result = db.session.query(ParkingLot).filter(ParkingLot.prime_location_name.ilike(f"%{query}%")).all()
+        elif type == "address":
+            result = db.session.query(ParkingLot).filter(ParkingLot.address.ilike(f"%{query}%")).all()
+        elif type == "city":
+            result = db.session.query(ParkingLot).filter(ParkingLot.city.ilike(f"%{query}%")).all()
+        if type == "pincode":
+            result = db.session.query(ParkingLot).filter(ParkingLot.pin_code.ilike(f"%{query}%")).all()
+        return render_template("/user/search.html", results = result, type = type, user_histories= user_histories, request = request)
 
 @app.route("/user/stats")
 @login_required
