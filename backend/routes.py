@@ -94,7 +94,6 @@ def admin_search():
             result = db.session.query(ParkingLot).filter(ParkingLot.prime_location_name.ilike(f"%{query}%")).all()
         return render_template("/admin/search.html", results = result, type = type, user_histories= user_histories, request = request)
 
-
 @app.route("/user/dashboard")
 @login_required
 def user_dash():
@@ -102,6 +101,15 @@ def user_dash():
     all_par = db.session.query(ParkingLot).join(ParkingSpot).filter(ParkingSpot.status == 'A').distinct().all()
     #fetch registered users
     booking_history = db.session.query(ReservedParkingSpot).filter_by(user_id=current_user.id).all()
+    # Add duration for released spots
+    for booking in booking_history:
+        if booking.leaving_timestamp != "Not yet left":
+            start_time = datetime.strptime(booking.parking_timestamp, "%Y-%m-%d %H:%M:%S")
+            end_time = datetime.strptime(booking.leaving_timestamp, "%Y-%m-%d %H:%M:%S")
+            duration = end_time - start_time
+            booking.duration = str(duration)  # This will be like '0:45:00' (HH:MM:SS)
+        else:
+            booking.duration = "Ongoing"
     return render_template("/user/dashboard.html", curr_user=current_user, all_par=all_par, booking_history = booking_history)
 
 @app.route("/user/search", methods = ["GET", "POST"])

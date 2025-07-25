@@ -181,6 +181,7 @@
                                     <th scope="col">Booked at</th>
                                     <th scope="col">Released at</th>
                                     <th scope="col">Vehicle Number</th>
+                                    <th scope="col">Duration</th>
                                     <th scope="col" class="text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -194,6 +195,7 @@
                                     <td>{{ru.parking_timestamp}}</td>
                                     <td>{{ru.leaving_timestamp}}</td>
                                     <td>{{ru.vehicle_number}}</td>
+                                    <td><strong>{{ ru.duration }}</strong></td>
                                     <td class="text-center">
                                         {% if ru.leaving_timestamp == 'Not yet left' %}
                                         <form action="/release/{{ ru.id }}" method="POST">
