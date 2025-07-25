@@ -75,18 +75,24 @@ def admin_dash():
 
 @app.route("/admin/search", methods = ["GET", "POST"])
 def admin_search():
+    all_users = db.session.query(User).all()
+
+    user_histories = {
+        user.id: ReservedParkingSpot.query.filter_by(user_id=user.id).all()
+        for user in all_users
+    }
+
     if request.method == "GET":
         return render_template("/admin/search.html")
     elif request.method == "POST":
-        type = request.form.get("search_by")
+        type = request.form.get("searchby")
         query = request.form.get("search_query")
-
+        result = []
         if type == "user":
-            result = db.session.query(User).filter_by(User.name.ilike(f"%{query}%")).all()
-            return render_template("/admin/search.html", result = result)
+            result = db.session.query(User).filter(User.name.ilike(f"%{query}%")).all()
         elif type == "parking":
-            result = db.session.query(ParkingLot).filter_by(ParkingLot.prime_location_name.ilike(f"%{query}%")).all()
-            return render_template("/admin/search.html", result = result)
+            result = db.session.query(ParkingLot).filter(ParkingLot.prime_location_name.ilike(f"%{query}%")).all()
+        return render_template("/admin/search.html", results = result, type = type, user_histories= user_histories, request = request)
 
 
 @app.route("/user/dashboard")

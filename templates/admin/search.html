@@ -48,12 +48,12 @@
         <form action="/admin/search" class="d-flex my-3 align-items-center mx-4" method="POST">
             <h5 class="card-title me-5">Search for</h5>
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="searchby" id="user" value="user">
-                <label class="form-check-label" for="user">Registered User</label>
+                <input class="form-check-input" type="radio" name="searchby" id="parking" value="parking" checked>
+                <label class="form-check-label" for="parking">Parking Lot</label>
             </div>
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="searchby" id="parking" value="parking">
-                <label class="form-check-label" for="parking">Parking Lot</label>
+                <input class="form-check-input" type="radio" name="searchby" id="user" value="user">
+                <label class="form-check-label" for="user">Registered User</label>
             </div>
             <div class="d-flex ms-auto">
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="query"
@@ -64,16 +64,18 @@
     </div>
 
     <!-- Search Results -->
-
     <div class="card mx-auto text-center" style="width:90%">
         <div class="card-header">
             <h5 class="card-title">Search Results</h5>
         </div>
+        {% if not results and not request.form %}
+        <p class="card-text fw-semibold my-3">No text to display. Kindly search for either parking lots or registered users.</p>
+        {% endif %}
+
+        {% if type=="parking" %}
+        {% if results %}
         <div class="card-body">
-            <p class="card-text">No text to display. Kindly search for either parking lots or registered users.</p>
-        </div>
-        <div class="card-body">
-            <div class="row my-2 g-3 text-center">
+            <div class="row g-3 text-center">
                 {% for lot in results %}
                 <div class="col-4">
                     <div class="card">
@@ -248,8 +250,105 @@
                 {% endfor %}
             </div>
         </div>
-    </div>
-    </div>
+        {% else %}
+        <div class="my-2 fw-semibold">No Parking Lots Found</div>
+        {% endif %}
+        {% elif type=="user" %}
+        {% if results %}
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Phone</th>
+                        <th scope="col">City</th>
+                        <th scope="col">Pincode</th>
+                        <th scope="col" class="text-center">History</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in results %}
+                    <tr>
+                        <th scope="row">{{user.id}}</th>
+                        <td>{{user.name}}</td>
+                        <td>{{user.email}}</td>
+                        <td>{{user.phone}}</td>
+                        <td>{{user.city}}</td>
+                        <td>{{user.pincode}}</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal"
+                                data-bs-target="#historyModal-{{ user.id }}">
+                                <i class="bi bi-hourglass"></i>
+                            </button>
+
+                            <!-- modal for each user history-->
+                            <div class="modal fade" id="historyModal-{{ user.id }}" tabindex="-1"
+                                aria-labelledby="historyModalLabel-{{ user.id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="historyModalLabel-{{ user.id }}">
+                                                Parking History - {{ user.name }}
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            {% if user_histories[user.id] %}
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Lot</th>
+                                                        <th>Spot</th>
+                                                        <th>City</th>
+                                                        <th>Start</th>
+                                                        <th>End</th>
+                                                        <th>Vehicle</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for booking in user_histories[user.id] %}
+                                                    <tr>
+                                                        <td>{{ booking.Parking_Lot.prime_location_name }}
+                                                        </td>
+                                                        <td>{{ booking.Parking_Spot.id }}</td>
+                                                        <td>{{ booking.Parking_Lot.city }}</td>
+                                                        <td>{{ booking.parking_timestamp }}</td>
+                                                        <td>{{ booking.leaving_timestamp }}</td>
+                                                        <td>{{ booking.vehicle_number }}</td>
+                                                        <td>
+                                                            {% if booking.leaving_timestamp == 'Not yet left' %}
+                                                            <span class="badge bg-warning">Active</span>
+                                                            {% else %}
+                                                            <span class="badge bg-success">Completed</span>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                            {% else %}
+                                            <p>No history found for this user.</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="my-2 fw-semibold">No Users Found</div>
+        {% endif %}
+        {% endif %}
     </div>
 
 
