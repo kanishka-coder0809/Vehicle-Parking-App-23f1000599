@@ -94,10 +94,10 @@ def admin_search():
             result = db.session.query(ParkingLot).filter(ParkingLot.prime_location_name.ilike(f"%{query}%")).all()
         return render_template("/admin/search.html", results = result, type = type, user_histories= user_histories, request = request)
     
-@app.route("/admin/summary")
-def admin_summary():
-    if request.method == "GET":
-        return render_template("/admin/summary.html")
+# @app.route("/admin/summary")
+# def admin_summary():
+#     if request.method == "GET":
+#         return render_template("/admin/summary.html")
 
 @app.route("/user/dashboard")
 @login_required
