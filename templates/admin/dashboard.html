@@ -140,6 +140,13 @@
                                             data-bs-target="#editParking-{{lot.id}}">Edit</button>
                                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
                                             data-bs-target="#viewParking-{{lot.id}}">View</button>
+                                        <!-- Conditionally show Delete button -->
+                                        {% set occupied_count = lot.spots | selectattr('status', 'equalto', 'O') | list
+                                        |
+                                        length %}
+                                        {% if occupied_count == 0 and lot.reserved_parking_spot|length == 0 %}
+                                        <button class="btn btn-outline-danger"><i class="bi bi-trash-fill"></i></button>
+                                        {% endif %}
                                     </div>
 
                                     <!-- Modal for Edit -->

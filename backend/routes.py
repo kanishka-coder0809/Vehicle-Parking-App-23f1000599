@@ -294,19 +294,56 @@ def booking():
 @app.route("/release/<int:booking_id>", methods=["POST"])
 @login_required
 def release_spot(booking_id):
-    reservation = db.session.query(ReservedParkingSpot).filter_by(id=booking_id, user_id=current_user.id).first()
+    # Fetch the reservation with the given ID and confirm it belongs to the current user
+    reservation = ReservedParkingSpot.query.filter_by(id=booking_id, user_id=current_user.id).first()
     
-    if reservation and reservation.leaving_timestamp == "Not yet left":
-        reservation.leaving_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
-        # Make the spot available again
-        spot = db.session.query(ParkingSpot).filter_by(id=reservation.spot_id).first()
-        if spot:
-            spot.status = 'A'
-        
-        db.session.commit()
-        flash("Spot released successfully.", "success")
-    else:
-        flash("Invalid or already released booking.", "danger")
-    
+    if not reservation:
+        flash("Reservation not found.", "danger")
+        return redirect("/user/dashboard")
+
+    if reservation.leaving_timestamp != "Not yet left":
+        flash("Spot already released.", "warning")
+        return redirect("/user/dashboard")
+
+    # Set leaving timestamp to now
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    reservation.leaving_timestamp = now
+
+    # Fetch the associated spot
+    spot = ParkingSpot.query.filter_by(id=reservation.spot_id).first()
+    if spot:
+        spot.status = 'A'  # Mark it as available
+
+    db.session.commit()
+    flash("Spot released successfully.", "success")
     return redirect("/user/dashboard")
+
+
+@app.route("/delete_parking/<int:lot_id>", methods=["POST"])
+@login_required
+def delete_parking(lot_id):
+    lot = db.session.query(ParkingLot).filter_by(id=lot_id).first()
+
+    if not lot:
+        flash("Parking lot not found.", "danger")
+        return redirect("/admin/dashboard")
+
+    # Check if any of the spots are booked
+    booked_spots = [spot for spot in lot.spots if spot.status == 'O']
+    if booked_spots:
+        flash("Cannot delete parking lot with active bookings.", "warning")
+        return redirect("/admin/dashboard")
+
+    # Also ensure no ReservedParkingSpot exists (historically)
+    if lot.reserved_parking_spot:
+        flash("Cannot delete parking lot with past reservations.", "warning")
+        return redirect("/admin/dashboard")
+
+    # Delete all associated spots first
+    for spot in lot.spots:
+        db.session.delete(spot)
+
+    db.session.delete(lot)
+    db.session.commit()
+    flash("Parking lot deleted successfully.", "success")
+    return redirect("/admin/dashboard")
