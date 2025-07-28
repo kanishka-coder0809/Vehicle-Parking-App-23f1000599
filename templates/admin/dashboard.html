@@ -412,32 +412,12 @@
                             {% endfor %}
                         </tbody>
                     </table>
-
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        function closeBothModals(lotId, spotId) {
-            // Get both modals
-            const spotModal = document.getElementById(`spotModal-${lotId}-${spotId}`);
-            const parkingModal = document.getElementById(`viewParking-${lotId}`);
-
-            // Use Bootstrap's Modal instance to hide them
-            const bsSpotModal = bootstrap.Modal.getInstance(spotModal);
-            const bsParkingModal = bootstrap.Modal.getInstance(parkingModal);
-
-            if (bsSpotModal) bsSpotModal.hide();
-            if (bsParkingModal) bsParkingModal.hide();
-
-            // Delay the redirect slightly to ensure the modals finish closing
-            setTimeout(() => {
-                window.location.href = "/admin/dashboard";  // Adjust this to your actual route
-            }, 100);
-        }
-    </script>
-
+    <script src="/static/admin.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
         crossorigin="anonymous"></script>
