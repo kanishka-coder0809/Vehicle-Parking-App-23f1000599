@@ -5,6 +5,8 @@ from flask_login import login_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 from datetime import datetime
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pylab as plt
 
 @app.route("/")
@@ -105,8 +107,9 @@ def admin_summary():
             park_names.append(parking.prime_location_name)
             book_count.append(len(parking.reserved_parking_spot))
         plt.barh(y = park_names, width = book_count)
-        plt.show()
-        return "hello"
+        plt.savefig("./static/admin/parkinglot_booking_count.png", bbox_inches='tight', pad_inches=0.5)
+        plt.close()
+        return render_template("/admin/summary.html")
 
 
 @app.route("/user/dashboard")
