@@ -111,7 +111,6 @@ def admin_summary():
         plt.close()
         return render_template("/admin/summary.html")
 
-
 @app.route("/user/dashboard")
 @login_required
 def user_dash():
@@ -159,11 +158,15 @@ def user_search():
 @login_required
 def user_summary():
     from datetime import datetime
+    from collections import defaultdict
+    import matplotlib.pyplot as plt
 
-    # Fetch only released bookings
+    # Fetch all bookings for current user
     bookings = ReservedParkingSpot.query.filter_by(user_id=current_user.id).all()
 
     summary_data = []
+    bookings_per_day = defaultdict(int)  # for line chart
+
     for booking in bookings:
         if booking.leaving_timestamp != "Not yet left":
             in_time = datetime.strptime(booking.parking_timestamp, "%Y-%m-%d %H:%M:%S")
@@ -182,7 +185,28 @@ def user_summary():
                 'cost': f"₹{total_cost:.2f}"
             })
 
-    return render_template('/user/summary.html', summary_data=summary_data)
+            date_only = in_time.date().isoformat()  # Extract YYYY-MM-DD
+            bookings_per_day[date_only] += 1
+
+    # Sort the bookings by date
+    sorted_dates = sorted(bookings_per_day)
+    booking_counts = [bookings_per_day[date] for date in sorted_dates]
+
+    # Plot line chart
+    plt.figure(figsize=(8, 4))
+    plt.plot(sorted_dates, booking_counts, marker='o', linestyle='-', color='blue')
+    plt.xlabel("Date")
+    plt.ylabel("No. of Bookings")
+    plt.title("Your Parking Bookings Over Time")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    # Save chart to static folder
+    chart_path = "./static/user/user_booking_trend.png"
+    plt.savefig(chart_path, bbox_inches='tight', pad_inches=0.5)
+    plt.close()
+
+    return render_template('/user/summary.html', summary_data=summary_data, chart_path=chart_path)
 
 
 @app.route("/parkingLots", methods=["POST"])
