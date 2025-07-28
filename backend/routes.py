@@ -1,7 +1,7 @@
 from app import app
 from flask import render_template, request, redirect, flash
 from .models import db, Admin, User, ParkingLot, ParkingSpot, ReservedParkingSpot
-from flask_login import login_user, login_required, current_user
+from flask_login import login_user,logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 from datetime import datetime
@@ -12,6 +12,13 @@ import matplotlib.pylab as plt
 @app.route("/")
 def index():
     return render_template("home.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect("/login") 
+
 
 @app.route("/register", methods = ["GET", "POST"])
 def register():
