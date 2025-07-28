@@ -5,6 +5,7 @@ from flask_login import login_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 from datetime import datetime
+import matplotlib.pylab as plt
 
 @app.route("/")
 def index():
@@ -94,10 +95,19 @@ def admin_search():
             result = db.session.query(ParkingLot).filter(ParkingLot.prime_location_name.ilike(f"%{query}%")).all()
         return render_template("/admin/search.html", results = result, type = type, user_histories= user_histories, request = request)
     
-# @app.route("/admin/summary")
-# def admin_summary():
-#     if request.method == "GET":
-#         return render_template("/admin/summary.html")
+@app.route("/admin/summary")
+def admin_summary():
+    if request.method == "GET":
+        parkings = db.session.query(ParkingLot).all()
+        park_names = []
+        book_count = []
+        for parking in parkings:
+            park_names.append(parking.prime_location_name)
+            book_count.append(len(parking.reserved_parking_spot))
+        plt.barh(y = park_names, width = book_count)
+        plt.show()
+        return "hello"
+
 
 @app.route("/user/dashboard")
 @login_required
