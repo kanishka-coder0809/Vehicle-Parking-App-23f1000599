@@ -20,8 +20,10 @@ body {
   }
 }
 
-.hero-section {
-  padding: 35px 0;
+.hero-section,
+.services-section,
+.about-section {
+  padding: 35px 0 0;
 }
 
 .hero-text h1 {
@@ -42,27 +44,54 @@ body {
   border-color: #bbb;
 }
 
-.navbar-brand {
-  font-weight: bold;
+/* Navbar */
+
+.navbar-nav .nav-link {
+  transition: color 0.2s ease-in-out;
 }
 
-.title{
-  font-weight: bolder;
-    text-align: center;
-    /* margin: 0; */
-    position: relative;
-    line-height: 100px;
+.navbar-nav .nav-link:hover {
+  color: #5b6dff;
 }
-.title::after{
-    content: '';
-    background-color: blue;
-    width: 80px;
-    height: 4px;
-    border-radius: 5px;
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
+
+.navbar .btn-primary {
+  background-color: #5b6dff;
+  border: none;
+  transition: background-color 0.2s ease;
+  font-weight: 500;
+}
+
+.navbar .btn-primary:hover {
+  background-color: #4a5df0;
+}
+
+.light-glass-navbar {
+  background-color: rgba(255, 255, 255, 0.30);
+  /* Soft white tint */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background-color 0.3s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Titles */
+.title {
+  font-weight: bolder;
+  text-align: center;
+  position: relative;
+  line-height: 100px;
+}
+
+.title::after {
+  content: '';
+  background-color: blue;
+  width: 80px;
+  height: 4px;
+  border-radius: 5px;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 /* Card shadow and hover effect */
@@ -79,6 +108,25 @@ body {
 
 /* Center title and apply blue color */
 .card-title {
-  color: #5b6dff; /* Your theme blue */
+  color: #5b6dff;
+  /* Your theme blue */
   font-weight: 600;
+}
+
+/* footer */
+.footer {
+  text-align: center;
+  background: black;
+  color: white;
+  font-size: 14px;
+  padding: 20px 0 10px;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.footer p {
+  color: white;
+}
+
+.footer li{
+  list-style-type: none;
 }

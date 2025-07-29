@@ -14,28 +14,39 @@
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm light-glass-navbar">
         <div class="container">
-            <a class="navbar-brand" href="/">
-                <img src="/static/images/Logo.svg" alt="Logo" width="30" height="24"
-                    class="d-inline-block align-text-top">
+            <!-- Brand -->
+            <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="/">
+                <img src="/static/images/Logo.svg" alt="Logo" width="32" height="32" class="me-2">
                 FindMySpot
             </a>
+
+            <!-- Toggler for mobile -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- Align nav items to the right -->
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link active" href="#hero">HOME</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#services">SERVICES</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/about">ABOUT</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/login">LOGIN<i
-                                class="bi bi-box-arrow-in-right"></i></a></li>
+
+            <!-- Navbar Links -->
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item mx-2">
+                        <a class="nav-link fw-semibold text-dark" href="#hero">Home</a>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link fw-semibold text-dark" href="#services">Services</a>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link fw-semibold text-dark" href="#about">About</a>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <a href="/login" class="nav-link fw-semibold text-dark">Login</a>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
+
 
     <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-indicators">
@@ -111,7 +122,7 @@
     </section>
 
     <!-- Services Section -->
-    <section class="services-section" id="services">
+    <section class="services-section my-2" id="services">
         <div class="container">
             <h2 class="title">Services</h2>
             <div class="row align-items-center">
@@ -167,14 +178,58 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="text-center text-lg-start mt-auto border-top">
+    <!-- About Section -->
+    <section class="about-section" id="about">
+        <div class="container">
+            <h2 class="title">About</h2>
+            <div class="row align-items-center">
+                <!-- Text Column -->
+                <div class="col-md-6 hero-text">
+                    <p class="fs-5">A college project named <span class="text-primary fw-bold">FindMySpot</span> created
+                        by <strong>Mayank Dhangar</strong>.</p>
+                    <p class="mb-3">
+                        <span class="fw-bold text-primary">FindMySpot</span> is a smart vehicle parking management
+                        system built to simplify urban parking chaos. Whether you're a daily commuter or a casual
+                        driver, the app helps you locate nearby parking slots, pre-book them in real-time, and enjoy a
+                        seamless, contactless parking experience.
+                    </p>
 
-        <!-- Copyright -->
-        <div class="text-center p-3 bg-white border-top">
-            © 2025 FindMySpot. All Rights Reserved.
+                    <p class="mb-3">
+                        The system features two dashboards:
+                    </p>
+
+                    <ul class="mb-4">
+                        <li><strong>User Dashboard:</strong> Allows users to browse and book parking lots, view
+                            available spots, manage bookings, track parking history, and view the summary. It’s
+                            clean, mobile-friendly, and highly intuitive.</li>
+                        <li><strong>Admin Dashboard:</strong> Enables administrators to manage parking lots and spots,
+                            view user bookings, monitor space availability, update parking lots, and analyze overall
+                            usage and revenue through an interactive UI.</li>
+                    </ul>
+
+                    <p class="mb-4">
+                        With a focus on usability, responsiveness, and real-time updates, <strong>FindMySpot</strong> is
+                        ideal for smart city initiatives and modern campus or commercial parking solutions. Built using
+                        Flask, Bootstrap, and SQLAlchemy, it delivers both functionality and scalability.
+                    </p>
+                </div>
+                <!-- Animation Column -->
+                <div class="col-md-6 text-center mt-5 mt-md-0">
+                    <!-- MP4 Video on loop -->
+                    <video autoplay muted loop width="90%" height="auto">
+                        <source src="/static/images/Developer.mp4" type="video/mp4">
+                    </video>
+                </div>
+            </div>
         </div>
-    </footer>
+    </section>
+
+    <!--Footer-->
+    <div class="footer">
+        <div class="container">
+            <p class="fw-semibold">FindMySpot &COPY; - Copyright 2025 | Made with &#x2665;&#xfe0f; by Mayank Dhangar</p>
+        </div>
+    </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
