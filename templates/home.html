@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FindMySpot - Find Nearby Parking Location</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link rel="stylesheet" href="/static/css/home.css">
 </head>
 
@@ -25,9 +27,11 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <!-- Align nav items to the right -->
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link active" href="/">HOME</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/services">SERVICES</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#hero">HOME</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#services">SERVICES</a></li>
                     <li class="nav-item"><a class="nav-link" href="/about">ABOUT</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/login">LOGIN<i
+                                class="bi bi-box-arrow-in-right"></i></a></li>
                 </ul>
             </div>
         </div>
@@ -81,8 +85,9 @@
     </div>
 
     <!-- Hero Section -->
-    <section class="hero-section">
+    <section class="hero-section" id="hero">
         <div class="container">
+            <h2 class="title">FindMySpot</h2>
             <div class="row align-items-center">
                 <!-- Text Column -->
                 <div class="col-md-6 hero-text">
@@ -97,9 +102,66 @@
                 <!-- Animation Column -->
                 <div class="col-md-6 text-center mt-5 mt-md-0">
                     <!-- MP4 Video on loop -->
-                    <video autoplay muted loop width="100%" height="auto">
+                    <video autoplay muted loop width="90%" height="auto">
                         <source src="/static/images/parking.mp4" type="video/mp4">
                     </video>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services-section" id="services">
+        <div class="container">
+            <h2 class="title">Services</h2>
+            <div class="row align-items-center">
+                <!-- Animation Column -->
+                <div class="col-md-6 text-center mt-5 mt-md-0">
+                    <!-- MP4 Video on loop -->
+                    <video autoplay muted loop width="90%" height="auto">
+                        <source src="/static/images/services.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <!-- Text Column -->
+                <div class="col-md-6 mb-3">
+                    <div class="container">
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                            <div class="col">
+                                <div class="card custom-card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-primary">Advance Slot Booking</h5>
+                                        <p class="card-text">Reserve your parking spot in advance to avoid last-minute
+                                            hassle.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card custom-card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-primary">Booking History</h5>
+                                        <p class="card-text">Track all your past bookings and payments in one place.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card custom-card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-primary">Multi-City Support</h5>
+                                        <p class="card-text">Book and park in any supported city where FindMySpot
+                                            operates.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card custom-card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-primary">Parking Spot Finder</h5>
+                                        <p class="card-text">Filter by city, locality or pincode.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -116,6 +178,9 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
 </body>
 
 </html>

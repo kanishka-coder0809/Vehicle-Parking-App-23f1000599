@@ -21,7 +21,7 @@ body {
 }
 
 .hero-section {
-  padding: 15vh 0;
+  padding: 35px 0;
 }
 
 .hero-text h1 {
@@ -44,4 +44,41 @@ body {
 
 .navbar-brand {
   font-weight: bold;
+}
+
+.title{
+  font-weight: bolder;
+    text-align: center;
+    /* margin: 0; */
+    position: relative;
+    line-height: 100px;
+}
+.title::after{
+    content: '';
+    background-color: blue;
+    width: 80px;
+    height: 4px;
+    border-radius: 5px;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Card shadow and hover effect */
+.custom-card {
+  box-shadow: 0 4px 12px rgba(0, 30, 255, 0.164);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+}
+
+.custom-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 30, 255, 0.164);
+}
+
+/* Center title and apply blue color */
+.card-title {
+  color: #5b6dff; /* Your theme blue */
+  font-weight: 600;
 }
