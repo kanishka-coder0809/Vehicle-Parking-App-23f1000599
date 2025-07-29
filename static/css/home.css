@@ -1,5 +1,4 @@
 body {
-  background: linear-gradient(to right, #e6ecfc, #f0f4ff);
   font-family: "Segoe UI", sans-serif;
 }
 
@@ -45,13 +44,4 @@ body {
 
 .navbar-brand {
   font-weight: bold;
-}
-
-.animated-image {
-  animation: bounceIn 1.5s ease;
-  transition: transform 0.4s ease;
-}
-
-.animated-image:hover {
-  transform: scale(1.05);
 }
