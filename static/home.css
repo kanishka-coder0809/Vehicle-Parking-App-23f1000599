@@ -1,0 +1,57 @@
+body {
+  background: linear-gradient(to right, #e6ecfc, #f0f4ff);
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Animations */
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.hero-section {
+  padding: 15vh 0;
+}
+
+.hero-text h1 {
+  font-size: 2.8rem;
+  font-weight: bold;
+}
+
+.hero-text p {
+  color: #555;
+}
+
+.btn-primary {
+  background-color: #5b6dff;
+  border: none;
+}
+
+.btn-outline-secondary {
+  border-color: #bbb;
+}
+
+.navbar-brand {
+  font-weight: bold;
+}
+
+.animated-image {
+  animation: bounceIn 1.5s ease;
+  transition: transform 0.4s ease;
+}
+
+.animated-image:hover {
+  transform: scale(1.05);
+}
