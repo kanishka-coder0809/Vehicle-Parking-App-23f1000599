@@ -10,7 +10,7 @@ body {
     position: relative;
 }
 
-.login-container {
+.login-container, .register-container {
     background-color: #ffffff;
     border-radius: 20px;
     padding: 40px 30px;
@@ -20,28 +20,12 @@ body {
     transition: transform 0.3s ease-in-out;
 }
 
-.login-container:hover {
+.login-container:hover, .register-container:hover {
     transform: scale(1.02);
 }
 
 .login-container h4 {
     font-weight: bold;
-}
-
-.register-container {
-    background-color: white;
-    border-radius: 20px;
-    padding: 30px 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-    transition: transform 0.3s ease-in-out;
-    /* Smooth scale effect */
-}
-
-.register-container:hover {
-    transform: scale(1.02);
-    /* Slightly larger on hover */
 }
 
 .register-container p {

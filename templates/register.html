@@ -16,49 +16,59 @@
 
   <div class="register-container">
     <h4 class="text-center mb-3 fw-bold">Create Account</h4>
-    <p class="text-center">We missed you! Please enter your details.</p>
-    <form action="/register" method="POST">
+    <p class="text-center">Book your spot Now! Please enter your details.</p>
+    <div class="row align-items-center">
+      <!-- Form Column -->
+      <div class="col-md-6">
+        <form action="/register" method="POST">
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="fullname" placeholder="Full Name" name="name" required>
+            <label for="fullname">Full Name</label>
+          </div>
 
-      <div class="form-floating mb-3">
-        <input type="text" class="form-control" id="fullname" placeholder="Full Name" name="name" required>
-        <label for="fullname">Full Name</label>
+          <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="email" placeholder="Email" name="email" required>
+            <label for="email">Email</label>
+          </div>
+
+          <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="password" placeholder="Password" name="password" required>
+            <label for="password">Password</label>
+          </div>
+
+          <div class="form-floating mb-3">
+            <input type="tel" class="form-control" id="phone" placeholder="Phone" name="phone" required>
+            <label for="phone">Phone Number</label>
+          </div>
+
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="address" placeholder="city" name="city" required>
+            <label for="city">City</label>
+          </div>
+
+          <div class="form-floating mb-3">
+            <input type="number" class="form-control" id="pincode" placeholder="Pincode" name="pincode" required>
+            <label for="pincode">Pincode</label>
+          </div>
+
+          <div class="d-grid mb-2">
+            <button type="submit" class="btn btn-primary">Register</button>
+          </div>
+
+          <div class="form-footer mt-3">
+            Already have an account? <a href="/login" class="text-primary">Login</a>
+          </div>
+        </form>
       </div>
 
-      <div class="form-floating mb-3">
-        <input type="email" class="form-control" id="email" placeholder="Email" name="email" required>
-        <label for="email">Email</label>
+      <!-- Animation Column -->
+      <div class="col-md-6 text-center mt-6 mt-md-0">
+        <video autoplay muted loop width="80%" height="auto">
+          <source src="/static/images/Register.mp4" type="video/mp4">
+        </video>
       </div>
-
-      <div class="form-floating mb-3">
-        <input type="password" class="form-control" id="password" placeholder="Password" name="password" required>
-        <label for="password">Password</label>
-      </div>
-
-      <div class="form-floating mb-3">
-        <input type="tel" class="form-control" id="phone" placeholder="Phone" name="phone" required>
-        <label for="phone">Phone Number</label>
-      </div>
-
-      <div class="form-floating mb-3">
-        <input type="text" class="form-control" id="address" placeholder="city" name="city" required>
-        <label for="city">City</label>
-      </div>
-
-      <div class="form-floating mb-3">
-        <input type="number" class="form-control" id="pincode" placeholder="Pincode" name="pincode" required>
-        <label for="pincode">Pincode</label>
-      </div>
-
-      <div class="d-grid mb-2">
-        <button type="submit" class="btn btn-primary">Register</button>
-      </div>
-
-      <div class="form-footer mt-3">
-        Already have an account? <a href="/login" class="text-primary">Login</a>
-      </div>
-    </form>
+    </div>
   </div>
-
 </body>
 
 </html>
