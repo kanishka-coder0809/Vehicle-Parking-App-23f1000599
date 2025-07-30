@@ -44,15 +44,6 @@ body {
   border-color: #bbb;
 }
 
-.light-glass-navbar {
-  background-color: rgba(255, 255, 255, 0.30);
-  /* Soft white tint */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: background-color 0.3s ease;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
 /* Titles */
 .title {
   font-weight: bolder;
@@ -90,22 +81,4 @@ body {
   color: #5b6dff;
   /* Your theme blue */
   font-weight: 600;
-}
-
-/* footer */
-.footer {
-  text-align: center;
-  background: black;
-  color: white;
-  font-size: 14px;
-  padding: 20px 0 10px;
-  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.08);
-}
-
-.footer p {
-  color: white;
-}
-
-.footer li{
-  list-style-type: none;
 }
