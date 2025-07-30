@@ -346,11 +346,13 @@
 
                                                 <div class="modal-body">
                                                     <p><strong>Status:</strong> {{ spot.status }}</p>
-                                                    {% if spot.reserved_parking_spot %}
-                                                    {% set res = spot.reserved_parking_spot[0] %}
+                                                    {% set active_res = spot.reserved_parking_spot |
+                                                    selectattr('leaving_timestamp', 'equalto', 'Not yet left') | list %}
+                                                    {% if active_res %}
+                                                    {% set res = active_res[0] %}
                                                     <p><strong>Reserved By:</strong> {{ res.user.name }}</p>
                                                     <p><strong>From:</strong> {{ res.parking_timestamp }}</p>
-                                                    <p><strong>To:</strong> {{ res.leaving_timestamp }}</p>
+                                                    <p><strong>To:</strong> Ongoing</p>
                                                     <p><strong>Cost Rate:</strong> ₹{{ res.parkingCost_unitTime }}</p>
                                                     {% else %}
                                                     <p>This spot is currently available.</p>
