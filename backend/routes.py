@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, request, redirect, flash
+from flask import render_template, request, redirect, flash, url_for
 from .models import db, Admin, User, ParkingLot, ParkingSpot, ReservedParkingSpot
 from flask_login import login_user,logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
@@ -17,8 +17,8 @@ def index():
 @login_required
 def logout():
     logout_user()
-    return redirect("/login") 
-
+    flash('Logged Out Successfully !!', 'success')
+    return redirect(url_for('login'))
 
 @app.route("/register", methods = ["GET", "POST"])
 def register():
@@ -33,12 +33,14 @@ def register():
         u_pincode = request.form.get("pincode")
         user = db.session.query(User).filter_by(email = u_email).first()
         if user:
-            return "E-mail Already Exist"
+            flash('E-mail Alreay Exist !!', 'warning')
+            return redirect(url_for('register'))
         else:
             new_user = User(name = u_name, email = u_email, password = u_password, phone = u_phone, city = u_city, pincode = u_pincode)
             db.session.add(new_user)
             db.session.commit()
-            return redirect("/login")
+            flash('E-mail Registered !!', 'success')
+            return redirect(url_for('login'))
 
 @app.route("/login", methods =["GET", "POST"])
 def login():
@@ -54,14 +56,18 @@ def login():
             if login.password == l_password:
                 if isinstance(login, Admin):
                     login_user(login)
+                    flash('Logged in successfully!', 'success')
                     return redirect(f"/admin/dashboard")
                 elif isinstance(login, User):
                     login_user(login)
+                    flash('Logged in successfully!', 'success')
                     return redirect(f"/user/dashboard")
             else:
-                return "Incorrect Password"
+                flash('Invalid password !!', 'danger')
+                return redirect(url_for('login'))
         else:
-            return "E-mail doesn't exist"
+            flash('Invalid E-mail !!', 'danger')
+            return redirect(url_for('login'))
 
 @app.route("/admin/dashboard")
 @login_required  
@@ -229,12 +235,14 @@ def parkingLot():
         par_max = request.form.get("maximum_number_of_spots")
         parking = db.session.query(ParkingLot).filter_by(prime_location_name=par_name).first()
         if parking:
-            return "Parking Lot Already Exist"
+            flash('Parking Lot Already Existed !!', 'warning')
+            return redirect('/admin/dashboard')
         else:
             new_par = ParkingLot(prime_location_name = par_name, price = par_price, address = par_add, city = par_city, pin_code = par_pin, maximum_number_of_spots = par_max)
             db.session.add(new_par)
             db.session.commit()
-            return redirect("/admin/dashboard")
+            flash('Parking Lot Created !!', 'success')
+            return redirect('/admin/dashboard')
     elif request.args.get("task") == "edit":
         par_name = request.form.get("name")
         par_price = request.form.get("price")
@@ -268,9 +276,11 @@ def parkingLot():
                 for spot in removable_spots[:current_count - par_max]:
                     db.session.delete(spot)
             db.session.commit()
-            return redirect("/admin/dashboard")
+            flash('Parking Lot Edited !!', 'success')
+            return redirect('/admin/dashboard')
         else:
-            return "Parking Lot doesn't exist"
+            flash('Parking Lot Does not Exist !!', 'warning')
+            return redirect('/admin/dashboard')
 
 @app.route("/booking", methods=["POST"])
 @login_required
