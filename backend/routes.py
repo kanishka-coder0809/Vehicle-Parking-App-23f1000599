@@ -29,11 +29,13 @@ def register():
         u_email = request.form.get("email")
         u_password = request.form.get("password")
         u_phone = request.form.get("phone")
+        u_city = request.form.get("city")
+        u_pincode = request.form.get("pincode")
         user = db.session.query(User).filter_by(email = u_email).first()
         if user:
             return "E-mail Already Exist"
         else:
-            new_user = User(name = u_name, email = u_email, password = u_password, phone = u_phone)
+            new_user = User(name = u_name, email = u_email, password = u_password, phone = u_phone, city = u_city, pincode = u_pincode)
             db.session.add(new_user)
             db.session.commit()
             return redirect("/login")
