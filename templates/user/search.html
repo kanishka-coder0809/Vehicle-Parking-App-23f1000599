@@ -78,7 +78,7 @@
             <div class="d-flex ms-auto">
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="query"
                     name="search_query" />
-                <button class="btn btn-outline-success" type="submit">Search</button>
+                <button class="btn btn-outline-primary" type="submit">Search</button>
             </div>
         </form>
     </div>
@@ -100,7 +100,7 @@
                 <div class="col-4">
                     <div class="card">
                         <div class="card-body">
-                            <p><strong>{{ lot.prime_location_name }}</strong></p>
+                            <strong>{{ lot.prime_location_name }}</strong>
                             <p>Available Spots: {{ lot.spots | selectattr('status', 'equalto', 'A') | list |
                                 length }}</p>
                             <div class="btn-group btn-group-sm" role="group" aria-label="Basic outlined example">
@@ -170,7 +170,7 @@
                                                 </div>
 
                                                 <div class="d-grid">
-                                                    <button type="submit" class="btn btn-success" {% if not
+                                                    <button type="submit" class="btn btn-primary" {% if not
                                                         available_spot %} disabled {% endif %}>
                                                         Confirm Booking
                                                     </button>

@@ -67,17 +67,17 @@
                 type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Registered Users</button>
         </li>
     </ul>
-    <div class="tab-content" id="pills-tabContent">
+    <div class="tab-content my-3" id="pills-tabContent">
         <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab"
             tabindex="0">
             <!-- Parking Lots -->
-            <div class="card shadow-lg mx-auto my-3" style="width:80%">
+            <div class="card shadow-lg mx-auto bigger-card" style="width:80%">
                 <div class="card-body">
-                    <div class="card-header d-flex align-items-center">
-                        <h5 class="card-title">Parking Lots</h5>
+                    <div class="card-header align-items-center d-flex bg-transparent pb-3">
+                        <h5 class="card-title fw-semibold">Parking Lots</h5>
 
                         <!-- Button trigger modal -->
-                        <button type="button" class="btn btn-warning ms-auto" class="btn btn-primary"
+                        <button type="button" class="btn btn-warning ms-auto"
                             data-bs-toggle="modal" data-bs-target="#createParking">+ Create</button>
 
                         <!-- Modal -->
@@ -142,9 +142,9 @@
                     <div class="row my-2 g-3 text-center">
                         {% for lot in all_par %}
                         <div class="col-4">
-                            <div class="card">
+                            <div class="card custom-card">
                                 <div class="card-body">
-                                    <p>{{lot.prime_location_name}}</p>
+                                    <strong>{{lot.prime_location_name}}</strong>
                                     <p>(Occupied: {{ lot.spots | selectattr('status', 'equalto', 'O') | list | length
                                         }}/{{lot.maximum_number_of_spots}})</p>
                                     <div class="btn-group btn-group-sm" role="group"
@@ -275,7 +275,7 @@
                                                                 {% for spot in lot.spots %}
                                                                 <div class="col">
                                                                     <button
-                                                                        class="btn {% if spot.status == 'A' %}btn-success{% else %}btn-danger{% endif %}"
+                                                                        class="btn {% if spot.status == 'A' %}btn-success{% else %}btn-danger{% endif %} rounded-pill"
                                                                         data-bs-target="#spotModal-{{ lot.id }}-{{ spot.id }}"
                                                                         data-bs-toggle="modal">
                                                                         {{ spot.status }}
@@ -356,7 +356,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
         <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
             <!-- Registered Users -->

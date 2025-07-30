@@ -1,0 +1,15 @@
+.custom-card {
+  box-shadow: 0 4px 12px rgba(0, 30, 255, 0.164);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+}
+
+.custom-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 30, 255, 0.164);
+}
+
+.bigger-card{
+    box-shadow: 0 4px 12px rgba(0, 30, 255, 0.164);
+    border: none;
+}

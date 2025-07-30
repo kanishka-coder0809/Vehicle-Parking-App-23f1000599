@@ -70,7 +70,7 @@
             <div class="d-flex ms-auto">
                 <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="query"
                     name="search_query" />
-                <button class="btn btn-outline-success" type="submit">Search</button>
+                <button class="btn btn-outline-primary" type="submit">Search</button>
             </div>
         </form>
     </div>
@@ -81,7 +81,8 @@
             <h5 class="card-title">Search Results</h5>
         </div>
         {% if not results and not request.form %}
-        <p class="card-text fw-semibold my-3">No text to display. Kindly search for either parking lots or registered users.</p>
+        <p class="card-text fw-semibold my-3">No text to display. Kindly search for either parking lots or registered
+            users.</p>
         {% endif %}
 
         {% if type=="parking" %}
@@ -100,6 +101,16 @@
                                     data-bs-target="#editParking-{{lot.id}}">Edit</button>
                                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
                                     data-bs-target="#viewParking-{{lot.id}}">View</button>
+                                <!-- Conditionally show Delete button -->
+                                {% set occupied_count = lot.spots | selectattr('status', 'equalto', 'O') | list
+                                |
+                                length %}
+                                {% if occupied_count == 0 and lot.reserved_parking_spot|length == 0 %}
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                                    data-bs-target="#deleteParking-{{lot.id}}">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                                {% endif %}
                             </div>
 
                             <!-- Modal for Edit -->
@@ -208,7 +219,7 @@
                                                         {% for spot in lot.spots %}
                                                         <div class="col">
                                                             <button
-                                                                class="btn {% if spot.status == 'A' %}btn-success{% else %}btn-danger{% endif %}"
+                                                                class="btn {% if spot.status == 'A' %}btn-success{% else %}btn-danger{% endif %} rounded-pill"
                                                                 data-bs-target="#spotModal-{{ lot.id }}-{{ spot.id }}"
                                                                 data-bs-toggle="modal">
                                                                 {{ spot.status }}
@@ -222,6 +233,32 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Model for Delete -->
+                            <div class="modal fade" id="deleteParking-{{lot.id}}" aria-hidden="true"
+                                aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-4" id="deleteParkingLabel-{{lot.id}}">
+                                                {{lot.prime_location_name}}</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <h6>Are you sure you want to delete this parking lot ??</h6>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <form action="/delete_parking/{{ lot.id }}" method="POST">
+                                                <button class="btn btn-danger">Yes</button>
+                                            </form>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">No</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             {% for spot in lot.spots %}
                             <div class="modal fade" id="spotModal-{{ lot.id }}-{{ spot.id }}" tabindex="-1"
                                 aria-labelledby="spotModalLabel-{{ lot.id }}-{{ spot.id }}" aria-hidden="true">
@@ -231,8 +268,6 @@
                                             <h5 class="modal-title" id="spotModalLabel-{{ lot.id }}-{{ spot.id }}">Spot
                                                 #{{ spot.id
                                                 }}</h5>
-                                            <!-- <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button> -->
                                             <button type="button" class="btn-close"
                                                 onclick="closeBothModals('{{ lot.id }}', '{{ spot.id }}')">
                                             </button>
