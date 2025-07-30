@@ -44,27 +44,6 @@ body {
   border-color: #bbb;
 }
 
-/* Navbar */
-
-.navbar-nav .nav-link {
-  transition: color 0.2s ease-in-out;
-}
-
-.navbar-nav .nav-link:hover {
-  color: #5b6dff;
-}
-
-.navbar .btn-primary {
-  background-color: #5b6dff;
-  border: none;
-  transition: background-color 0.2s ease;
-  font-weight: 500;
-}
-
-.navbar .btn-primary:hover {
-  background-color: #4a5df0;
-}
-
 .light-glass-navbar {
   background-color: rgba(255, 255, 255, 0.30);
   /* Soft white tint */
