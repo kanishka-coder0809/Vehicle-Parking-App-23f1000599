@@ -223,16 +223,39 @@
                                     <td><strong>{{ ru.duration }}</strong></td>
                                     <td class="text-center">
                                         {% if ru.leaving_timestamp == 'Not yet left' %}
-                                        <form action="/release/{{ ru.id }}" method="POST">
-                                            <button class="btn btn-warning btn-sm"
-                                                onclick="return confirm('Release this spot?');">
-                                                Release Spot
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#releaseParking-{{ru.id}}">
+                                            <i class="bi bi-ev-front"></i> Release
+                                        </button>
                                         {% else %}
                                         <span class="badge bg-success">Completed</span>
                                         {% endif %}
                                     </td>
+
+                                    <!-- Modal for Release Parking Spot -->
+                                    <div class="modal fade" id="releaseParking-{{ru.id}}" aria-hidden="true"
+                                        aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-4" id="releaseParkingLabel-{{ru.id}}">
+                                                        Spot #{{ru.id}} {{ru.Parking_Lot.prime_location_name}}</h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <h6>Are you sure you want to release this parking spot ??</h6>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <form action="/release/{{ ru.id }}" method="POST">
+                                                        <button class="btn btn-danger">Yes</button>
+                                                    </form>
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">No</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </tr>
                                 {% endfor %}
                             </tbody>
