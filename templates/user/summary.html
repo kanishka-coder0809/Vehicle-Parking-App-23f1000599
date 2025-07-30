@@ -11,24 +11,31 @@
 </head>
 
 <body>
-    <nav class="navbar sticky-top navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid ms-5">
-            <a class="navbar-brand" href="#">FindMySpot</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm light-glass-navbar">
+        <div class="container">
+            <!-- Brand -->
+            <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="/" target="_blank">
+                <img src="/static/images/Logo.svg" alt="Logo" width="32" height="32" class="me-2">
+                FindMySpot
+            </a>
+
+            <!-- Toggler for mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ms-auto me-5">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/user/dashboard">Dashboard</a>
+
+            <!-- Navbar Links -->
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item mx-2">
+                        <a class="nav-link fw-semibold text-dark" href="/user/dashboard">Dashboard</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/user/search">Search</a>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link fw-semibold text-dark" href="/user/search">Search</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page"href="/user/summary">Summary</a>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link fw-semibold text-primary" href="/user/summary">Summary</a>
                     </li>
                     <div class="dropdown">
                         <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
@@ -81,12 +88,13 @@
             </table>
         </div>
         {% else %}
-            <p class="text-muted">No completed bookings yet.</p>
+        <p class="text-muted">No completed bookings yet.</p>
         {% endif %}
     </div>
 
     <div class="card mx-auto my-5 shadow-lg" style="width:40rem">
-        <img src="/static/user/user_booking_trend.png" alt="Booking Trend Line Chart" class="img-fluid" style="max-width: 600px;">
+        <img src="/static/user/user_booking_trend.png" alt="Booking Trend Line Chart" class="img-fluid"
+            style="max-width: 600px;">
         <div class="card-body text-center">
             <h5 class="card-title">Booking Trend</h5>
         </div>
