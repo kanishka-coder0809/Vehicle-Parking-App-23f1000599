@@ -28,4 +28,4 @@ from backend.api import *
 
 #the server is running only if we want to run app.py file 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0',debug=True)
