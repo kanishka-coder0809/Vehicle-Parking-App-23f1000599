@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/static/js/theme-init.js"></script>
+    <title>FindMySpot | Wallet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/static/css/nav_footer.css">
+    <link rel="stylesheet" href="/static/css/Dark.css">
+    <link rel="stylesheet" href="/static/css/wallet.css">
+    <link rel="icon" href="/static/images/logo.png" type="image/png">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm light-glass-navbar">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="/" target="_blank">
+                <img src="/static/images/Logo.png" alt="Logo" width="32" height="32" class="me-2">
+                FindMySpot
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item mx-2 dropdown navbar-links-dropdown">
+                        <button class="btn navbar-menu-toggle dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i data-lucide="menu"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/user/dashboard">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="/user/search">Search</a></li>
+                            <li><a class="dropdown-item" href="/user/favorites">Favorites</a></li>
+                            <li><a class="dropdown-item" href="/user/summary">Summary</a></li>
+                            <li><a class="dropdown-item" href="/user/wallet">Wallet</a></li>
+                            <li><a class="dropdown-item" href="/user/subscriptions">Subscriptions</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item mx-2 d-flex align-items-center">
+                        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle dark/light theme">
+                            <i data-lucide="sun" class="icon-sun"></i>
+                            <i data-lucide="moon-star" class="icon-moon"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item mx-2 dropdown navbar-profile-dropdown">
+                        <button class="btn navbar-profile-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile menu">
+                            {% if current_user.profile_image and current_user.profile_image != 'default.png' %}
+                            <img src="/static/user_profiles/{{ current_user.profile_image }}" alt="Profile" class="profile-avatar" onerror="this.onerror=null;this.src='/static/images/default-avatar.webp';">
+                            {% else %}
+                            <img src="/static/images/default-avatar.webp" alt="Default profile" class="profile-avatar">
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a href="/user/profile" class="dropdown-item">Profile</a></li>
+                            <li><a href="/logout" class="dropdown-item">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="wallet-flash-stack" aria-live="polite" aria-atomic="true">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show wallet-flash auto-dismiss" role="alert" data-auto-dismiss="5000">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <main class="wallet-page">
+        <div class="wallet-shell">
+            <div class="wallet-head">
+                <div>
+                    <h1 class="wallet-title">My Wallet</h1>
+                    <p class="wallet-subtitle mb-0">Manage balance, add money, withdraw, and see refunds from parking.</p>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary wallet-settings dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear-fill me-2"></i>Settings
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#addMoneyModal">Add Money</button></li>
+                        <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#withdrawModal">Withdraw</button></li>
+                        <li><a class="dropdown-item" href="/user/wallet">Refresh</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-1">
+                <div class="col-lg-8">
+                    <div class="wallet-card balance-card">
+                        <div class="balance-hero">
+                            <div class="wallet-icon-wrap">
+                                <img src="/static/images/wallet.png" alt="Wallet" class="wallet-icon" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
+                                <div class="wallet-icon-fallback d-none">₹</div>
+                            </div>
+                            <div class="balance-copy">
+                                <p class="section-label mb-1">Wallet Balance</p>
+                                <h2 class="balance-value">₹{{ '%.0f'|format(wallet_balance) }}</h2>
+                                <div class="action-row">
+                                    <button class="btn btn-success action-btn" data-bs-toggle="modal" data-bs-target="#addMoneyModal">+ Add Money</button>
+                                    <button class="btn btn-primary action-btn" data-bs-toggle="modal" data-bs-target="#withdrawModal">Withdraw</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                    </div>
+
+                    <div class="wallet-section mt-3">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                            <h5 class="fw-bold mb-0">Recent Transactions</h5>
+                            <div class="wallet-table-filter-group">
+                                <label for="walletTxnFilter" class="form-label mb-0 me-2 wallet-table-filter-label">Filter</label>
+                                <div class="dropdown wallet-filter-dropdown">
+                                    <button class="btn wallet-filter-trigger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="walletTxnFilterTrigger">
+                                        All
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end wallet-filter-menu" aria-labelledby="walletTxnFilterTrigger">
+                                        <li><button class="dropdown-item wallet-filter-item active" type="button" data-value="all">All</button></li>
+                                        <li><button class="dropdown-item wallet-filter-item" type="button" data-value="added">Added Money</button></li>
+                                        <li><button class="dropdown-item wallet-filter-item" type="button" data-value="withdraw">Withdraw</button></li>
+                                        <li><button class="dropdown-item wallet-filter-item" type="button" data-value="refund">Refund</button></li>
+                                        <li><button class="dropdown-item wallet-filter-item" type="button" data-value="penalty">Penalty</button></li>
+                                    </ul>
+                                </div>
+                                <input type="hidden" id="walletTxnFilter" value="all">
+                            </div>
+                        </div>
+                        <div class="table-responsive wallet-table-wrap">
+                            <table class="table wallet-table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                        <th>Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for txn in transactions %}
+                                    {% set wallet_category = 'refund' if txn.transaction_type == 'refund' or 'refund' in (txn.description|lower) else 'penalty' if 'penalty' in (txn.description|lower) or 'overtime' in (txn.description|lower) else 'withdraw' if txn.transaction_type == 'debit' else 'added' %}
+                                    <tr data-wallet-category="{{ wallet_category }}">
+                                        <td>{{ txn.created_at }}</td>
+                                        <td>{{ txn.description }}</td>
+                                        <td class="{% if txn.transaction_type in ['credit', 'refund'] %}positive{% else %}negative{% endif %}">
+                                            {% if txn.transaction_type in ['credit', 'refund'] %}+{% else %}-{% endif %} Rs {{ '%.0f'|format(txn.amount) }}
+                                        </td>
+                                        <td>
+                                            <span class="txn-badge {% if txn.transaction_type in ['credit', 'refund'] %}badge-credit{% else %}badge-debit{% endif %}">
+                                                {{ txn.transaction_type|replace('_', ' ')|title }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="4" class="text-center text-muted py-4">No wallet activity found.</td></tr>
+                                    {% endfor %}
+                                    <tr id="walletFilterEmptyRow" class="d-none">
+                                        <td colspan="4" class="text-center text-muted py-4">No transactions match the selected filter.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button type="button" class="btn btn-link wallet-link p-0 border-0" data-bs-toggle="modal" data-bs-target="#allTransactionsModal">
+                                View All Transactions <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="wallet-card chart-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <div>
+                                <h5 class="mb-1 fw-bold">Transaction Distribution</h5>
+                                <p class="mb-0 wallet-card-subtitle">Added money, withdraw, refund, and penalty share.</p>
+                            </div>
+                            <span class="wallet-chart-chip">Pie chart</span>
+                        </div>
+                        <div class="wallet-chart-wrap">
+                            <canvas id="walletDistributionChart" class="wallet-chart-canvas" aria-label="Wallet transaction distribution chart"></canvas>
+                        </div>
+                        <div class="wallet-chart-legend mt-3">
+                            <div class="legend-item"><span class="legend-dot added"></span> Added Money <strong>Rs {{ '%.0f'|format(wallet_chart.counts.added) }}</strong></div>
+                            <div class="legend-item"><span class="legend-dot withdraw"></span> Withdraw <strong>Rs {{ '%.0f'|format(wallet_chart.counts.withdraw) }}</strong></div>
+                            <div class="legend-item"><span class="legend-dot refund"></span> Refund <strong>Rs {{ '%.0f'|format(wallet_chart.counts.refund) }}</strong></div>
+                            <div class="legend-item"><span class="legend-dot penalty"></span> Penalty <strong>Rs {{ '%.0f'|format(wallet_chart.counts.penalty) }}</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div class="modal fade" id="addMoneyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content wallet-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Money</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/wallet/add-money" method="POST">
+                    <div class="modal-body">
+                        <label class="form-label">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control" name="amount" min="1" step="1" placeholder="Enter amount" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Add Money</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="withdrawModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content wallet-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title">Withdraw</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/wallet/withdraw" method="POST">
+                    <div class="modal-body">
+                        <label class="form-label">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control" name="amount" min="1" step="1" placeholder="Enter amount" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Withdraw</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade wallet-all-transactions-modal" id="allTransactionsModal" tabindex="-1" aria-labelledby="allTransactionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content wallet-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="allTransactionsModalLabel">All Transactions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive wallet-all-table-wrap">
+                        <table class="table wallet-table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for txn in transactions %}
+                                <tr>
+                                    <td>{{ txn.created_at }}</td>
+                                    <td>{{ txn.description }}</td>
+                                    <td class="{% if txn.transaction_type in ['credit', 'refund'] %}positive{% else %}negative{% endif %}">
+                                        {% if txn.transaction_type in ['credit', 'refund'] %}+{% else %}-{% endif %} Rs {{ '%.0f'|format(txn.amount) }}
+                                    </td>
+                                    <td>
+                                        <span class="txn-badge {% if txn.transaction_type in ['credit', 'refund'] %}badge-credit{% else %}badge-debit{% endif %}">
+                                            {{ txn.transaction_type|replace('_', ' ')|title }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">No wallet activity found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/js/theme-toggle.js"></script>
+    <script src="/static/js/flash-alerts.js"></script>
+    <script id="walletChartCounts" type="application/json">{{ wallet_chart.counts|tojson }}</script>
+    <script>
+        (function () {
+            const filter = document.getElementById('walletTxnFilter');
+            const filterTrigger = document.getElementById('walletTxnFilterTrigger');
+            const filterItems = Array.from(document.querySelectorAll('.wallet-filter-item'));
+            const rows = Array.from(document.querySelectorAll('tr[data-wallet-category]'));
+            const emptyRow = document.getElementById('walletFilterEmptyRow');
+
+            if (!filter || rows.length === 0) {
+                return;
+            }
+
+            const updateEmptyState = () => {
+                const visibleRows = rows.filter((row) => row.style.display !== 'none');
+                if (emptyRow) {
+                    emptyRow.classList.toggle('d-none', visibleRows.length > 0);
+                }
+            };
+
+            filter.addEventListener('change', () => {
+                const selected = filter.value;
+                rows.forEach((row) => {
+                    const category = row.dataset.walletCategory;
+                    row.style.display = selected === 'all' || category === selected ? '' : 'none';
+                });
+                updateEmptyState();
+            });
+
+            updateEmptyState();
+
+            filterItems.forEach((item) => {
+                item.addEventListener('click', () => {
+                    const value = item.dataset.value || 'all';
+                    filter.value = value;
+                    if (filterTrigger) {
+                        filterTrigger.textContent = item.textContent ? item.textContent.trim() : 'All';
+                    }
+                    filterItems.forEach((btn) => btn.classList.toggle('active', btn === item));
+                    filter.dispatchEvent(new Event('change'));
+                });
+            });
+
+            const chartCanvas = document.getElementById('walletDistributionChart');
+            const countsEl = document.getElementById('walletChartCounts');
+            const chartCounts = countsEl ? JSON.parse(countsEl.textContent || '{}') : {};
+            let walletPieChart = null;
+
+            const renderWalletChart = () => {
+                if (!chartCanvas || typeof Chart === 'undefined') {
+                    return;
+                }
+
+                const labelMap = {
+                    added: 'Added Money',
+                    withdraw: 'Withdraw',
+                    refund: 'Refund',
+                    penalty: 'Penalty'
+                };
+
+                const colorMap = {
+                    added: '#1d66e5',
+                    withdraw: '#f59e0b',
+                    refund: '#10b981',
+                    penalty: '#ef4444'
+                };
+
+                const labels = [];
+                const values = [];
+                const colors = [];
+
+                ['added', 'withdraw', 'refund', 'penalty'].forEach((key) => {
+                    const value = Number(chartCounts[key] || 0);
+                    if (value > 0) {
+                        labels.push(labelMap[key]);
+                        values.push(value);
+                        colors.push(colorMap[key]);
+                    }
+                });
+
+                const safeLabels = labels.length ? labels : ['No Data'];
+                const safeValues = values.length ? values : [1];
+                const safeColors = colors.length ? colors : ['#5f6b7f'];
+                const total = safeValues.reduce((sum, value) => sum + value, 0);
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                const textColor = isDark ? '#f2f6ff' : '#182132';
+                const borderColor = isDark ? '#c7d6ef' : '#ffffff';
+                const tooltipBg = isDark ? 'rgba(10, 16, 27, 0.96)' : 'rgba(255, 255, 255, 0.96)';
+                const tooltipTitle = isDark ? '#f2f6ff' : '#111827';
+                const tooltipBody = isDark ? '#dbe8ff' : '#1f2937';
+                const tooltipBorder = isDark ? 'rgba(127, 169, 255, 0.28)' : 'rgba(29, 102, 229, 0.18)';
+
+                if (walletPieChart) {
+                    walletPieChart.destroy();
+                }
+
+                walletPieChart = new Chart(chartCanvas, {
+                    type: 'pie',
+                    data: {
+                        labels: safeLabels,
+                        datasets: [{
+                            data: safeValues,
+                            backgroundColor: safeColors,
+                            borderColor: borderColor,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: tooltipBg,
+                                titleColor: tooltipTitle,
+                                bodyColor: tooltipBody,
+                                borderColor: tooltipBorder,
+                                borderWidth: 1,
+                                padding: 10,
+                                cornerRadius: 10,
+                                callbacks: {
+                                    label: function (context) {
+                                        const value = Number(context.raw || 0);
+                                        const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+                                        return context.label + ': Rs ' + value.toFixed(0) + ' (' + pct + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            renderWalletChart();
+
+            const themeObserver = new MutationObserver(renderWalletChart);
+            themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        }());
+    </script>
+</body>
+
+</html>

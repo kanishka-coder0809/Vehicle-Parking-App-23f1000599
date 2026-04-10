@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/static/js/theme-init.js"></script>
+    <title>FindMySpot | Favorite Parking Lots</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/static/css/nav_footer.css">
+    <link rel="stylesheet" href="/static/css/Dark.css">
+    <link rel="icon" href="/static/images/logo.png" type="image/png">
+    <style>
+        .favorites-shell {
+            width: min(96vw, 1720px);
+            margin: 14px auto 0;
+            padding: 0 6px;
+            flex: 1 0 auto;
+        }
+
+        .saas-card {
+            border-radius: 16px;
+            border: 1px solid #e7ebf4;
+            box-shadow: 0 14px 36px rgba(22, 34, 57, 0.08);
+            background: #ffffff;
+        }
+
+        .fav-header-card {
+            padding: 16px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .fav-header-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            font-size: 1.2rem;
+            color: #7c3aed;
+            background: linear-gradient(120deg, rgba(79, 70, 229, 0.16), rgba(124, 58, 237, 0.13));
+        }
+
+        .fav-title {
+            margin: 0;
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: #1c2434;
+        }
+
+        .fav-subtitle {
+            margin: 3px 0 0;
+            color: #64738d;
+            font-size: 0.84rem;
+        }
+
+        .fav-count-chip {
+            border-radius: 999px;
+            background: #eef2fb;
+            color: #495775;
+            font-size: 0.76rem;
+            font-weight: 700;
+            padding: 0.3rem 0.68rem;
+        }
+
+        .fav-toolbar {
+            margin-bottom: 14px;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .fav-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .fav-toolbar .form-select {
+            min-height: 40px;
+            min-width: 170px;
+            border-radius: 12px;
+            border-color: #dce3f1;
+        }
+
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .favorite-card {
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid #e5eaf4;
+            background: #fff;
+            box-shadow: 0 12px 24px rgba(16, 26, 44, 0.07);
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+
+        .favorite-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 34px rgba(16, 26, 44, 0.14);
+            border-color: #ccd6ec;
+        }
+
+        .favorite-card h6 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a2334;
+        }
+
+        .lot-location {
+            margin-top: 7px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #5f6d88;
+            font-size: 0.82rem;
+        }
+
+        .lot-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
+            margin-bottom: 8px;
+            color: #5e6a85;
+            font-size: 0.82rem;
+        }
+
+        .rating-stars {
+            color: #f59e0b;
+            font-size: 0.82rem;
+            letter-spacing: 1px;
+        }
+
+        .spot-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 9px;
+        }
+
+        .spot-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .spot-green { background: #22c55e; }
+        .spot-yellow { background: #f59e0b; }
+        .spot-red { background: #ef4444; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .info-chip {
+            border: 1px solid #e7ebf4;
+            border-radius: 10px;
+            padding: 8px;
+            background: #fbfcff;
+        }
+
+        .info-chip small {
+            display: block;
+            color: #68748f;
+            font-size: 0.72rem;
+        }
+
+        .info-chip strong {
+            color: #1f2a40;
+            font-size: 0.86rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn-gradient-primary {
+            border: 0;
+            border-radius: 12px;
+            background: linear-gradient(120deg, #4f46e5, #7c3aed);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.22);
+        }
+
+        .btn-gradient-primary:hover {
+            color: #fff;
+            filter: brightness(1.04);
+        }
+
+        .btn-soft-danger {
+            border-radius: 10px;
+            border: 1px solid #f0c4c4;
+            background: #fff;
+            color: #be3d3d;
+            font-weight: 600;
+        }
+
+        .btn-soft-danger:hover {
+            border-color: #eca7a7;
+            background: #fff7f7;
+            color: #9f2626;
+        }
+
+        .btn-soft-icon {
+            border-radius: 10px;
+            border: 1px solid #dbe2f1;
+            background: #fff;
+            color: #5c6882;
+            font-weight: 600;
+        }
+
+        .btn-soft-icon:hover {
+            border-color: #c6d3eb;
+            background: #f8faff;
+            color: #34405d;
+        }
+
+        .empty-state {
+            margin-top: 6px;
+            border-radius: 14px;
+            border: 1px dashed #cdd7ee;
+            background: #f9fbff;
+            padding: 34px 16px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 54px;
+            height: 54px;
+            margin: 0 auto 12px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(120deg, rgba(79, 70, 229, 0.16), rgba(124, 58, 237, 0.13));
+            color: #5b3de0;
+            font-size: 1.35rem;
+        }
+
+        .empty-title {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1f2a40;
+        }
+
+        .empty-sub {
+            margin: 5px 0 12px;
+            color: #64748b;
+            font-size: 0.84rem;
+        }
+
+        html[data-theme="dark"] .saas-card,
+        html[data-theme="dark"] .favorite-card,
+        html[data-theme="dark"] .info-chip,
+        html[data-theme="dark"] .empty-state,
+        html[data-theme="dark"] .btn-soft-icon,
+        html[data-theme="dark"] .btn-soft-danger,
+        html[data-theme="dark"] .form-select {
+            background: #111a2b;
+            border-color: #2c3a54;
+            color: #e6ecf8;
+            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        html[data-theme="dark"] .fav-title,
+        html[data-theme="dark"] .favorite-card h6,
+        html[data-theme="dark"] .info-chip strong,
+        html[data-theme="dark"] .empty-title {
+            color: #f0f3ff;
+        }
+
+        html[data-theme="dark"] .fav-subtitle,
+        html[data-theme="dark"] .lot-location,
+        html[data-theme="dark"] .lot-meta,
+        html[data-theme="dark"] .info-chip small,
+        html[data-theme="dark"] .empty-sub {
+            color: #adb9d2;
+        }
+
+        html[data-theme="dark"] .fav-count-chip {
+            background: #1c2b45;
+            color: #c9d9f5;
+        }
+
+        @media (max-width: 1199.98px) {
+            .favorites-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .fav-toolbar {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .favorites-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body class="favorites-page">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm light-glass-navbar">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="/" target="_blank">
+                <img src="/static/images/Logo.png" alt="Logo" width="32" height="32" class="me-2">
+                FindMySpot
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item mx-2 dropdown navbar-links-dropdown">
+                        <button class="btn navbar-menu-toggle dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i data-lucide="menu"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/user/dashboard">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="/user/search">Search</a></li>
+                            <li><a class="dropdown-item" href="/user/favorites">Favorites</a></li>
+                            <li><a class="dropdown-item" href="/user/summary">Summary</a></li>
+                            <li><a class="dropdown-item" href="/user/wallet">Wallet</a></li>
+                            <li><a class="dropdown-item" href="/user/subscriptions">Subscriptions</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item mx-2 d-flex align-items-center">
+                        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle dark/light theme">
+                            <i data-lucide="sun" class="icon-sun"></i>
+                            <i data-lucide="moon-star" class="icon-moon"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item mx-2 dropdown navbar-profile-dropdown">
+                        <button class="btn navbar-profile-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile menu">
+                            {% if current_user.profile_image and current_user.profile_image != 'default.png' %}
+                            <img src="/static/user_profiles/{{ current_user.profile_image }}" alt="Profile" class="profile-avatar" onerror="this.onerror=null;this.src='/static/images/default-avatar.webp';">
+                            {% else %}
+                            <img src="/static/images/default-avatar.webp" alt="Default profile" class="profile-avatar">
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a href="/user/profile" class="dropdown-item">Profile</a></li>
+                            <li><a href="/logout" class="dropdown-item">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <main class="favorites-shell my-3 favorites-content">
+        <section class="saas-card fav-header-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="fav-header-icon"><i class="bi bi-heart-fill"></i></div>
+                <div>
+                    <h1 class="fav-title">Favorites Parking Lots</h1>
+                    <p class="fav-subtitle">Manage your saved parking spots</p>
+                </div>
+            </div>
+            <span class="fav-count-chip">{{ favorite_lots|length }} saved</span>
+        </section>
+
+        <section class="saas-card fav-toolbar" {% if not favorite_lots %}style="display:none"{% endif %}>
+            <div class="fw-semibold">Quick controls</div>
+            <div class="fav-toolbar-right">
+                <select id="favoritesSort" class="form-select">
+                    <option value="default">Sort by</option>
+                    <option value="price">Price</option>
+                    <option value="rating">Rating</option>
+                    <option value="distance">Distance</option>
+                </select>
+            </div>
+        </section>
+
+        {% if favorite_lots %}
+        <section id="favoritesGrid" class="favorites-grid">
+            {% for lot in favorite_lots %}
+            {% set available_spots = lot.spots | selectattr('status', 'equalto', 'A') | list | length %}
+            {% set rating = avg_ratings.get(lot.id, 0) %}
+            {% set pin_gap = (lot.pin_code - current_user.pincode)|abs if current_user.pincode else 0 %}
+            {% set distance_score = 1 if pin_gap <= 5 else 2 if pin_gap <= 20 else 3 %}
+            {% set distance_text = 'Near' if distance_score == 1 else 'Medium' if distance_score == 2 else 'Far' %}
+            {% set spot_class = 'spot-green' if available_spots > 20 else 'spot-yellow' if available_spots > 5 else 'spot-red' %}
+            {% set parking_type = 'Covered' if lot.maximum_number_of_spots >= 50 else 'Open' %}
+            <article class="favorite-card" data-favorite-card data-price="{{ lot.price }}" data-rating="{{ rating }}" data-distance="{{ distance_score }}" data-available="{{ 1 if available_spots > 0 else 0 }}">
+                <h6>{{ lot.prime_location_name }}</h6>
+                <p class="lot-location"><i class="bi bi-geo-alt"></i>{{ lot.city }}, {{ lot.address }}</p>
+                <div class="lot-meta">
+                    <span class="rating-stars">{% if rating >= 1 %}★{% else %}☆{% endif %}{% if rating >= 2 %}★{% else %}☆{% endif %}{% if rating >= 3 %}★{% else %}☆{% endif %}{% if rating >= 4 %}★{% else %}☆{% endif %}{% if rating >= 5 %}★{% else %}☆{% endif %}</span>
+                    <span>{{ '%.1f'|format(rating) }}/5</span>
+                </div>
+                <p class="spot-status"><span class="spot-dot {{ spot_class }}"></span>{{ available_spots }} spots available</p>
+                <div class="info-grid">
+                    <div class="info-chip"><small>Price / hour</small><strong>₹{{ lot.price }}</strong></div>
+                    <div class="info-chip"><small>Distance</small><strong>{{ distance_text }}</strong></div>
+                    <div class="info-chip"><small>Type</small><strong>{{ parking_type }}</strong></div>
+                    <div class="info-chip"><small>Status</small><strong>{{ 'Available' if available_spots > 0 else 'Full' }}</strong></div>
+                </div>
+                <div class="card-actions">
+                    <button type="button" class="btn btn-gradient-primary btn-sm" data-bs-target="#bookParking-{{ lot.id }}">Book Now</button>
+                    <form action="/favorite/toggle" method="POST" class="m-0">
+                        <input type="hidden" name="lot_id" value="{{ lot.id }}">
+                        <button type="submit" class="btn btn-soft-danger btn-sm">Remove from Favorites</button>
+                    </form>
+                    <form action="/favorite/toggle" method="POST" class="m-0">
+                        <input type="hidden" name="lot_id" value="{{ lot.id }}">
+                        <button type="submit" class="btn btn-soft-icon btn-sm" title="Toggle favorite"><i class="bi bi-heart-fill text-danger"></i></button>
+                    </form>
+                    <a href="/user/dashboard?tab=available&view=map&lot={{ lot.id }}" class="btn btn-soft-icon btn-sm" title="View on map"><i class="bi bi-geo-alt"></i></a>
+                </div>
+            </article>
+
+            <!-- Modal for Book -->
+            <div class="modal fade" id="bookParking-{{ lot.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="booking-brand">
+                                <img src="/static/images/logo.png" alt="FindMySpot">
+                                <div>
+                                    <p class="booking-brand-title">FindMySpot</p>
+                                    <p class="booking-brand-subtitle">Book Parking Spot</p>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body booking-modal-body">
+                            <form action="/payment/checkout" method="GET" class="booking-duration-form" data-hourly-rate="{{ lot.price }}" data-default-minutes="60">
+                                <input type="hidden" name="lot_id" value="{{ lot.id }}">
+                                <input type="hidden" name="user_id" value="{{ current_user.id }}">
+                                <input type="hidden" name="duration_minutes" class="duration-minutes-hidden" value="60">
+                                {% set available_spot = lot.spots | selectattr('status', 'equalto', 'A') | list | first %}
+                                <input type="hidden" name="spot_id" value="{{ available_spot.id if available_spot else '' }}">
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Lot ID</label>
+                                        <input type="text" class="form-control" value="{{ lot.id }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">User ID</label>
+                                        <input type="text" class="form-control" value="{{ current_user.id }}" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Spot ID</label>
+                                        <input type="text" class="form-control" value="{{ available_spot.id if available_spot else 'No spots available' }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Price per hour</label>
+                                        <input type="text" class="form-control" value="₹{{ lot.price }}" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Location</label>
+                                        <input type="text" class="form-control" value="{{ lot.address }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">City</label>
+                                        <input type="text" class="form-control" value="{{ lot.city }}" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Hours</label>
+                                        <select class="form-select duration-hours" required>
+                                            {% for h in range(0, 13) %}
+                                            <option value="{{ h }}" {% if h == 1 %}selected{% endif %}>{{ h }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Minutes</label>
+                                        <select class="form-select duration-minutes" required>
+                                            <option value="0" selected>00</option>
+                                            <option value="15">15</option>
+                                            <option value="30">30</option>
+                                            <option value="45">45</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Calculated Payable Amount</label>
+                                        <input type="text" class="form-control price-preview calculated-price" value="Rs {{ lot.price }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Vehicle Number</label>
+                                        <input type="text" name="vehicle_number" class="form-control" placeholder="Enter your vehicle number" required>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary" {% if not available_spot %} disabled {% endif %}>Continue To Payment</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+        <div class="empty-state d-none" id="favoritesFilteredEmpty">
+            <div class="empty-icon"><i class="bi bi-funnel"></i></div>
+            <p class="empty-title">No favorites match your filter</p>
+            <p class="empty-sub">Try changing sort/filter values to view saved parking lots.</p>
+        </div>
+        {% else %}
+        <section class="empty-state">
+            <div class="empty-icon"><i class="bi bi-car-front-fill"></i></div>
+            <p class="empty-title">No favorite parking spots yet 🚗</p>
+            <p class="empty-sub">Save your preferred lots from dashboard or search to access them quickly.</p>
+            <a href="/user/search" class="btn btn-gradient-primary">Browse Parking</a>
+        </section>
+        {% endif %}
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/js/theme-toggle.js"></script>
+    <script src="/static/js/flash-alerts.js"></script>
+    <script>
+        (function () {
+            const bookingModals = Array.from(document.querySelectorAll('.modal[id^="bookParking-"]'));
+            bookingModals.forEach((modalEl) => {
+                if (modalEl.parentElement !== document.body) {
+                    document.body.appendChild(modalEl);
+                }
+            });
+        })();
+
+        (function () {
+            document.addEventListener('click', (event) => {
+                const trigger = event.target instanceof Element
+                    ? event.target.closest('[data-bs-target^="#bookParking-"]')
+                    : null;
+                if (!(trigger instanceof HTMLElement)) {
+                    return;
+                }
+
+                const targetSelector = trigger.getAttribute('data-bs-target');
+                if (!targetSelector || typeof bootstrap === 'undefined') {
+                    return;
+                }
+
+                const modalElement = document.querySelector(targetSelector);
+                if (!(modalElement instanceof HTMLElement)) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+                const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                modal.show();
+            });
+        })();
+
+        (function () {
+            function updateFormPreview(formEl) {
+                const hourlyRate = Number(formEl.dataset.hourlyRate || 0);
+                const hours = Number(formEl.querySelector('.duration-hours')?.value || 0);
+                const minutes = Number(formEl.querySelector('.duration-minutes')?.value || 0);
+                const totalMinutes = Math.max((hours * 60) + minutes, 15);
+                const amount = ((hourlyRate * totalMinutes) / 60).toFixed(2);
+
+                const hiddenInput = formEl.querySelector('.duration-minutes-hidden');
+                const amountInput = formEl.querySelector('.calculated-price');
+                if (hiddenInput) hiddenInput.value = String(totalMinutes);
+                if (amountInput) amountInput.value = `Rs ${amount}`;
+            }
+
+            document.querySelectorAll('.booking-duration-form').forEach((formEl) => {
+                formEl.querySelectorAll('.duration-hours, .duration-minutes').forEach((inputEl) => {
+                    inputEl.addEventListener('change', () => updateFormPreview(formEl));
+                });
+
+                formEl.addEventListener('submit', () => updateFormPreview(formEl));
+                updateFormPreview(formEl);
+            });
+        })();
+
+        (function () {
+            const grid = document.getElementById('favoritesGrid');
+            const cards = grid ? Array.from(grid.querySelectorAll('[data-favorite-card]')) : [];
+            const sortSelect = document.getElementById('favoritesSort');
+            const filteredEmpty = document.getElementById('favoritesFilteredEmpty');
+
+            if (!cards.length || !grid) return;
+
+            const applyFilters = () => {
+                let visibleCount = 0;
+
+                cards.forEach((card) => {
+                    card.style.display = '';
+                    visibleCount += 1;
+                });
+
+                if (filteredEmpty) {
+                    filteredEmpty.classList.toggle('d-none', visibleCount > 0);
+                }
+            };
+
+            const sortCards = () => {
+                if (!sortSelect) return;
+                const mode = sortSelect.value;
+                const sorted = [...cards];
+
+                if (mode === 'price') {
+                    sorted.sort((a, b) => Number(a.dataset.price || 0) - Number(b.dataset.price || 0));
+                } else if (mode === 'rating') {
+                    sorted.sort((a, b) => Number(b.dataset.rating || 0) - Number(a.dataset.rating || 0));
+                } else if (mode === 'distance') {
+                    sorted.sort((a, b) => Number(a.dataset.distance || 0) - Number(b.dataset.distance || 0));
+                }
+
+                sorted.forEach((card) => grid.appendChild(card));
+            };
+
+            if (sortSelect) {
+                sortSelect.addEventListener('change', () => {
+                    sortCards();
+                    applyFilters();
+                });
+            }
+
+            applyFilters();
+        })();
+    </script>
+</body>
+
+</html>

@@ -4,11 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/static/js/theme-init.js"></script>
     <title>FindMySpot | Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/static/css/nav_footer.css">
+    <link rel="stylesheet" href="/static/css/Dark.css">
     <link rel="icon" href="/static/images/logo.png" type="image/png">
 </head>
 
@@ -38,6 +40,12 @@
                     </li>
                     <li class="nav-item mx-2">
                         <a class="nav-link fw-semibold text-dark" href="/admin/summary">Summary</a>
+                    </li>
+                    <li class="nav-item mx-2 d-flex align-items-center">
+                        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle dark/light theme">
+                            <i data-lucide="sun" class="icon-sun"></i>
+                            <i data-lucide="moon-star" class="icon-moon"></i>
+                        </button>
                     </li>
                     <div class="dropdown">
                         <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
@@ -399,18 +407,13 @@
         {% endif %}
     </div>
 
-    <!--Footer-->
-    <div class="footer">
-        <div class="container">
-            <p class="fw-semibold">FindMySpot &COPY; - Copyright 2025 | Made with &#x2665;&#xfe0f; by Mayank Dhangar</p>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
         crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/js/theme-toggle.js"></script>
 </body>
 
 </html>

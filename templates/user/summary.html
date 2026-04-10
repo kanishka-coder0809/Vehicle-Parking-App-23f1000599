@@ -1,119 +1,763 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FindMySpot | User Dashboard</title>
+    <script src="/static/js/theme-init.js"></script>
+    <title>FindMySpot | Summary</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/static/css/nav_footer.css">
+    <link rel="stylesheet" href="/static/css/Dark.css">
     <link rel="icon" href="/static/images/logo.png" type="image/png">
+    <style>
+        :root {
+            --summary-bg: radial-gradient(circle at 85% -10%, rgba(161, 140, 255, 0.25), transparent 42%), radial-gradient(circle at 12% 15%, rgba(124, 58, 237, 0.18), transparent 38%), #f5f7fd;
+            --summary-card: #ffffff;
+            --summary-border: rgba(87, 74, 145, 0.15);
+            --summary-text: #1f2235;
+            --summary-muted: #5f6787;
+            --summary-accent: linear-gradient(135deg, #6f4bff, #aa5fff);
+            --summary-shadow: 0 14px 36px rgba(83, 59, 170, 0.14);
+            --summary-radius: 16px;
+        }
+
+        [data-theme="dark"] {
+            --summary-bg: radial-gradient(circle at 90% -15%, rgba(151, 118, 255, 0.24), transparent 42%), radial-gradient(circle at 10% 20%, rgba(122, 97, 246, 0.18), transparent 38%), #0f1320;
+            --summary-card: rgba(20, 27, 44, 0.82);
+            --summary-border: rgba(166, 152, 224, 0.2);
+            --summary-text: #eef2ff;
+            --summary-muted: #b5c0df;
+            --summary-shadow: 0 16px 34px rgba(4, 8, 20, 0.42);
+        }
+
+        body {
+            background: var(--summary-bg);
+            color: var(--summary-text);
+        }
+
+        .summary-page {
+            max-width: 1240px;
+            padding-top: 1.25rem;
+            padding-bottom: 2rem;
+        }
+
+        .summary-card {
+            border: 1px solid var(--summary-border);
+            border-radius: var(--summary-radius);
+            background: var(--summary-card);
+            box-shadow: var(--summary-shadow);
+        }
+
+        .summary-hero {
+            background: linear-gradient(135deg, rgba(111, 75, 255, 0.95), rgba(170, 95, 255, 0.9));
+            color: #f9f7ff;
+            border-radius: var(--summary-radius);
+            padding: 1.35rem 1.5rem;
+            box-shadow: 0 20px 36px rgba(90, 56, 188, 0.28);
+        }
+
+        .summary-hero p {
+            margin: 0;
+            opacity: 0.84;
+        }
+
+        .summary-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: rgba(119, 84, 252, 0.14);
+            color: #6c49ff;
+            font-size: 1.15rem;
+        }
+
+        .stat-label {
+            margin: 0;
+            color: var(--summary-muted);
+            font-size: 0.85rem;
+        }
+
+        .stat-value {
+            margin: 0.15rem 0 0;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .filter-card,
+        .table-card,
+        .chart-card,
+        .insight-card,
+        .export-card {
+            padding: 1rem 1.1rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.9rem;
+        }
+
+        .form-select,
+        .form-control {
+            border-radius: 12px;
+            border-color: var(--summary-border);
+        }
+
+        .summary-table-wrap {
+            max-height: 420px;
+            overflow: auto;
+            border-radius: 12px;
+            border: 1px solid var(--summary-border);
+        }
+
+        .summary-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: rgba(111, 75, 255, 0.15);
+            color: var(--summary-text);
+            backdrop-filter: blur(4px);
+            white-space: nowrap;
+        }
+
+        .sort-head {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .summary-table tbody tr:nth-child(even) {
+            background: rgba(121, 95, 244, 0.05);
+        }
+
+        .summary-table tbody tr:hover {
+            background: rgba(111, 75, 255, 0.12);
+            transition: background 0.18s ease;
+        }
+
+        .status-badge {
+            border-radius: 999px;
+            padding: 0.28rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background: rgba(16, 185, 129, 0.2);
+            color: #0d8a62;
+        }
+
+        .status-active {
+            background: rgba(37, 99, 235, 0.2);
+            color: #1f5bd2;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .chart-title {
+            font-weight: 700;
+            margin-bottom: 0.7rem;
+        }
+
+        .chart-canvas {
+            min-height: 250px;
+            max-height: 280px;
+        }
+
+        .insight-list p {
+            margin: 0 0 0.55rem;
+            color: var(--summary-muted);
+        }
+
+        .insight-list strong {
+            color: var(--summary-text);
+        }
+
+        .export-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+        }
+
+        .btn-accent {
+            border: none;
+            border-radius: 10px;
+            background: var(--summary-accent);
+            color: #fff;
+            padding: 0.52rem 0.85rem;
+            font-weight: 600;
+        }
+
+        .btn-soft {
+            border-radius: 10px;
+            border: 1px solid var(--summary-border);
+            background: transparent;
+            color: var(--summary-text);
+            padding: 0.52rem 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        @media (max-width: 1199px) {
+            .summary-grid-4 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .chart-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .chart-grid .chart-card:last-child {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .summary-grid-4,
+            .filter-grid,
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-page {
+                padding-top: 0.8rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top shadow-sm light-glass-navbar">
         <div class="container">
-            <!-- Brand -->
             <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="/" target="_blank">
                 <img src="/static/images/Logo.png" alt="Logo" width="32" height="32" class="me-2">
                 FindMySpot
             </a>
-
-            <!-- Toggler for mobile -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
-            <!-- Navbar Links -->
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav align-items-center">
-                    <li class="nav-item mx-2">
-                        <a class="nav-link fw-semibold text-dark" href="/user/dashboard">Dashboard</a>
-                    </li>
-                    <li class="nav-item mx-2">
-                        <a class="nav-link fw-semibold text-dark" href="/user/search">Search</a>
-                    </li>
-                    <li class="nav-item mx-2">
-                        <a class="nav-link fw-semibold text-primary" href="/user/summary">Summary</a>
-                    </li>
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="bi bi-person fs-5"></i>
+                    <li class="nav-item mx-2 dropdown navbar-links-dropdown">
+                        <button class="btn navbar-menu-toggle dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i data-lucide="menu"></i>
                         </button>
-                        <ul class="dropdown-menu" style="min-width: unset; width: auto;">
-                            <li>
-                                <a href="/logout" class="dropdown-item">
-                                    <i class="bi bi-box-arrow-right"></i>
-                                </a>
-                            </li>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/user/dashboard">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="/user/search">Search</a></li>
+                            <li><a class="dropdown-item" href="/user/favorites">Favorites</a></li>
+                            <li><a class="dropdown-item" href="/user/summary">Summary</a></li>
+                            <li><a class="dropdown-item" href="/user/wallet">Wallet</a></li>
+                            <li><a class="dropdown-item" href="/user/subscriptions">Subscriptions</a></li>
                         </ul>
-                    </div>
+                    </li>
+                    <li class="nav-item mx-2 d-flex align-items-center">
+                        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle dark/light theme">
+                            <i data-lucide="sun" class="icon-sun"></i>
+                            <i data-lucide="moon-star" class="icon-moon"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item mx-2 dropdown navbar-profile-dropdown">
+                        <button class="btn navbar-profile-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile menu">
+                            {% if current_user.profile_image and current_user.profile_image != 'default.png' %}
+                            <img src="/static/user_profiles/{{ current_user.profile_image }}" alt="Profile" class="profile-avatar" onerror="this.onerror=null;this.src='/static/images/default-avatar.webp';">
+                            {% else %}
+                            <img src="/static/images/default-avatar.webp" alt="Default profile" class="profile-avatar">
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a href="/user/profile" class="dropdown-item">Profile</a></li>
+                            <li><a href="/logout" class="dropdown-item">Logout</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-4">
-       <h2 class="text-center my-4 fw-bold">Summary</h2>
+    <main class="container summary-page">
+        <section class="summary-hero d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <div>
+                <p>Bookings overview</p>
+                <h2 class="mb-0 fw-bold">Analytics Summary Dashboard</h2>
+            </div>
+            <div class="small">Track spend, trends, and parking behavior in one place.</div>
+        </section>
 
-        {% if summary_data %}
-        <div class="table-responsive text-center">
-            <table class="table table-bordered table-hover">
-                <thead class="table-primary">
-                    <tr>
-                        <th>Spot ID</th>
-                        <th>Lot Name</th>
-                        <th>In Time</th>
-                        <th>Out Time</th>
-                        <th>Duration</th>
-                        <th>Vehicle No</th>
-                        <th>Total Cost</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in summary_data %}
-                    <tr>
-                        <td>{{ entry.spot_id }}</td>
-                        <td>{{ entry.lot_name }}</td>
-                        <td>{{ entry.in_time }}</td>
-                        <td>{{ entry.out_time }}</td>
-                        <td>{{ entry.duration }}</td>
-                        <td>{{ entry.vehicle_number }}</td>
-                        <td>{{ entry.cost }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <p class="text-muted">No completed bookings yet.</p>
-        {% endif %}
-    </div>
+        <section class="summary-grid-4 mb-3">
+            <article class="summary-card stat-card">
+                <div class="stat-icon"><i class="bi bi-journal-check"></i></div>
+                <div>
+                    <p class="stat-label">Total Bookings</p>
+                    <h3 class="stat-value" id="statTotalBookings">{{ summary_stats.total_bookings }}</h3>
+                </div>
+            </article>
+            <article class="summary-card stat-card">
+                <div class="stat-icon"><i class="bi bi-currency-rupee"></i></div>
+                <div>
+                    <p class="stat-label">Total Spend</p>
+                    <h3 class="stat-value" id="statTotalSpend">₹{{ '%.2f'|format(summary_stats.total_spend) }}</h3>
+                </div>
+            </article>
+            <article class="summary-card stat-card">
+                <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+                <div>
+                    <p class="stat-label">Average Duration</p>
+                    <h3 class="stat-value" id="statAvgDuration">{{ summary_stats.average_duration }}</h3>
+                </div>
+            </article>
+            <article class="summary-card stat-card">
+                <div class="stat-icon"><i class="bi bi-pin-map-fill"></i></div>
+                <div>
+                    <p class="stat-label">Most Visited Location</p>
+                    <h3 class="stat-value text-truncate" id="statMostVisited" title="{{ summary_stats.most_visited_location }}">{{ summary_stats.most_visited_location }}</h3>
+                </div>
+            </article>
+        </section>
 
-    <div class="card mx-auto my-5 shadow-sm" style="width:40rem">
-        <img src="/static/user/user_booking_trend.png" alt="Booking Trend Line Chart" class="img-fluid"
-            style="max-width: 600px;">
-        <div class="card-body text-center">
-            <h5 class="card-title">Booking Trend</h5>
-        </div>
-    </div>
+        <section class="summary-card filter-card mb-3">
+            <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                <h5 class="mb-0 fw-bold">Filters</h5>
+                <button type="button" class="btn-soft" id="clearSummaryFilters"><i class="bi bi-arrow-counterclockwise"></i>Reset</button>
+            </div>
+            <div class="filter-grid">
+                <div>
+                    <label for="dateRangeFilter" class="form-label mb-1">Date Range</label>
+                    <select class="form-select" id="dateRangeFilter">
+                        <option value="all">All Time</option>
+                        <option value="7d">Last 7 Days</option>
+                        <option value="month">This Month</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="locationFilter" class="form-label mb-1">Location</label>
+                    <select class="form-select" id="locationFilter">
+                        <option value="all">All Locations</option>
+                        {% for location in location_options %}
+                        <option value="{{ location }}">{{ location }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="vehicleFilter" class="form-label mb-1">Vehicle</label>
+                    <select class="form-select" id="vehicleFilter">
+                        <option value="all">All Vehicles</option>
+                        {% for vehicle in vehicle_options %}
+                        <option value="{{ vehicle }}">{{ vehicle }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </section>
 
-     <!--Footer-->
-    <div class="footer">
-        <div class="container">
-            <p class="fw-semibold">FindMySpot &COPY; - Copyright 2025 | Made with &#x2665;&#xfe0f; by Mayank Dhangar</p>
-        </div>
-    </div>
+        <section class="summary-card table-card mb-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <h5 class="mb-0 fw-bold">Bookings Table</h5>
+                <small class="text-muted" id="tableCountLabel"></small>
+            </div>
+            <div class="summary-table-wrap">
+                <table class="table summary-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="sort-head" data-sort="spot_id">Spot <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sort-head" data-sort="lot_name">Location <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sort-head" data-sort="in_time">In Time <i class="bi bi-arrow-down-up"></i></th>
+                            <th>Out Time</th>
+                            <th class="sort-head" data-sort="duration_minutes">Duration <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sort-head" data-sort="vehicle_number">Vehicle <i class="bi bi-arrow-down-up"></i></th>
+                            <th>Status</th>
+                            <th class="sort-head" data-sort="cost_value">Cost <i class="bi bi-arrow-down-up"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="chart-grid mb-3">
+            <article class="summary-card chart-card">
+                <h6 class="chart-title">Bookings Over Time</h6>
+                <canvas id="lineChart" class="chart-canvas" aria-label="Bookings over time"></canvas>
+            </article>
+            <article class="summary-card chart-card">
+                <h6 class="chart-title">Top Parking Locations Usage</h6>
+                <canvas id="barChart" class="chart-canvas" aria-label="Top parking locations usage"></canvas>
+            </article>
+            <article class="summary-card chart-card">
+                <h6 class="chart-title">Usage Distribution</h6>
+                <canvas id="pieChart" class="chart-canvas" aria-label="Usage distribution"></canvas>
+            </article>
+        </section>
+
+        <section class="row g-3">
+            <div class="col-lg-7">
+                <article class="summary-card insight-card h-100">
+                    <h5 class="fw-bold mb-2">Insights</h5>
+                    <div class="insight-list" id="insightsList">
+                        <p>You spent <strong id="insightMonthSpend">₹{{ '%.2f'|format(summary_stats.month_spend) }}</strong> this month.</p>
+                        <p>Most used parking: <strong id="insightMostUsed">{{ summary_stats.most_visited_location }}</strong>.</p>
+                        <p>Highest cost booking: <strong id="insightHighestCost">₹{{ '%.2f'|format(summary_stats.highest_cost_booking) }}</strong>.</p>
+                    </div>
+                </article>
+            </div>
+            <div class="col-lg-5">
+                <article class="summary-card export-card h-100">
+                    <h5 class="fw-bold mb-2">Export</h5>
+                    <p class="text-muted mb-3">Download a report copy for records and quick sharing.</p>
+                    <div class="export-actions">
+                        <a class="btn-accent" href="/user/monthly-invoice"><i class="bi bi-file-earmark-pdf"></i> Download PDF</a>
+                        <a class="btn-soft" href="/user/summary/export-csv"><i class="bi bi-filetype-csv"></i> Export CSV</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
         crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/js/theme-toggle.js"></script>
+    <script id="summaryDataJson" type="application/json">{{ summary_data|tojson }}</script>
+    <script>
+        (function () {
+            const dataElement = document.getElementById('summaryDataJson');
+            const originalRecords = dataElement ? JSON.parse(dataElement.textContent || '[]') : [];
+            const tableBody = document.getElementById('summaryTableBody');
+            const tableCountLabel = document.getElementById('tableCountLabel');
+            const dateRangeFilter = document.getElementById('dateRangeFilter');
+            const locationFilter = document.getElementById('locationFilter');
+            const vehicleFilter = document.getElementById('vehicleFilter');
+            const resetFiltersBtn = document.getElementById('clearSummaryFilters');
+
+            const statTotalBookings = document.getElementById('statTotalBookings');
+            const statTotalSpend = document.getElementById('statTotalSpend');
+            const statAvgDuration = document.getElementById('statAvgDuration');
+            const statMostVisited = document.getElementById('statMostVisited');
+
+            const insightMonthSpend = document.getElementById('insightMonthSpend');
+            const insightMostUsed = document.getElementById('insightMostUsed');
+            const insightHighestCost = document.getElementById('insightHighestCost');
+
+            let sortKey = 'in_time';
+            let sortDirection = 'desc';
+            let lineChart = null;
+            let barChart = null;
+            let pieChart = null;
+
+            const parseDate = (value) => {
+                if (!value) {
+                    return null;
+                }
+                const parsed = new Date(value.replace(' ', 'T'));
+                return Number.isNaN(parsed.getTime()) ? null : parsed;
+            };
+
+            const formatCurrency = (value) => `₹${Number(value || 0).toFixed(2)}`;
+
+            const durationLabel = (minutes) => {
+                if (!minutes || minutes <= 0) {
+                    return '0 min';
+                }
+                const hours = Math.floor(minutes / 60);
+                const remMinutes = minutes % 60;
+                if (!hours) {
+                    return `${remMinutes} min`;
+                }
+                return `${hours}h ${remMinutes}m`;
+            };
+
+            const withinRange = (record, range) => {
+                if (range === 'all') {
+                    return true;
+                }
+                const inDate = parseDate(record.in_time);
+                if (!inDate) {
+                    return false;
+                }
+                const now = new Date();
+                if (range === '7d') {
+                    const lastWeek = new Date(now);
+                    lastWeek.setDate(now.getDate() - 7);
+                    return inDate >= lastWeek;
+                }
+                if (range === 'month') {
+                    return inDate.getMonth() === now.getMonth() && inDate.getFullYear() === now.getFullYear();
+                }
+                return true;
+            };
+
+            const getFiltered = () => originalRecords.filter((record) => {
+                const matchesRange = withinRange(record, dateRangeFilter.value);
+                const matchesLocation = locationFilter.value === 'all' || record.lot_name === locationFilter.value;
+                const matchesVehicle = vehicleFilter.value === 'all' || record.vehicle_number === vehicleFilter.value;
+                return matchesRange && matchesLocation && matchesVehicle;
+            });
+
+            const sortRecords = (records) => {
+                const copy = records.slice();
+                copy.sort((a, b) => {
+                    const aValue = a[sortKey];
+                    const bValue = b[sortKey];
+                    let compare = 0;
+
+                    if (sortKey === 'in_time') {
+                        compare = (parseDate(aValue)?.getTime() || 0) - (parseDate(bValue)?.getTime() || 0);
+                    } else if (sortKey === 'cost_value' || sortKey === 'duration_minutes' || sortKey === 'spot_id') {
+                        compare = Number(aValue || 0) - Number(bValue || 0);
+                    } else {
+                        compare = String(aValue || '').localeCompare(String(bValue || ''));
+                    }
+
+                    return sortDirection === 'asc' ? compare : -compare;
+                });
+                return copy;
+            };
+
+            const renderTable = (records) => {
+                if (!tableBody) {
+                    return;
+                }
+
+                if (!records.length) {
+                    tableBody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No bookings match the selected filters.</td></tr>';
+                    if (tableCountLabel) {
+                        tableCountLabel.textContent = '0 bookings';
+                    }
+                    return;
+                }
+
+                const rows = records.map((record) => {
+                    const statusClass = record.status === 'Active' ? 'status-active' : 'status-completed';
+                    return `<tr>
+                        <td>${record.spot_id}</td>
+                        <td>${record.lot_name}</td>
+                        <td>${record.in_time}</td>
+                        <td>${record.out_time}</td>
+                        <td>${record.duration}</td>
+                        <td>${record.vehicle_number || '-'}</td>
+                        <td><span class="status-badge ${statusClass}">${record.status}</span></td>
+                        <td>${formatCurrency(record.cost_value)}</td>
+                    </tr>`;
+                }).join('');
+
+                tableBody.innerHTML = rows;
+                if (tableCountLabel) {
+                    tableCountLabel.textContent = `${records.length} booking${records.length === 1 ? '' : 's'}`;
+                }
+            };
+
+            const aggregateCountBy = (records, key) => {
+                const map = {};
+                records.forEach((record) => {
+                    const value = record[key] || '-';
+                    map[value] = (map[value] || 0) + 1;
+                });
+                return map;
+            };
+
+            const updateStats = (records) => {
+                const totalBookings = records.length;
+                const totalSpend = records
+                    .filter((record) => record.status === 'Completed')
+                    .reduce((sum, record) => sum + Number(record.cost_value || 0), 0);
+                const avgMinutes = totalBookings
+                    ? Math.round(records.reduce((sum, record) => sum + Number(record.duration_minutes || 0), 0) / totalBookings)
+                    : 0;
+                const locationMap = aggregateCountBy(records, 'lot_name');
+                const mostVisited = Object.keys(locationMap).sort((a, b) => locationMap[b] - locationMap[a])[0] || '-';
+
+                if (statTotalBookings) {
+                    statTotalBookings.textContent = String(totalBookings);
+                }
+                if (statTotalSpend) {
+                    statTotalSpend.textContent = formatCurrency(totalSpend);
+                }
+                if (statAvgDuration) {
+                    statAvgDuration.textContent = durationLabel(avgMinutes);
+                }
+                if (statMostVisited) {
+                    statMostVisited.textContent = mostVisited;
+                    statMostVisited.title = mostVisited;
+                }
+
+                const now = new Date();
+                const monthSpend = records
+                    .filter((record) => {
+                        if (record.status !== 'Completed') {
+                            return false;
+                        }
+                        const outDate = parseDate(record.out_time);
+                        return outDate && outDate.getMonth() === now.getMonth() && outDate.getFullYear() === now.getFullYear();
+                    })
+                    .reduce((sum, record) => sum + Number(record.cost_value || 0), 0);
+                const highestCost = records.reduce((max, record) => Math.max(max, Number(record.cost_value || 0)), 0);
+
+                if (insightMonthSpend) {
+                    insightMonthSpend.textContent = formatCurrency(monthSpend);
+                }
+                if (insightMostUsed) {
+                    insightMostUsed.textContent = mostVisited;
+                }
+                if (insightHighestCost) {
+                    insightHighestCost.textContent = formatCurrency(highestCost);
+                }
+            };
+
+            const renderCharts = (records) => {
+                const lineCtx = document.getElementById('lineChart');
+                const barCtx = document.getElementById('barChart');
+                const pieCtx = document.getElementById('pieChart');
+                if (!lineCtx || !barCtx || !pieCtx || typeof Chart === 'undefined') {
+                    return;
+                }
+
+                const dateMap = aggregateCountBy(records, 'date');
+                const lineLabels = Object.keys(dateMap).sort();
+                const lineValues = lineLabels.map((label) => dateMap[label]);
+
+                const locationMap = aggregateCountBy(records, 'lot_name');
+                const topLocations = Object.keys(locationMap)
+                    .sort((a, b) => locationMap[b] - locationMap[a])
+                    .slice(0, 6);
+                const topLocationValues = topLocations.map((location) => locationMap[location]);
+
+                const statusMap = aggregateCountBy(records, 'status');
+                const pieLabels = ['Completed', 'Active'];
+                const pieValues = pieLabels.map((label) => statusMap[label] || 0);
+
+                if (lineChart) {
+                    lineChart.destroy();
+                }
+                if (barChart) {
+                    barChart.destroy();
+                }
+                if (pieChart) {
+                    pieChart.destroy();
+                }
+
+                lineChart = new Chart(lineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: lineLabels.length ? lineLabels : ['No Data'],
+                        datasets: [{
+                            label: 'Bookings',
+                            data: lineValues.length ? lineValues : [0],
+                            borderColor: '#7b59ff',
+                            backgroundColor: 'rgba(123, 89, 255, 0.2)',
+                            tension: 0.35,
+                            fill: true,
+                            pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                barChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: topLocations.length ? topLocations : ['No Data'],
+                        datasets: [{
+                            label: 'Usage Count',
+                            data: topLocationValues.length ? topLocationValues : [0],
+                            backgroundColor: ['#7b59ff', '#8d67ff', '#a778ff', '#bf8bff', '#d09dff', '#e1b0ff']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                pieChart = new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: pieLabels,
+                        datasets: [{
+                            data: pieValues,
+                            backgroundColor: ['#7b59ff', '#35a3ff'],
+                            borderColor: '#ffffff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            };
+
+            const repaint = () => {
+                const filtered = sortRecords(getFiltered());
+                renderTable(filtered);
+                updateStats(filtered);
+                renderCharts(filtered);
+            };
+
+            document.querySelectorAll('[data-sort]').forEach((head) => {
+                head.addEventListener('click', () => {
+                    const clickedSortKey = head.dataset.sort;
+                    if (!clickedSortKey) {
+                        return;
+                    }
+                    if (sortKey === clickedSortKey) {
+                        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortKey = clickedSortKey;
+                        sortDirection = 'asc';
+                    }
+                    repaint();
+                });
+            });
+
+            [dateRangeFilter, locationFilter, vehicleFilter].forEach((control) => {
+                if (control) {
+                    control.addEventListener('change', repaint);
+                }
+            });
+
+            if (resetFiltersBtn) {
+                resetFiltersBtn.addEventListener('click', () => {
+                    dateRangeFilter.value = 'all';
+                    locationFilter.value = 'all';
+                    vehicleFilter.value = 'all';
+                    repaint();
+                });
+            }
+
+            repaint();
+        }());
+    </script>
 </body>
 
 </html>

@@ -4,15 +4,555 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/static/js/theme-init.js"></script>
     <title>FindMySpot | User Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
     <link rel="stylesheet" href="/static/css/nav_footer.css">
+    <link rel="stylesheet" href="/static/css/Dark.css">
     <link rel="icon" href="/static/images/logo.png" type="image/png">
+    <style>
+        .dashboard-page {
+            min-height: 100vh;
+            background: radial-gradient(circle at 10% 0%, #edf1ff 0%, #f6f8fc 42%, #f9fbff 100%);
+            padding-bottom: 90px;
+        }
+
+        .dashboard-shell {
+            width: min(96vw, 1720px);
+            margin: 14px auto 0;
+            padding: 0 6px;
+        }
+
+        .saas-card {
+            border-radius: 16px;
+            border: 1px solid #e7ebf4;
+            box-shadow: 0 14px 36px rgba(22, 34, 57, 0.08);
+            background: #ffffff;
+        }
+
+        .pass-highlight {
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 14px;
+            background: linear-gradient(125deg, rgba(79, 70, 229, 0.1), rgba(124, 58, 237, 0.08));
+        }
+
+        .plan-pill {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            background: linear-gradient(120deg, #4f46e5, #7c3aed);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            margin-bottom: 6px;
+        }
+
+        .pass-title {
+            margin: 0;
+            font-size: 1.02rem;
+            font-weight: 700;
+            color: #1c2434;
+        }
+
+        .pass-sub {
+            margin: 3px 0 0;
+            color: #5e6982;
+            font-size: 0.84rem;
+        }
+
+        .usage-stats {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .usage-chip {
+            border: 1px solid #d9def0;
+            border-radius: 12px;
+            padding: 8px 10px;
+            min-width: 92px;
+            background: #fff;
+            text-align: left;
+        }
+
+        .usage-chip small {
+            display: block;
+            color: #68748f;
+            font-size: 0.72rem;
+        }
+
+        .usage-chip strong {
+            display: block;
+            color: #1f2a40;
+            font-size: 0.95rem;
+        }
+
+        .dashboard-toolbar {
+            padding: 12px;
+            margin-bottom: 14px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 2.1fr 1fr 1fr 1fr auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-grid .form-control,
+        .filter-grid .form-select {
+            border-radius: 12px;
+            border-color: #dce3f1;
+            min-height: 42px;
+        }
+
+        .view-toggle-wrap {
+            display: inline-flex;
+            border: 1px solid #dce3f1;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .view-toggle-wrap .btn {
+            border: 0;
+            border-radius: 0;
+            padding: 0.45rem 0.75rem;
+            font-weight: 600;
+            color: #5d6780;
+            background: #fff;
+        }
+
+        .view-toggle-wrap .btn.active {
+            color: #fff;
+            background: linear-gradient(120deg, #4f46e5, #7c3aed);
+        }
+
+        .dashboard-tabs .nav-link {
+            border-radius: 12px;
+            border: 1px solid transparent;
+            color: #5a6782;
+            font-weight: 600;
+            padding: 0.52rem 0.85rem;
+        }
+
+        .dashboard-tabs .nav-link.active {
+            background: linear-gradient(120deg, #4f46e5, #7c3aed);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.22);
+        }
+
+        .parking-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .parking-card {
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid #e5eaf4;
+            background: #fff;
+            box-shadow: 0 12px 24px rgba(16, 26, 44, 0.07);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .parking-card.highlighted-card {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14), 0 18px 34px rgba(16, 26, 44, 0.14);
+        }
+
+        .parking-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 34px rgba(16, 26, 44, 0.14);
+            border-color: #ccd6ec;
+        }
+
+        .parking-card h6 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a2334;
+        }
+
+        .parking-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
+            margin-bottom: 8px;
+            color: #5e6a85;
+            font-size: 0.82rem;
+        }
+
+        .rating-stars {
+            color: #f59e0b;
+            font-size: 0.82rem;
+            letter-spacing: 1px;
+        }
+
+        .spot-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .spot-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .spot-green { background: #22c55e; }
+        .spot-yellow { background: #f59e0b; }
+        .spot-red { background: #ef4444; }
+
+        .parking-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .parking-info-item {
+            border: 1px solid #e7ebf4;
+            border-radius: 10px;
+            padding: 8px;
+            background: #fbfcff;
+        }
+
+        .parking-info-item small {
+            display: block;
+            color: #68748f;
+            font-size: 0.72rem;
+        }
+
+        .parking-info-item strong {
+            color: #1f2a40;
+            font-size: 0.86rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn-gradient-primary {
+            border: 0;
+            border-radius: 12px;
+            background: linear-gradient(120deg, #4f46e5, #7c3aed);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.22);
+        }
+
+        .btn-gradient-primary:hover {
+            color: #fff;
+            filter: brightness(1.03);
+        }
+
+        .btn-soft-icon {
+            border-radius: 10px;
+            border: 1px solid #dbe2f1;
+            background: #fff;
+            color: #5c6882;
+            font-weight: 600;
+        }
+
+        .btn-soft-icon:hover {
+            border-color: #c6d3eb;
+            background: #f8faff;
+            color: #34405d;
+        }
+
+        .map-view-shell {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .map-view-card {
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid #e5eaf4;
+            background: #fff;
+            box-shadow: 0 12px 24px rgba(16, 26, 44, 0.07);
+        }
+
+        .map-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .map-state {
+            font-size: 0.82rem;
+            color: #6b7690;
+        }
+
+        .map-canvas {
+            min-height: 440px;
+            height: 440px;
+            border-radius: 16px;
+            border: 1px solid #e5eaf4;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-canvas.loading::before {
+            content: "Loading map...";
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            color: #3f4a63;
+            background: linear-gradient(125deg, rgba(79, 70, 229, 0.08), rgba(124, 58, 237, 0.06));
+            z-index: 1;
+        }
+
+        .map-list {
+            display: grid;
+            gap: 10px;
+            align-content: start;
+        }
+
+        .map-item {
+            border: 1px solid #e5eaf4;
+            border-radius: 12px;
+            padding: 10px;
+            background: #fff;
+        }
+
+        .map-item.active-map-item {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.14);
+        }
+
+        .view-panel {
+            transition: opacity 0.24s ease, transform 0.24s ease;
+        }
+
+        .view-panel-enter {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        .history-timeline {
+            display: grid;
+            gap: 12px;
+        }
+
+        .history-card {
+            border-radius: 14px;
+            border: 1px solid #e5eaf4;
+            background: #fff;
+            padding: 12px;
+            box-shadow: 0 10px 20px rgba(16, 26, 44, 0.06);
+        }
+
+        .status-badge {
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .status-active { background: #dbeafe; color: #1d4ed8; }
+        .status-completed { background: #dcfce7; color: #15803d; }
+
+        .time-left-live {
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .booking-modal-body {
+            max-height: 68vh;
+            overflow-y: auto;
+            padding-top: 8px;
+        }
+
+        .booking-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .booking-brand img {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .booking-brand-title {
+            margin: 0;
+            font-weight: 700;
+            color: #2660c7;
+            font-size: 1rem;
+            line-height: 1.2;
+        }
+
+        .booking-brand-subtitle {
+            margin: 0;
+            color: #6f7a92;
+            font-size: 0.82rem;
+        }
+
+        .price-preview {
+            background: rgba(38, 96, 199, 0.08);
+            border: 1px solid rgba(38, 96, 199, 0.24);
+            color: #15408f;
+            font-weight: 700;
+        }
+
+        html[data-theme="dark"] .dashboard-page {
+            background: radial-gradient(circle at 10% 0%, #19152f 0%, #0e1320 44%, #0b111d 100%);
+        }
+
+        html[data-theme="dark"] .saas-card,
+        html[data-theme="dark"] .parking-card,
+        html[data-theme="dark"] .history-card,
+        html[data-theme="dark"] .map-item,
+        html[data-theme="dark"] .usage-chip,
+        html[data-theme="dark"] .parking-info-item {
+            background: #111a2b;
+            border-color: #2c3a54;
+            color: #e6ecf8;
+            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        html[data-theme="dark"] .pass-highlight {
+            background: linear-gradient(125deg, rgba(79, 70, 229, 0.24), rgba(124, 58, 237, 0.2));
+            border-color: #3b3560;
+        }
+
+        html[data-theme="dark"] .pass-title,
+        html[data-theme="dark"] .parking-card h6,
+        html[data-theme="dark"] .usage-chip strong,
+        html[data-theme="dark"] .parking-info-item strong {
+            color: #f0f3ff;
+        }
+
+        html[data-theme="dark"] .pass-sub,
+        html[data-theme="dark"] .usage-chip small,
+        html[data-theme="dark"] .parking-info-item small,
+        html[data-theme="dark"] .parking-meta {
+            color: #adb9d2;
+        }
+
+        html[data-theme="dark"] .filter-grid .form-control,
+        html[data-theme="dark"] .filter-grid .form-select,
+        html[data-theme="dark"] .view-toggle-wrap,
+        html[data-theme="dark"] .btn-soft-icon {
+            background: #111a2b;
+            border-color: #2e3d59;
+            color: #dfe8ff;
+        }
+
+        html[data-theme="dark"] .view-toggle-wrap .btn {
+            background: #111a2b;
+            color: #c8d3ea;
+        }
+
+        html[data-theme="dark"] .map-view-visual {
+            border-color: #2c3a54;
+        }
+
+        html[data-theme="dark"] .map-view-card,
+        html[data-theme="dark"] .map-canvas {
+            background: #111a2b;
+            border-color: #2c3a54;
+        }
+
+        html[data-theme="dark"] .map-canvas.loading::before {
+            color: #d9e4fb;
+            background: linear-gradient(125deg, rgba(79, 70, 229, 0.2), rgba(124, 58, 237, 0.16));
+        }
+
+        html[data-theme="dark"] .map-state {
+            color: #a7b5cf;
+        }
+
+        @media (max-width: 1199.98px) {
+            .parking-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .dashboard-page {
+                padding-bottom: 104px;
+            }
+
+            .map-view-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .map-canvas {
+                min-height: 420px;
+                height: 420px;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .parking-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .view-toggle-wrap {
+                width: 100%;
+            }
+
+            .view-toggle-wrap .btn {
+                flex: 1 1 0;
+            }
+
+            .map-canvas {
+                min-height: 400px;
+                height: 400px;
+            }
+
+            .pass-highlight {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .usage-stats {
+                justify-content: flex-start;
+            }
+        }
+    </style>
 </head>
 
-<body>
+<body class="dashboard-page">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top shadow-sm light-glass-navbar">
         <div class="container">
@@ -30,28 +570,38 @@
             <!-- Navbar Links -->
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav align-items-center">
-                    <li class="nav-item mx-2">
-                        <a class="nav-link fw-semibold text-primary" href="/user/dashboard">Dashboard</a>
-                    </li>
-                    <li class="nav-item mx-2">
-                        <a class="nav-link fw-semibold text-dark" href="/user/search">Search</a>
-                    </li>
-                    <li class="nav-item mx-2">
-                        <a class="nav-link fw-semibold text-dark" href="/user/summary">Summary</a>
-                    </li>
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="bi bi-person fs-5"></i>
+                    <li class="nav-item mx-2 dropdown navbar-links-dropdown">
+                        <button class="btn navbar-menu-toggle dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i data-lucide="menu"></i>
                         </button>
-                        <ul class="dropdown-menu" style="min-width: unset; width: auto;">
-                            <li>
-                                <a href="/logout" class="dropdown-item">
-                                    <i class="bi bi-box-arrow-right"></i>
-                                </a>
-                            </li>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/user/dashboard">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="/user/search">Search</a></li>
+                            <li><a class="dropdown-item" href="/user/favorites">Favorites</a></li>
+                            <li><a class="dropdown-item" href="/user/summary">Summary</a></li>
+                            <li><a class="dropdown-item" href="/user/wallet">Wallet</a></li>
+                            <li><a class="dropdown-item" href="/user/subscriptions">Subscriptions</a></li>
                         </ul>
-                    </div>
+                    </li>
+                    <li class="nav-item mx-2 d-flex align-items-center">
+                        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle dark/light theme">
+                            <i data-lucide="sun" class="icon-sun"></i>
+                            <i data-lucide="moon-star" class="icon-moon"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item mx-2 dropdown navbar-profile-dropdown">
+                        <button class="btn navbar-profile-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile menu">
+                            {% if current_user.profile_image and current_user.profile_image != 'default.png' %}
+                            <img src="/static/user_profiles/{{ current_user.profile_image }}" alt="Profile" class="profile-avatar" onerror="this.onerror=null;this.src='/static/images/default-avatar.webp';">
+                            {% else %}
+                            <img src="/static/images/default-avatar.webp" alt="Default profile" class="profile-avatar">
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a href="/user/profile" class="dropdown-item">Profile</a></li>
+                            <li><a href="/logout" class="dropdown-item">Logout</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -68,219 +618,920 @@
     {% endif %}
     {% endwith %}
 
-    <!-- Toggle Between Available Spots and Parking History -->
-    <ul class="nav nav-pills mb-3 d-flex justify-content-center mt-3" id="pills-tab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home"
-                type="button" role="tab" aria-controls="pills-home" aria-selected="true">Available Parking Lots</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"
-                type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Your Parking
-                History</button>
-        </li>
-    </ul>
-    <div class="tab-content my-4" id="pills-tabContent">
-        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab"
-            tabindex="0">
-            <!-- Parking Lots -->
-            <div class="card shadow-sm mx-auto my-2 bigger-card" style="width:80%">
-                <div class="card-body">
-                    <div class="card-header d-flex align-items-center justify-content-center bg-transparent">
-                        <h5 class="card-title">Available Parking Lots</h5>
-                    </div>
+    {% set active_bookings_count = booking_history | selectattr('leaving_timestamp', 'equalto', 'Not yet left') | list | length %}
+    {% set completed_bookings_count = booking_history|length - active_bookings_count %}
+    <div class="dashboard-shell">
+        <div class="saas-card pass-highlight">
+            <div>
+                {% if active_subscription %}
+                <span class="plan-pill">{{ 'Advanced' if active_subscription.tier == 'commuter' else active_subscription.tier|title }} Plan</span>
+                <p class="pass-title">Your active membership is live</p>
+                <p class="pass-sub">Valid till {{ active_subscription.end_date }}</p>
+                {% else %}
+                <span class="plan-pill">Free Plan</span>
+                <p class="pass-title">No active pass right now</p>
+                <p class="pass-sub">Upgrade to unlock faster and discounted booking.</p>
+                {% endif %}
+            </div>
+            <div class="usage-stats">
+                <div class="usage-chip">
+                    <small>Active Sessions</small>
+                    <strong>{{ active_bookings_count }}</strong>
+                </div>
+                <div class="usage-chip">
+                    <small>Total Bookings</small>
+                    <strong>{{ booking_history|length }}</strong>
+                </div>
+                <div class="usage-chip">
+                    <small>Favorites</small>
+                    <strong>{{ favorite_lot_ids|length }}</strong>
+                </div>
+            </div>
+        </div>
 
-                    <div class="row g-3 text-center mt-1">
-                        {% for lot in all_par %}
-                        <div class="col-4">
-                            <div class="card shadow-sm custom-card">
-                                <div class="card-body">
-                                    <strong>{{ lot.prime_location_name }}</strong>
-                                    <p>Available Spots: {{ lot.spots | selectattr('status', 'equalto', 'A') | list |
-                                        length }}</p>
-                                    <div class="btn-group btn-group-sm" role="group"
-                                        aria-label="Basic outlined example">
-                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
-                                            data-bs-target="#bookParking-{{ lot.id }}">Book</button>
-                                    </div>
+        <div class="saas-card dashboard-toolbar">
+            <div class="filter-grid">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 rounded-start-3"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control border-start-0" id="parkingSearchInput" placeholder="Search by location or parking name">
+                </div>
+                <select id="priceFilter" class="form-select">
+                    <option value="all">Price: All</option>
+                    <option value="low">Under ₹100/hr</option>
+                    <option value="mid">₹100 - ₹250/hr</option>
+                    <option value="high">Above ₹250/hr</option>
+                </select>
+                <select id="distanceFilter" class="form-select">
+                    <option value="all">Distance: All</option>
+                    <option value="near">Near</option>
+                    <option value="medium">Medium</option>
+                    <option value="far">Far</option>
+                </select>
+                <select id="ratingFilter" class="form-select">
+                    <option value="all">Rating: All</option>
+                    <option value="4">4+ stars</option>
+                    <option value="3">3+ stars</option>
+                </select>
+                <div class="view-toggle-wrap">
+                    <button class="btn active" type="button" data-view-toggle="list" aria-pressed="true">List</button>
+                    <button class="btn" type="button" data-view-toggle="map" aria-pressed="false">Map</button>
+                </div>
+            </div>
+        </div>
 
-                                    <!-- Modal for Book -->
-                                    <div class="modal fade" id="bookParking-{{ lot.id }}" tabindex="-1"
-                                        aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Book Parking
-                                                        Spot</h1>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <form action="/booking" method="POST">
-                                                        <!-- Hidden Inputs to send to backend -->
-                                                        <input type="hidden" name="lot_id" value="{{ lot.id }}">
-                                                        <input type="hidden" name="user_id"
-                                                            value="{{ current_user.id }}">
-                                                        {% set available_spot = lot.spots | selectattr('status',
-                                                        'equalto', 'A') | list | first %}
-                                                        <input type="hidden" name="spot_id"
-                                                            value="{{ available_spot.id if available_spot else '' }}">
+        <ul class="nav nav-pills dashboard-tabs mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Available Parking</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Parking History</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-favorites-tab" data-bs-toggle="pill" data-bs-target="#pills-favorites" type="button" role="tab" aria-controls="pills-favorites" aria-selected="false">Saved / Favorites</button>
+            </li>
+        </ul>
 
-                                                        <!-- Readonly Display Info for the user -->
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Lot ID</label>
-                                                            <input type="text" class="form-control" value="{{ lot.id }}"
-                                                                readonly>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label">User ID</label>
-                                                            <input type="text" class="form-control"
-                                                                value="{{ current_user.id }}" readonly>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Spot ID</label>
-                                                            <input type="text" class="form-control"
-                                                                value="{{ available_spot.id if available_spot else 'No spots available' }}"
-                                                                readonly>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Location</label>
-                                                            <input type="text" class="form-control"
-                                                                value="{{ lot.address }}" readonly>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label">City</label>
-                                                            <input type="text" class="form-control"
-                                                                value="{{ lot.city }}" readonly>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Price per hour</label>
-                                                            <input type="text" class="form-control"
-                                                                value="₹{{ lot.price }}" readonly>
-                                                        </div>
+        <div class="tab-content my-2" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
+                <div id="parkingListView" class="parking-grid view-panel">
+                    {% for lot in all_par %}
+                    {% set available_spots = lot.spots | selectattr('status', 'equalto', 'A') | list | length %}
+                    {% set rating = avg_ratings.get(lot.id, 0) %}
+                    {% set review_count = lot.reviews|length %}
+                    {% set pin_gap = (lot.pin_code - current_user.pincode)|abs if current_user.pincode else 0 %}
+                    {% set distance_score = 1 if pin_gap <= 5 else 2 if pin_gap <= 20 else 3 %}
+                    {% set distance_text = 'Near' if distance_score == 1 else 'Medium' if distance_score == 2 else 'Far' %}
+                    {% set spot_class = 'spot-green' if available_spots > 5 else 'spot-yellow' if available_spots > 0 else 'spot-red' %}
+                    {% set parking_type = 'Covered' if lot.maximum_number_of_spots >= 50 else 'Open' %}
+                    {% set time_availability = 'Open Now' if available_spots > 0 else 'Limited' %}
+                    <div id="parking-card-{{ lot.id }}" class="parking-card" data-parking-card data-lot-id="{{ lot.id }}" data-location="{{ (lot.prime_location_name ~ ' ' ~ lot.city ~ ' ' ~ lot.address)|lower }}" data-address="{{ lot.address }}, {{ lot.city }}, {{ lot.pin_code }}" data-name="{{ lot.prime_location_name }}" data-price="{{ lot.price }}" data-rating="{{ rating }}" data-distance="{{ distance_score }}" data-available="{{ 1 if available_spots > 0 else 0 }}" data-spots="{{ available_spots }}" data-book-target="#bookParking-{{ lot.id }}">
+                        <h6>{{ lot.prime_location_name }}</h6>
+                        <div class="parking-meta">
+                            <span class="rating-stars">{% if rating >= 1 %}★{% else %}☆{% endif %}{% if rating >= 2 %}★{% else %}☆{% endif %}{% if rating >= 3 %}★{% else %}☆{% endif %}{% if rating >= 4 %}★{% else %}☆{% endif %}{% if rating >= 5 %}★{% else %}☆{% endif %}</span>
+                            <span>{{ '%.1f'|format(rating) }} ({{ review_count }} reviews)</span>
+                        </div>
+                        <p class="spot-status mb-2"><span class="spot-dot {{ spot_class }}"></span>{{ available_spots }} spots available</p>
+                        <div class="parking-info-grid">
+                            <div class="parking-info-item"><small>Price / hour</small><strong>₹{{ lot.price }}</strong></div>
+                            <div class="parking-info-item"><small>Distance</small><strong>{{ distance_text }}</strong></div>
+                            <div class="parking-info-item"><small>Type</small><strong>{{ parking_type }}</strong></div>
+                            <div class="parking-info-item"><small>Availability</small><strong>{{ time_availability }}</strong></div>
+                        </div>
+                        <div class="card-actions">
+                            <button type="button" class="btn btn-gradient-primary btn-sm" data-bs-target="#bookParking-{{ lot.id }}">Book Now</button>
+                            <form action="/favorite/toggle" method="POST" class="m-0">
+                                <input type="hidden" name="lot_id" value="{{ lot.id }}">
+                                <button type="submit" class="btn btn-soft-icon btn-sm" title="Favorite"><i class="bi {% if lot.id in favorite_lot_ids %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i></button>
+                            </form>
+                            <form action="/alert/subscribe" method="POST" class="m-0">
+                                <input type="hidden" name="lot_id" value="{{ lot.id }}">
+                                <button type="submit" class="btn btn-soft-icon btn-sm" title="Notify"><i class="bi bi-bell"></i></button>
+                            </form>
+                            <button type="button" class="btn btn-soft-icon btn-sm" data-open-map-btn data-lot-id="{{ lot.id }}" title="View on Map"><i class="bi bi-geo-alt"></i></button>
+                        </div>
 
-                                                        <!-- Vehicle Number Input from the user -->
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Vehicle Number</label>
-                                                            <input type="text" name="vehicle_number"
-                                                                class="form-control"
-                                                                placeholder="Enter your vehicle number" required>
-                                                        </div>
-
-                                                        <div class="d-grid">
-                                                            <button type="submit" class="btn btn-primary" {% if not
-                                                                available_spot %} disabled {% endif %}>
-                                                                Confirm Booking
-                                                            </button>
-                                                        </div>
-                                                    </form>
-                                                </div>
+                        <div class="modal fade" id="bookParking-{{ lot.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <div class="booking-brand">
+                                            <img src="/static/images/logo.png" alt="FindMySpot">
+                                            <div>
+                                                <p class="booking-brand-title">FindMySpot</p>
+                                                <p class="booking-brand-subtitle">Book Parking Spot</p>
                                             </div>
                                         </div>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body booking-modal-body">
+                                        <form action="/payment/checkout" method="GET" class="booking-duration-form" data-hourly-rate="{{ lot.price }}" data-default-minutes="60">
+                                            <input type="hidden" name="lot_id" value="{{ lot.id }}">
+                                            <input type="hidden" name="user_id" value="{{ current_user.id }}">
+                                            <input type="hidden" name="duration_minutes" class="duration-minutes-hidden" value="60">
+                                            {% set available_spot = lot.spots | selectattr('status', 'equalto', 'A') | list | first %}
+                                            <input type="hidden" name="spot_id" value="{{ available_spot.id if available_spot else '' }}">
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Lot ID</label>
+                                                    <input type="text" class="form-control" value="{{ lot.id }}" readonly>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">User ID</label>
+                                                    <input type="text" class="form-control" value="{{ current_user.id }}" readonly>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Spot ID</label>
+                                                    <input type="text" class="form-control" value="{{ available_spot.id if available_spot else 'No spots available' }}" readonly>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Price per hour</label>
+                                                    <input type="text" class="form-control" value="₹{{ lot.price }}" readonly>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Location</label>
+                                                    <input type="text" class="form-control" value="{{ lot.address }}" readonly>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">City</label>
+                                                    <input type="text" class="form-control" value="{{ lot.city }}" readonly>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Hours</label>
+                                                    <select class="form-select duration-hours" required>
+                                                        {% for h in range(0, 13) %}
+                                                        <option value="{{ h }}" {% if h == 1 %}selected{% endif %}>{{ h }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Minutes</label>
+                                                    <select class="form-select duration-minutes" required>
+                                                        <option value="0" selected>00</option>
+                                                        <option value="15">15</option>
+                                                        <option value="30">30</option>
+                                                        <option value="45">45</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Calculated Payable Amount</label>
+                                                    <input type="text" class="form-control price-preview calculated-price" value="Rs {{ lot.price }}" readonly>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Vehicle Number</label>
+                                                    <input type="text" name="vehicle_number" class="form-control" placeholder="Enter your vehicle number" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="d-grid">
+                                                <button type="submit" class="btn btn-gradient-primary" {% if not available_spot %}disabled{% endif %}>Continue To Payment</button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
 
+                <div id="parkingMapView" class="map-view-shell d-none view-panel view-panel-enter">
+                    <div class="map-view-card">
+                        <div class="map-card-head">
+                            <div>
+                                <h6 class="mb-1">Parking Map</h6>
+                                <p id="mapStateText" class="map-state mb-0">Map will center on your city by default.</p>
+                            </div>
+                            <button type="button" class="btn btn-soft-icon btn-sm" id="useMyLocationBtn"><i class="bi bi-crosshair me-1"></i>Use My Location</button>
+                        </div>
+                        <div id="parkingLeafletMap" class="map-canvas loading" aria-label="Parking locations map"></div>
+                    </div>
+                    <div class="map-list">
+                        {% for lot in all_par %}
+                        {% set available_spots = lot.spots | selectattr('status', 'equalto', 'A') | list | length %}
+                        {% set pin_gap = (lot.pin_code - current_user.pincode)|abs if current_user.pincode else 0 %}
+                        {% set distance_score = 1 if pin_gap <= 5 else 2 if pin_gap <= 20 else 3 %}
+                        <div class="map-item" data-map-item data-lot-id="{{ lot.id }}" data-location="{{ (lot.prime_location_name ~ ' ' ~ lot.city ~ ' ' ~ lot.address)|lower }}" data-address="{{ lot.address }}, {{ lot.city }}, {{ lot.pin_code }}" data-name="{{ lot.prime_location_name }}" data-price="{{ lot.price }}" data-rating="{{ avg_ratings.get(lot.id, 0) }}" data-distance="{{ distance_score }}" data-available="{{ 1 if available_spots > 0 else 0 }}" data-spots="{{ available_spots }}" data-book-target="#bookParking-{{ lot.id }}">
+                            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                <strong>{{ lot.prime_location_name }}</strong>
+                                <small>{{ lot.city }}</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small>{{ available_spots }} spots</small>
+                                <button type="button" class="btn btn-gradient-primary btn-sm" data-bs-target="#bookParking-{{ lot.id }}">Book Now</button>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
-            <!-- History of the user -->
-            <div class="card shadow-sm mx-auto" style="width:80%">
-                <div class="card-body">
-                    <div class="card-header text-center">
-                        <h5 class="card-title">History</h5>
-                    </div>
-                    {% if booking_history %}
-                    <div>
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Lot Name</th>
-                                    <th scope="col">Spot ID</th>
-                                    <th scope="col">City</th>
-                                    <th scope="col">Pincode</th>
-                                    <th scope="col">Booked at</th>
-                                    <th scope="col">Released at</th>
-                                    <th scope="col">Vehicle Number</th>
-                                    <th scope="col">Duration</th>
-                                    <th scope="col" class="text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for ru in booking_history %}
-                                <tr>
-                                    <th scope="row">{{ru.Parking_Lot.prime_location_name}}</th>
-                                    <td>{{ru.spot_id}}</td>
-                                    <td>{{ru.Parking_Lot.city}}</td>
-                                    <td>{{ru.Parking_Lot.pin_code}}</td>
-                                    <td>{{ru.parking_timestamp}}</td>
-                                    <td>{{ru.leaving_timestamp}}</td>
-                                    <td>{{ru.vehicle_number}}</td>
-                                    <td><strong>{{ ru.duration }}</strong></td>
-                                    <td class="text-center">
-                                        {% if ru.leaving_timestamp == 'Not yet left' %}
-                                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#releaseParking-{{ru.id}}">
-                                            <i class="bi bi-ev-front"></i> Release
-                                        </button>
-                                        {% else %}
-                                        <span class="badge bg-success">Completed</span>
-                                        {% endif %}
-                                    </td>
 
-                                    <!-- Modal for Release Parking Spot -->
-                                    <div class="modal fade" id="releaseParking-{{ru.id}}" aria-hidden="true"
-                                        aria-labelledby="exampleModalToggleLabel" tabindex="-1">
-                                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h1 class="modal-title fs-4" id="releaseParkingLabel-{{ru.id}}">
-                                                        Spot #{{ru.id}} {{ru.Parking_Lot.prime_location_name}}</h1>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <h6>Are you sure you want to release this parking spot ??</h6>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <form action="/release/{{ ru.id }}" method="POST">
-                                                        <button class="btn btn-danger">Yes</button>
-                                                    </form>
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">No</button>
-                                                </div>
-                                            </div>
-                                        </div>
+            <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+                <div class="history-timeline">
+                    {% if booking_history %}
+                    {% for ru in booking_history %}
+                    <div class="history-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <div>
+                                <h6 class="mb-1">{{ ru.Parking_Lot.prime_location_name }}</h6>
+                                <small class="text-muted">{{ ru.Parking_Lot.city }} | Spot #{{ ru.spot_id }} | {{ ru.parking_timestamp }}</small>
+                            </div>
+                            {% if ru.leaving_timestamp == 'Not yet left' %}
+                            <span class="status-badge status-active">Active</span>
+                            {% else %}
+                            <span class="status-badge status-completed">Completed</span>
+                            {% endif %}
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-sm-4"><small class="text-muted">Vehicle</small><div>{{ ru.vehicle_number }}</div></div>
+                            <div class="col-sm-4"><small class="text-muted">Duration</small><div>{{ ru.duration }} | {{ ru.booked_for }}</div></div>
+                            <div class="col-sm-4"><small class="text-muted">Time Left</small><div>
+                                {% if ru.leaving_timestamp == 'Not yet left' %}
+                                <span class="time-left-live {% if ru.remaining_seconds > 0 %}text-primary{% else %}text-danger{% endif %}" data-remaining-seconds="{{ ru.remaining_seconds }}">{{ ru.time_left }}</span>
+                                {% else %}
+                                --
+                                {% endif %}
+                            </div></div>
+                        </div>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            {% if ru.leaving_timestamp == 'Not yet left' %}
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#releaseParking-{{ru.id}}">Release</button>
+                            <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#cancelBooking-{{ru.id}}">Cancel</button>
+                            {% else %}
+                            <button type="button" class="btn btn-soft-icon btn-sm" data-bs-toggle="modal" data-bs-target="#reviewParking-{{ru.id}}">{% if ru.lot_id in user_review_lot_ids %}Update Review{% else %}Rate{% endif %}</button>
+                            <a class="btn btn-soft-icon btn-sm" href="/user/receipt/{{ru.id}}">Receipt</a>
+                            {% endif %}
+                        </div>
+
+                        <div class="modal fade" id="releaseParking-{{ru.id}}" aria-hidden="true" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-4">Spot #{{ru.id}} {{ru.Parking_Lot.prime_location_name}}</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                    <div class="modal-body"><h6>Are you sure you want to release this parking spot ??</h6></div>
+                                    <div class="modal-footer">
+                                        <form action="/release/{{ ru.id }}" method="POST"><button class="btn btn-danger">Yes</button></form>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="cancelBooking-{{ru.id}}" aria-hidden="true" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5">Cancel Booking #{{ru.id}}</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body"><h6>Refund policy: 100% within 15 min, 50% within 1 hour, else 0%.</h6></div>
+                                    <div class="modal-footer">
+                                        <form action="/cancel/{{ ru.id }}" method="POST"><button class="btn btn-warning">Confirm Cancel</button></form>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="reviewParking-{{ru.id}}" aria-hidden="true" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5">Rate {{ru.Parking_Lot.prime_location_name}}</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="/review" method="POST">
+                                            <input type="hidden" name="lot_id" value="{{ ru.lot_id }}">
+                                            <div class="mb-3">
+                                                <label class="form-label">Rating</label>
+                                                <select name="rating" class="form-select" required>
+                                                    <option value="">Select rating</option>
+                                                    <option value="5">5 - Excellent</option>
+                                                    <option value="4">4 - Very Good</option>
+                                                    <option value="3">3 - Good</option>
+                                                    <option value="2">2 - Fair</option>
+                                                    <option value="1">1 - Poor</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Comment</label>
+                                                <textarea name="comment" class="form-control" rows="3" placeholder="Share your experience"></textarea>
+                                            </div>
+                                            <div class="d-grid"><button class="btn btn-gradient-primary" type="submit">Submit Review</button></div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    {% endfor %}
                     {% else %}
-                    <div class="fw-semibold text-center mt-2">No History found for you.</div>
+                    <div class="saas-card p-4 text-center fw-semibold">No parking history found yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="pills-favorites" role="tabpanel" aria-labelledby="pills-favorites-tab" tabindex="0">
+                <div class="parking-grid">
+                    {% set fav_count = namespace(value=0) %}
+                    {% for lot in all_par %}
+                    {% if lot.id in favorite_lot_ids %}
+                    {% set fav_count.value = fav_count.value + 1 %}
+                    {% set available_spots = lot.spots | selectattr('status', 'equalto', 'A') | list | length %}
+                    <div class="parking-card">
+                        <h6>{{ lot.prime_location_name }}</h6>
+                        <div class="parking-meta">
+                            <span><i class="bi bi-geo-alt"></i> {{ lot.city }}</span>
+                            <span>{{ available_spots }} spots</span>
+                        </div>
+                        <div class="card-actions">
+                            <button type="button" class="btn btn-gradient-primary btn-sm" data-bs-target="#bookParking-{{ lot.id }}">Book Now</button>
+                            <form action="/favorite/toggle" method="POST" class="m-0">
+                                <input type="hidden" name="lot_id" value="{{ lot.id }}">
+                                <button type="submit" class="btn btn-soft-icon btn-sm"><i class="bi bi-heart-fill text-danger"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% if fav_count.value == 0 %}
+                    <div class="saas-card p-4 text-center fw-semibold">No saved parking yet. Add favorites from available list.</div>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
 
-    <!--Footer-->
-    <div class="footer">
-        <div class="container">
-            <p class="fw-semibold">FindMySpot &COPY; - Copyright 2025 | Made with &#x2665;&#xfe0f; by Mayank Dhangar</p>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
         crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/js/theme-toggle.js"></script>
+    <script src="/static/js/flash-alerts.js"></script>
+    <script>
+        (function () {
+            const bookingModals = Array.from(document.querySelectorAll('.modal[id^="bookParking-"]'));
+            bookingModals.forEach((modalEl) => {
+                if (modalEl.parentElement !== document.body) {
+                    document.body.appendChild(modalEl);
+                }
+            });
+        })();
+
+        (function () {
+            document.addEventListener('click', (event) => {
+                const trigger = event.target instanceof Element
+                    ? event.target.closest('[data-bs-target^="#bookParking-"]')
+                    : null;
+                if (!(trigger instanceof HTMLElement)) {
+                    return;
+                }
+
+                const targetSelector = trigger.getAttribute('data-bs-target');
+                if (!targetSelector || typeof bootstrap === 'undefined') {
+                    return;
+                }
+
+                const modalElement = document.querySelector(targetSelector);
+                if (!(modalElement instanceof HTMLElement)) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+                const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                modal.show();
+            });
+        })();
+
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const tabName = params.get("tab");
+            if (!tabName || typeof bootstrap === "undefined") return;
+
+            const tabMap = {
+                history: "pills-profile-tab",
+                favorites: "pills-favorites-tab",
+                available: "pills-home-tab",
+            };
+
+            const requestedTab = document.getElementById(tabMap[tabName] || "");
+            if (!requestedTab) return;
+
+            const tab = bootstrap.Tab.getOrCreateInstance(requestedTab);
+            tab.show();
+        })();
+
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const requestedView = params.get('view');
+            const requestedLotId = Number(params.get('lot') || 0);
+            const listView = document.getElementById('parkingListView');
+            const mapView = document.getElementById('parkingMapView');
+            const viewButtons = Array.from(document.querySelectorAll('[data-view-toggle]'));
+            const listCards = Array.from(document.querySelectorAll('[data-parking-card]'));
+            const mapItems = Array.from(document.querySelectorAll('[data-map-item]'));
+            const searchInput = document.getElementById('parkingSearchInput');
+            const priceFilter = document.getElementById('priceFilter');
+            const distanceFilter = document.getElementById('distanceFilter');
+            const ratingFilter = document.getElementById('ratingFilter');
+            const mapCanvas = document.getElementById('parkingLeafletMap');
+            const mapStateText = document.getElementById('mapStateText');
+            const useMyLocationBtn = document.getElementById('useMyLocationBtn');
+            const defaultCity = "{{ current_user.city|default('Delhi') }}".toLowerCase();
+            const cityCenters = {
+                delhi: { lat: 28.6139, lng: 77.2090 },
+                mumbai: { lat: 19.0760, lng: 72.8777 },
+                bengaluru: { lat: 12.9716, lng: 77.5946 },
+                bangalore: { lat: 12.9716, lng: 77.5946 },
+                pune: { lat: 18.5204, lng: 73.8567 },
+                hyderabad: { lat: 17.3850, lng: 78.4867 },
+                chennai: { lat: 13.0827, lng: 80.2707 },
+                kolkata: { lat: 22.5726, lng: 88.3639 },
+                ahmedabad: { lat: 23.0225, lng: 72.5714 },
+            };
+            const fallbackCenter = cityCenters[defaultCity] || { lat: 28.6139, lng: 77.2090 };
+
+            const lotCardById = new Map();
+            listCards.forEach((card) => {
+                const lotId = Number(card.dataset.lotId || 0);
+                if (lotId > 0) lotCardById.set(lotId, card);
+            });
+
+            const mapItemById = new Map();
+            mapItems.forEach((item) => {
+                const lotId = Number(item.dataset.lotId || 0);
+                if (lotId > 0) mapItemById.set(lotId, item);
+            });
+
+            const lotRecords = listCards.map((card) => ({
+                lotId: Number(card.dataset.lotId || 0),
+                name: card.dataset.name || '',
+                location: (card.dataset.location || ''),
+                price: Number(card.dataset.price || 0),
+                rating: Number(card.dataset.rating || 0),
+                distance: Number(card.dataset.distance || 0),
+                available: Number(card.dataset.available || 0),
+                spots: Number(card.dataset.spots || 0),
+                bookTarget: card.dataset.bookTarget || '',
+                card,
+            }));
+
+            lotRecords.forEach((record, index) => {
+                const signA = record.lotId % 2 === 0 ? 1 : -1;
+                const signB = record.lotId % 3 === 0 ? -1 : 1;
+                const distanceSpread = record.distance === 1 ? 0.012 : (record.distance === 2 ? 0.024 : 0.04);
+                const jitter = (index + 1) * 0.0012;
+                record.lat = fallbackCenter.lat + (distanceSpread * signA) + jitter;
+                record.lng = fallbackCenter.lng + (distanceSpread * signB) - jitter;
+            });
+
+            const visibleLotIds = new Set();
+            let activeView = 'list';
+            let mapInstance = null;
+            let mapInitialized = false;
+            let mapInitStarted = false;
+            const markerByLotId = new Map();
+
+            const updateMapState = (message) => {
+                if (mapStateText) mapStateText.textContent = message;
+            };
+
+            const matchesFilters = (record) => {
+                const location = record.location;
+                const price = record.price;
+                const rating = record.rating;
+                const distance = record.distance;
+
+                const search = (searchInput && searchInput.value ? searchInput.value.toLowerCase().trim() : '');
+                if (search && !location.includes(search)) {
+                    return false;
+                }
+
+                if (priceFilter) {
+                    const val = priceFilter.value;
+                    if (val === 'low' && !(price < 100)) return false;
+                    if (val === 'mid' && !(price >= 100 && price <= 250)) return false;
+                    if (val === 'high' && !(price > 250)) return false;
+                }
+
+                if (distanceFilter) {
+                    const val = distanceFilter.value;
+                    if (val === 'near' && distance !== 1) return false;
+                    if (val === 'medium' && distance !== 2) return false;
+                    if (val === 'far' && distance !== 3) return false;
+                }
+
+                if (ratingFilter) {
+                    const val = ratingFilter.value;
+                    if (val !== 'all' && rating < Number(val)) return false;
+                }
+
+                return true;
+            };
+
+            const updateMarkerVisibility = () => {
+                if (!mapInstance || typeof L === 'undefined') return;
+
+                const visibleMarkers = [];
+
+                markerByLotId.forEach((entry, lotId) => {
+                    const visible = visibleLotIds.has(lotId);
+                    if (visible) {
+                        if (!mapInstance.hasLayer(entry.marker)) {
+                            entry.marker.addTo(mapInstance);
+                        }
+                        visibleMarkers.push(entry.marker);
+                    } else if (mapInstance.hasLayer(entry.marker)) {
+                        mapInstance.removeLayer(entry.marker);
+                    }
+
+                });
+
+                if (visibleMarkers.length > 0) {
+                    const group = L.featureGroup(visibleMarkers);
+                    mapInstance.fitBounds(group.getBounds().pad(0.2));
+                }
+            };
+
+            const applyFilters = () => {
+                visibleLotIds.clear();
+
+                lotRecords.forEach((record) => {
+                    const visible = matchesFilters(record);
+                    record.card.style.display = visible ? '' : 'none';
+
+                    const mapItem = mapItemById.get(record.lotId);
+                    if (mapItem) {
+                        mapItem.style.display = visible ? '' : 'none';
+                    }
+
+                    if (visible) {
+                        visibleLotIds.add(record.lotId);
+                    }
+                });
+
+                updateMarkerVisibility();
+            };
+
+            const focusLotOnMap = async (lotId) => {
+                await switchView('map');
+                await initializeMapIfNeeded();
+
+                const markerEntry = markerByLotId.get(lotId);
+                if (!markerEntry || !mapInstance) return;
+
+                mapInstance.panTo(markerEntry.marker.getLatLng());
+                mapInstance.setZoom(Math.max(mapInstance.getZoom() || 12, 14));
+                openMarkerPopup(markerEntry.record, markerEntry.marker);
+
+                mapItems.forEach((mapItem) => {
+                    mapItem.classList.toggle('active-map-item', Number(mapItem.dataset.lotId || 0) === lotId);
+                });
+            };
+
+            const switchView = async (view) => {
+                activeView = view;
+                const showList = view === 'list';
+
+                viewButtons.forEach((b) => {
+                    const isActive = b.dataset.viewToggle === view;
+                    b.classList.toggle('active', isActive);
+                    b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                });
+
+                if (listView) {
+                    listView.classList.toggle('d-none', !showList);
+                    if (showList) {
+                        requestAnimationFrame(() => listView.classList.remove('view-panel-enter'));
+                    } else {
+                        listView.classList.add('view-panel-enter');
+                    }
+                }
+
+                if (mapView) {
+                    mapView.classList.toggle('d-none', showList);
+                    if (!showList) {
+                        requestAnimationFrame(() => mapView.classList.remove('view-panel-enter'));
+                        await initializeMapIfNeeded();
+                        if (mapInstance) {
+                            window.setTimeout(() => mapInstance.invalidateSize(), 80);
+                        }
+                        updateMarkerVisibility();
+                    } else {
+                        mapView.classList.add('view-panel-enter');
+                    }
+                }
+            };
+
+            const highlightCard = (lotId, switchToList) => {
+                const card = lotCardById.get(lotId);
+                if (!card) return;
+
+                if (switchToList && activeView !== 'list') {
+                    switchView('list');
+                }
+
+                listCards.forEach((listCard) => listCard.classList.remove('highlighted-card'));
+                mapItems.forEach((mapItem) => {
+                    mapItem.classList.toggle('active-map-item', Number(mapItem.dataset.lotId || 0) === lotId);
+                });
+
+                if (card.style.display === 'none') return;
+
+                card.classList.add('highlighted-card');
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                window.setTimeout(() => card.classList.remove('highlighted-card'), 2200);
+            };
+
+            const getUserLocation = () => new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error('Geolocation not available'));
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        resolve({ lat: position.coords.latitude, lng: position.coords.longitude });
+                    },
+                    () => reject(new Error('Location permission denied')),
+                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+                );
+            });
+
+            const openMarkerPopup = (record, marker) => {
+                const contentHtml = `
+                    <div style="min-width:210px; padding:4px 2px;">
+                        <div style="font-weight:700; color:#1a2334; margin-bottom:4px;">${record.name}</div>
+                        <div style="font-size:12px; color:#5e6a85; margin-bottom:2px;">Available: ${record.spots} spots</div>
+                        <div style="font-size:12px; color:#5e6a85; margin-bottom:10px;">Price: Rs ${record.price}/hour</div>
+                        <button type="button" class="btn btn-sm btn-primary map-book-now" data-book-target="${record.bookTarget}" data-lot-id="${record.lotId}">Book Now</button>
+                    </div>
+                `;
+
+                marker.bindPopup(contentHtml, { closeButton: true, autoPan: true }).openPopup();
+            };
+
+            const createMarkers = () => {
+                if (!mapInstance || typeof L === 'undefined') return;
+
+                lotRecords.forEach((record) => {
+                    if (markerByLotId.has(record.lotId)) {
+                        return;
+                    }
+
+                    const marker = L.marker([record.lat, record.lng], { title: record.name });
+                    marker.on('click', () => {
+                        highlightCard(record.lotId, true);
+                        openMarkerPopup(record, marker);
+                    });
+
+                    markerByLotId.set(record.lotId, { marker, record });
+                });
+            };
+
+            const initializeMapIfNeeded = async () => {
+                if (mapInitialized || mapInitStarted || !mapCanvas) return;
+
+                mapInitStarted = true;
+                mapCanvas.classList.add('loading');
+                updateMapState('Loading OpenStreetMap...');
+
+                try {
+                    if (typeof L === 'undefined') {
+                        throw new Error('Leaflet is not loaded');
+                    }
+
+                    let center = fallbackCenter;
+
+                    try {
+                        center = await getUserLocation();
+                        updateMapState('Map centered on your current location.');
+                    } catch (error) {
+                        updateMapState(`Map centered on ${defaultCity || 'default city'}.`);
+                    }
+
+                    mapInstance = L.map(mapCanvas, {
+                        center: [center.lat, center.lng],
+                        zoom: 12,
+                        zoomControl: true,
+                    });
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(mapInstance);
+
+                    mapInstance.on('popupopen', (event) => {
+                        const popupRoot = event.popup.getElement();
+                        if (!popupRoot) return;
+                        const button = popupRoot.querySelector('.map-book-now');
+                        if (!button) return;
+                        button.addEventListener('click', () => {
+                            const targetSelector = button.getAttribute('data-book-target');
+                            const trigger = targetSelector ? document.querySelector(`[data-bs-target="${targetSelector}"]`) : null;
+                            if (trigger instanceof HTMLElement) {
+                                trigger.click();
+                            }
+                        }, { once: true });
+                    });
+
+                    createMarkers();
+                    mapInitialized = true;
+                    updateMarkerVisibility();
+                } catch (error) {
+                    updateMapState('Unable to load map right now. Please try again.');
+                } finally {
+                    mapCanvas.classList.remove('loading');
+                }
+            };
+
+            [searchInput, priceFilter, distanceFilter, ratingFilter].forEach((el) => {
+                if (!el) return;
+                el.addEventListener('input', applyFilters);
+                el.addEventListener('change', applyFilters);
+            });
+
+            mapItems.forEach((mapItem) => {
+                mapItem.addEventListener('click', async (event) => {
+                    const target = event.target;
+                    if (!(target instanceof Element)) return;
+                    const lotId = Number(mapItem.dataset.lotId || 0);
+                    if (!lotId) return;
+
+                    if (target.closest('button[data-bs-target]')) {
+                        return;
+                    }
+
+                    await initializeMapIfNeeded();
+
+                    const markerEntry = markerByLotId.get(lotId);
+                    if (markerEntry && mapInstance) {
+                        mapInstance.panTo(markerEntry.marker.getLatLng());
+                        mapInstance.setZoom(Math.max(mapInstance.getZoom() || 12, 14));
+                        openMarkerPopup(markerEntry.record, markerEntry.marker);
+                    }
+
+                    highlightCard(lotId, false);
+                });
+            });
+
+            document.querySelectorAll('[data-open-map-btn]').forEach((btn) => {
+                btn.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const lotId = Number(btn.getAttribute('data-lot-id') || 0);
+                    if (!lotId) return;
+                    await focusLotOnMap(lotId);
+                });
+            });
+
+            if (useMyLocationBtn) {
+                useMyLocationBtn.addEventListener('click', async () => {
+                    await initializeMapIfNeeded();
+                    if (!mapInstance) return;
+
+                    updateMapState('Detecting your location...');
+                    try {
+                        const currentPosition = await getUserLocation();
+                        mapInstance.setView([currentPosition.lat, currentPosition.lng], 13);
+                        mapInstance.setZoom(13);
+                        updateMapState('Map centered on your current location.');
+                    } catch (error) {
+                        updateMapState('Could not access your location. Please allow location permission.');
+                    }
+                });
+            }
+
+            viewButtons.forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const view = btn.dataset.viewToggle;
+                    await switchView(view || 'list');
+                });
+            });
+
+            document.querySelectorAll('.parking-card').forEach((card) => {
+                card.addEventListener('click', (event) => {
+                    const target = event.target;
+                    if (!(target instanceof Element)) return;
+                    if (target.closest('button, a, form, input, select, textarea, .modal')) return;
+                    const modalTrigger = card.querySelector('[data-bs-target^="#bookParking-"]');
+                    if (modalTrigger instanceof HTMLElement) {
+                        modalTrigger.click();
+                    }
+                });
+            });
+
+            applyFilters();
+            if (requestedView === 'map') {
+                if (requestedLotId > 0) {
+                    focusLotOnMap(requestedLotId);
+                } else {
+                    switchView('map');
+                }
+            } else {
+                switchView('list');
+            }
+        })();
+
+        (function () {
+            function formatHMS(totalSeconds) {
+                const safe = Math.max(Math.floor(totalSeconds), 0);
+                const hh = String(Math.floor(safe / 3600)).padStart(2, '0');
+                const mm = String(Math.floor((safe % 3600) / 60)).padStart(2, '0');
+                const ss = String(safe % 60).padStart(2, '0');
+                return `${hh}:${mm}:${ss}`;
+            }
+
+            const countdownEls = document.querySelectorAll('.time-left-live[data-remaining-seconds]');
+            if (!countdownEls.length) return;
+
+            countdownEls.forEach((el) => {
+                const initial = Number(el.getAttribute('data-remaining-seconds') || 0);
+                el.dataset.remainingSeconds = String(initial);
+            });
+
+            window.setInterval(() => {
+                countdownEls.forEach((el) => {
+                    let remaining = Number(el.dataset.remainingSeconds || 0);
+                    remaining -= 1;
+                    el.dataset.remainingSeconds = String(remaining);
+
+                    if (remaining >= 0) {
+                        el.textContent = formatHMS(remaining);
+                        el.classList.remove('text-danger');
+                        el.classList.add('text-primary');
+                    } else {
+                        el.textContent = `Over by ${formatHMS(Math.abs(remaining))}`;
+                        el.classList.remove('text-primary');
+                        el.classList.add('text-danger');
+                    }
+                });
+            }, 1000);
+        })();
+
+        (function () {
+            function updateFormPreview(formEl) {
+                const hourlyRate = Number(formEl.dataset.hourlyRate || 0);
+                const hours = Number(formEl.querySelector('.duration-hours')?.value || 0);
+                const minutes = Number(formEl.querySelector('.duration-minutes')?.value || 0);
+                const totalMinutes = Math.max((hours * 60) + minutes, 15);
+                const amount = ((hourlyRate * totalMinutes) / 60).toFixed(2);
+
+                const hiddenInput = formEl.querySelector('.duration-minutes-hidden');
+                const amountInput = formEl.querySelector('.calculated-price');
+                if (hiddenInput) hiddenInput.value = String(totalMinutes);
+                if (amountInput) amountInput.value = `Rs ${amount}`;
+            }
+
+            document.querySelectorAll('.booking-duration-form').forEach((formEl) => {
+                formEl.querySelectorAll('.duration-hours, .duration-minutes').forEach((inputEl) => {
+                    inputEl.addEventListener('change', () => updateFormPreview(formEl));
+                });
+
+                formEl.addEventListener('submit', () => updateFormPreview(formEl));
+                updateFormPreview(formEl);
+            });
+        })();
+
+    </script>
 </body>
 
 </html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/static/js/theme-init.js"></script>
+    <title>FindMySpot | Wallet Checkout</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/static/css/nav_footer.css">
+    <link rel="stylesheet" href="/static/css/Dark.css">
+    <link rel="stylesheet" href="/static/css/payment_checkout.css">
+    <link rel="stylesheet" href="/static/css/wallet.css">
+    <link rel="icon" href="/static/images/logo.png" type="image/png">
+</head>
+
+<body class="checkout-page">
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm light-glass-navbar">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="/" target="_blank">
+                <img src="/static/images/Logo.png" alt="Logo" width="32" height="32" class="me-2">
+                FindMySpot
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item mx-2 dropdown navbar-links-dropdown">
+                        <button class="btn navbar-menu-toggle dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i data-lucide="menu"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/user/dashboard">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="/user/search">Search</a></li>
+                            <li><a class="dropdown-item" href="/user/favorites">Favorites</a></li>
+                            <li><a class="dropdown-item" href="/user/summary">Summary</a></li>
+                            <li><a class="dropdown-item" href="/user/wallet">Wallet</a></li>
+                            <li><a class="dropdown-item" href="/user/subscriptions">Subscriptions</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item mx-2 d-flex align-items-center">
+                        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle dark/light theme">
+                            <i data-lucide="sun" class="icon-sun"></i>
+                            <i data-lucide="moon-star" class="icon-moon"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item mx-2 dropdown navbar-profile-dropdown">
+                        <button class="btn navbar-profile-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile menu">
+                            {% if current_user.profile_image and current_user.profile_image != 'default.png' %}
+                            <img src="/static/user_profiles/{{ current_user.profile_image }}" alt="Profile" class="profile-avatar" onerror="this.onerror=null;this.src='/static/images/default-avatar.webp';">
+                            {% else %}
+                            <img src="/static/images/default-avatar.webp" alt="Default profile" class="profile-avatar">
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a href="/logout" class="dropdown-item">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="checkout-wrapper">
+        <div class="checkout-shell mx-auto">
+            <div class="checkout-header d-flex justify-content-between align-items-center">
+                <div class="brand d-flex align-items-center gap-2">
+                    <img src="/static/images/logo.png" alt="FindMySpot" class="brand-logo">
+                    <div>
+                        <h5 class="mb-0">Wallet Payment</h5>
+                        <small>Pay directly from your wallet balance</small>
+                    </div>
+                </div>
+                <a href="/payment/checkout?lot_id={{ lot.id }}&vehicle_number={{ vehicle_number }}&duration_minutes={{ duration_minutes }}" class="btn btn-close" aria-label="Close"></a>
+            </div>
+
+            <div class="checkout-content">
+                <div class="payment-tab-strip">
+                    <a class="pay-tab" href="/payment/checkout/card?lot_id={{ lot.id }}&vehicle_number={{ vehicle_number }}&duration_minutes={{ duration_minutes }}">Card</a>
+                    <a class="pay-tab" href="/payment/checkout/upi?lot_id={{ lot.id }}&vehicle_number={{ vehicle_number }}&duration_minutes={{ duration_minutes }}">UPI</a>
+                    <a class="pay-tab active" href="/payment/checkout/wallet?lot_id={{ lot.id }}&vehicle_number={{ vehicle_number }}&duration_minutes={{ duration_minutes }}">Wallet</a>
+                </div>
+
+                <div class="row g-3 mt-0 checkout-panel-layout">
+                    <div class="col-lg-7">
+                        <div class="checkout-card wallet-pay-card">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h4 class="pay-mode-title mb-0">Current Wallet Balance</h4>
+                                <div class="wallet-balance-chip">Rs {{ '%.0f'|format(wallet_balance) }}</div>
+                            </div>
+                            <div class="wallet-pay-hero">
+                                <img src="/static/images/wallet/wallet-icon.png" alt="Wallet" class="wallet-pay-icon" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
+                                <div class="wallet-pay-icon-fallback d-none">₹</div>
+                                <div class="wallet-pay-copy">
+                                    <p class="gateway-note mb-1">Use wallet balance to pay instantly.</p>
+                                    <div class="wallet-pay-amount">Pay Rs {{ '%.2f'|format(payable_amount) }} Now</div>
+                                    <p class="gateway-note mb-0">This amount will be deducted from your wallet and booking will be confirmed immediately.</p>
+                                </div>
+                            </div>
+
+                            {% if insufficient_balance %}
+                            <div class="active-booking-alert mt-3 wallet-warning">
+                                Insufficient balance. Please add money to your wallet first.
+                            </div>
+                            {% endif %}
+
+                            <div class="mt-3 d-grid">
+                                <button type="button" class="btn btn-primary btn-lg" id="walletPayBtn" {% if insufficient_balance %}disabled{% endif %}>
+                                    Pay from Wallet
+                                </button>
+                            </div>
+                            <div class="col-12 d-none mt-3" id="walletErrorBox"></div>
+
+                            <div id="paymentSuccessState" class="success-state d-none text-center mt-3">
+                                <div class="checkmark-wrap mx-auto mb-2">
+                                    <div class="checkmark-circle"></div>
+                                    <div class="checkmark-stem"></div>
+                                    <div class="checkmark-kick"></div>
+                                </div>
+                                <h5 class="mb-1">Payment Successful</h5>
+                                <p class="mb-1" id="bookingSuccessText">Booked</p>
+                                <a href="/user/dashboard" class="btn btn-success mt-2">Go to Dashboard</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5">
+                            <div class="summary-card summary-sticky">
+                            <h6 class="summary-title">Order Summary</h6>
+                            <div class="summary-item"><span>Parking Lot</span><strong>{{ lot.prime_location_name }}</strong></div>
+                            <div class="summary-item"><span>Lot ID</span><strong>{{ lot.id }}</strong></div>
+                            <div class="summary-item"><span>Vehicle No</span><strong>{{ vehicle_number if vehicle_number else 'N/A' }}</strong></div>
+                            <div class="summary-item"><span>Planned Duration</span><strong>{{ duration_label }}</strong></div>
+                            <div class="summary-item"><span>Per Hour Rate</span><strong>Rs {{ lot.price }}</strong></div>
+                            <div class="summary-item"><span>Base Amount</span><strong>Rs {{ '%.2f'|format(pricing_breakdown.base_amount) }}</strong></div>
+                            {% if pricing_breakdown.plan_name %}
+                            <div class="summary-item"><span>Active Plan</span><strong>{{ pricing_breakdown.plan_name }}</strong></div>
+                            {% for row in pricing_breakdown.discount_rows %}
+                                <div class="summary-item savings"><span>{{ row.label }}</span><strong>- Rs {{ '%.2f'|format(row.amount) }}</strong></div>
+                            {% endfor %}
+                                <div class="summary-item savings"><span>Total Savings</span><strong>Rs {{ '%.2f'|format(pricing_breakdown.total_savings) }}</strong></div>
+                            {% endif %}
+                                <div class="accordion refund-accordion my-2" id="refundAccordionWallet">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="refundHeadingWallet">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#refundCollapseWallet" aria-expanded="false" aria-controls="refundCollapseWallet">
+                                                Refund Policy
+                                            </button>
+                                        </h2>
+                                        <div id="refundCollapseWallet" class="accordion-collapse collapse" aria-labelledby="refundHeadingWallet" data-bs-parent="#refundAccordionWallet">
+                                            <div class="accordion-body">
+                                                {% for rule in refund_rules %}
+                                                <div class="refund-rule-row"><span>{{ rule.label }}</span><strong>{{ rule.refund }}</strong></div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <hr>
+                            <div class="summary-item total"><span>Payable Now ({{ duration_label }})</span><strong>Rs {{ '%.2f'|format(payable_amount) }}</strong></div>
+                            {% if pricing_breakdown.active_features %}
+                            <hr>
+                            <h6 class="summary-title mt-2">Applied Plan Features</h6>
+                                <ul class="features-compact">
+                                    {% for feature in pricing_breakdown.active_features %}
+                                    <li><i class="bi bi-check2-circle"></i><span>{{ feature }}</span></li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="checkout-data" data-lot-id="{{ lot.id }}" data-lot-name="{{ lot.prime_location_name }}"
+        data-vehicle-number="{{ vehicle_number }}" data-amount="{{ payable_amount }}" data-duration-minutes="{{ duration_minutes }}"
+        data-has-active-booking="{{ 'true' if active_booking else 'false' }}"
+        data-payment-label="{{ payment_label }}" data-wallet-balance="{{ wallet_balance }}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/js/theme-toggle.js"></script>
+    <script src="/static/js/payment-wallet.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/static/js/theme-init.js"></script>
+    <title>FindMySpot Pay | Subscription Plans</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/static/css/nav_footer.css">
+    <link rel="stylesheet" href="/static/css/Dark.css">
+    <link rel="icon" href="/static/images/logo.png" type="image/png">
+    <style>
+        :root {
+            --bill-bg: radial-gradient(circle at 15% -10%, rgba(127, 91, 255, 0.18), transparent 42%), radial-gradient(circle at 90% 12%, rgba(170, 95, 255, 0.2), transparent 36%), #f5f6ff;
+            --bill-card: #ffffff;
+            --bill-text: #1f2540;
+            --bill-muted: #677197;
+            --bill-border: rgba(108, 89, 188, 0.16);
+            --bill-shadow: 0 16px 36px rgba(80, 61, 165, 0.14);
+            --bill-gradient: linear-gradient(135deg, #6f4bff 0%, #aa5fff 100%);
+            --bill-radius: 16px;
+        }
+
+        [data-theme="dark"] {
+            --bill-bg: radial-gradient(circle at 8% -10%, rgba(121, 84, 255, 0.22), transparent 40%), radial-gradient(circle at 95% 12%, rgba(170, 95, 255, 0.2), transparent 34%), #0e1423;
+            --bill-card: rgba(20, 28, 48, 0.84);
+            --bill-text: #eef2ff;
+            --bill-muted: #b6c1e3;
+            --bill-border: rgba(171, 157, 230, 0.22);
+            --bill-shadow: 0 20px 40px rgba(2, 8, 20, 0.4);
+        }
+
+        body {
+            background: var(--bill-bg);
+            color: var(--bill-text);
+        }
+
+        .billing-page {
+            max-width: 1240px;
+            padding: 1.3rem 0.9rem 2rem;
+        }
+
+        .section-card {
+            border: 1px solid var(--bill-border);
+            border-radius: var(--bill-radius);
+            background: var(--bill-card);
+            box-shadow: var(--bill-shadow);
+        }
+
+        .hero-card {
+            background: var(--bill-gradient);
+            color: #fff;
+            padding: 1.2rem 1.3rem;
+        }
+
+        .hero-card p {
+            margin-bottom: 0;
+            opacity: 0.9;
+        }
+
+        .billing-toggle-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            flex-wrap: wrap;
+        }
+
+        .billing-toggle {
+            display: inline-flex;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .billing-toggle::before {
+            content: "";
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
+            border-radius: 999px;
+            background: #ffffff;
+            transform: translateX(0);
+            transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 6px 16px rgba(69, 48, 153, 0.32);
+        }
+
+        .billing-toggle[data-active="yearly"]::before {
+            transform: translateX(100%);
+        }
+
+        .billing-toggle button {
+            border: 0;
+            background: transparent;
+            padding: 0.46rem 1rem;
+            border-radius: 999px;
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.84);
+            min-width: 100px;
+        }
+
+        .billing-toggle button.active {
+            color: #26223c;
+        }
+
+        .save-badge {
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.32);
+            padding: 0.35rem 0.7rem;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .plan-card {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 36px rgba(82, 62, 168, 0.22);
+        }
+
+        .plan-card.popular {
+            border: 1px solid rgba(154, 96, 255, 0.45);
+        }
+
+        .popular-chip,
+        .current-chip {
+            position: absolute;
+            top: 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.24rem 0.6rem;
+            z-index: 2;
+        }
+
+        .popular-chip {
+            right: 10px;
+            background: #f8de67;
+            color: #594300;
+        }
+
+        .current-chip {
+            left: 10px;
+            background: rgba(16, 185, 129, 0.2);
+            color: #0d8d61;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .plan-card.active-plan {
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            box-shadow: 0 18px 36px rgba(41, 173, 124, 0.18), var(--bill-shadow);
+        }
+
+        .plan-body {
+            padding: 2.1rem 1rem 1rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 460px;
+        }
+
+        .plan-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
+        }
+
+        .plan-subtitle {
+            color: var(--bill-muted);
+            margin-bottom: 0.9rem;
+            min-height: 2.8rem;
+            font-size: 0.95rem;
+        }
+
+        .plan-price {
+            font-weight: 800;
+            font-size: 2.25rem;
+            margin-bottom: 0;
+            display: flex;
+            align-items: baseline;
+            gap: 0.35rem;
+            transition: transform 0.35s ease, opacity 0.35s ease;
+        }
+
+        .plan-price.switching {
+            transform: translateY(-3px);
+            opacity: 0.72;
+        }
+
+        .price-unit {
+            font-size: 0.9rem;
+            color: var(--bill-muted);
+            font-weight: 600;
+        }
+
+        .save-pill {
+            display: inline-flex;
+            gap: 0.4rem;
+            align-items: center;
+            margin-top: 0.45rem;
+            margin-bottom: 0.8rem;
+            border-radius: 999px;
+            border: 1px solid var(--bill-border);
+            color: var(--bill-muted);
+            padding: 0.2rem 0.55rem;
+            font-size: 0.78rem;
+            width: fit-content;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.55rem;
+            margin-bottom: 0.55rem;
+            color: var(--bill-text);
+            font-size: 0.95rem;
+        }
+
+        .feature-list i {
+            color: #8a5dff;
+            margin-top: 0.1rem;
+        }
+
+        .btn-gradient {
+            border: 0;
+            border-radius: 10px;
+            background: var(--bill-gradient);
+            color: #fff;
+            font-weight: 700;
+            padding: 0.55rem 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-gradient[aria-disabled="true"] {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .btn-soft {
+            border: 1px solid var(--bill-border);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--bill-text);
+            font-weight: 600;
+            padding: 0.52rem 0.85rem;
+        }
+
+        .sub-heading {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+        }
+
+        .compare-wrap {
+            overflow: auto;
+        }
+
+        .compare-table th,
+        .compare-table td {
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .key-val {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.48rem 0;
+            border-bottom: 1px dashed var(--bill-border);
+        }
+
+        .key-val span {
+            color: var(--bill-muted);
+        }
+
+        .key-val strong {
+            color: var(--bill-text);
+        }
+
+        .history-wrap {
+            max-height: 360px;
+            overflow: auto;
+            border-radius: 12px;
+            border: 1px solid var(--bill-border);
+        }
+
+        .history-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: rgba(111, 75, 255, 0.1);
+        }
+
+        .status-pill {
+            border-radius: 999px;
+            padding: 0.22rem 0.55rem;
+            font-size: 0.74rem;
+            font-weight: 700;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #0e8a61;
+        }
+
+        .status-completed {
+            background: rgba(99, 102, 241, 0.2);
+            color: #3e45c0;
+        }
+
+        .coupon-row {
+            display: flex;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+        }
+
+        .coupon-preview {
+            margin-top: 0.55rem;
+            color: var(--bill-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1199px) {
+            .plans-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .plans-grid .plan-card:last-child {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 991px) {
+            .info-grid,
+            .plans-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .plan-body {
+                min-height: unset;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm light-glass-navbar">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="/" target="_blank">
+                <img src="/static/images/Logo.png" alt="Logo" width="32" height="32" class="me-2">
+                FindMySpot
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item mx-2 dropdown navbar-links-dropdown">
+                        <button class="btn navbar-menu-toggle dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i data-lucide="menu"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/user/dashboard">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="/user/search">Search</a></li>
+                            <li><a class="dropdown-item" href="/user/favorites">Favorites</a></li>
+                            <li><a class="dropdown-item" href="/user/summary">Summary</a></li>
+                            <li><a class="dropdown-item" href="/user/wallet">Wallet</a></li>
+                            <li><a class="dropdown-item" href="/user/subscriptions">Subscriptions</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item mx-2 d-flex align-items-center">
+                        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle dark/light theme">
+                            <i data-lucide="sun" class="icon-sun"></i>
+                            <i data-lucide="moon-star" class="icon-moon"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item mx-2 dropdown navbar-profile-dropdown">
+                        <button class="btn navbar-profile-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile menu">
+                            {% if current_user.profile_image and current_user.profile_image != 'default.png' %}
+                            <img src="/static/user_profiles/{{ current_user.profile_image }}" alt="Profile" class="profile-avatar" onerror="this.onerror=null;this.src='/static/images/default-avatar.webp';">
+                            {% else %}
+                            <img src="/static/images/default-avatar.webp" alt="Default profile" class="profile-avatar">
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a href="/user/profile" class="dropdown-item">Profile</a></li>
+                            <li><a href="/logout" class="dropdown-item">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container mt-3">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <main class="container billing-page">
+        <section class="section-card hero-card mb-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                    <h2 class="mb-1 fw-bold"><i class="bi bi-stars me-2"></i>Pricing & Billing</h2>
+                    <p>Subscription dashboard for plans, payments, and billing history.</p>
+                </div>
+                <div class="billing-toggle-wrap">
+                    <div class="billing-toggle" role="tablist" aria-label="Billing cycle switch" data-active="monthly" id="billingToggle">
+                        <button type="button" id="billingMonthly" class="active">Monthly</button>
+                        <button type="button" id="billingYearly">Yearly</button>
+                    </div>
+                    <span class="save-badge"><i class="bi bi-piggy-bank"></i> Save 20%</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="d-flex justify-content-end mb-2">
+            <button type="button" class="btn-soft" data-bs-toggle="collapse" data-bs-target="#comparePlansCard" aria-expanded="false" aria-controls="comparePlansCard">
+                <i class="bi bi-grid-3x3-gap"></i> Compare Plans
+            </button>
+        </section>
+
+        <section class="collapse mb-3" id="comparePlansCard">
+            <div class="section-card p-3 compare-wrap">
+                <h5 class="sub-heading"><i class="bi bi-bar-chart-steps"></i> Plan Comparison</h5>
+                <table class="table compare-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Basic</th>
+                            <th>Advanced</th>
+                            <th>Premium</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Discount on bookings</td>
+                            <td>5%</td>
+                            <td>20% on extra hours</td>
+                            <td>No charge at select lots</td>
+                        </tr>
+                        <tr>
+                            <td>Priority booking</td>
+                            <td><i class="bi bi-x-lg text-danger"></i></td>
+                            <td><i class="bi bi-check-lg text-success"></i></td>
+                            <td><i class="bi bi-check-lg text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Reserved slots</td>
+                            <td><i class="bi bi-x-lg text-danger"></i></td>
+                            <td><i class="bi bi-x-lg text-danger"></i></td>
+                            <td><i class="bi bi-check-lg text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Entry speed</td>
+                            <td>Standard</td>
+                            <td>Fast</td>
+                            <td>Fastest (QR / FASTag)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="plans-grid">
+            {% set plans = [
+                {'tier': 'basic', 'title': 'Basic', 'subtitle': 'Great for occasional city parking users.', 'popular': false, 'cta': 'Get Basic'},
+                {'tier': 'commuter', 'title': 'Advanced', 'subtitle': 'Built for daily commuters with smarter savings.', 'popular': true, 'cta': 'Get Advanced'},
+                {'tier': 'premium', 'title': 'Premium', 'subtitle': 'Unlimited-style access for power users.', 'popular': false, 'cta': 'Get Premium'}
+            ] %}
+            {% for card in plans %}
+            {% set active_plan = active_subscription and active_subscription.tier == card.tier %}
+            {% set plan_data = subscription_plans[card.tier] %}
+            <article class="section-card plan-card {% if card.popular %}popular{% endif %} {% if active_plan %}active-plan{% endif %}">
+                {% if card.popular %}<span class="popular-chip">Most Popular</span>{% endif %}
+                {% if active_plan %}<span class="current-chip">Current Plan</span>{% endif %}
+                <div class="plan-body">
+                    <h4 class="plan-title">{{ card.title }}</h4>
+                    <p class="plan-subtitle">{{ card.subtitle }}</p>
+                    <h5 class="plan-price" data-price-value data-monthly="{{ plan_data.monthly_fee }}" data-yearly="{{ plan_data.yearly_fee }}">
+                        ₹{{ plan_data.monthly_fee }} <span class="price-unit" data-price-unit>/ month</span>
+                    </h5>
+                    <span class="save-pill" data-plan-savings data-monthly="{{ plan_data.monthly_fee }}" data-yearly="{{ plan_data.yearly_fee }}">
+                        <i class="bi bi-lightning-charge-fill"></i> Save 20% yearly
+                    </span>
+                    <ul class="feature-list">
+                        {% for feature in plan_data.features %}
+                        <li><i class="bi bi-check2-circle"></i><span>{{ feature }}</span></li>
+                        {% endfor %}
+                    </ul>
+                    <a href="/subscription/payment?tier={{ card.tier }}&billing_cycle=monthly"
+                        data-tier="{{ card.tier }}"
+                        class="btn-gradient plan-action"
+                        {% if active_plan %}aria-disabled="true"{% endif %}>
+                        {% if active_plan %}<i class="bi bi-check-circle"></i> Active Plan{% else %}{{ card.cta }}{% endif %}
+                    </a>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+
+        <section class="info-grid mt-3">
+            <article class="section-card p-3">
+                <h5 class="sub-heading"><i class="bi bi-receipt-cutoff"></i> Billing Info</h5>
+                <div class="key-val"><span>Current Plan</span><strong>{{ billing_summary.current_plan }}</strong></div>
+                <div class="key-val"><span>Next Billing Date</span><strong>{{ billing_summary.next_billing_date }}</strong></div>
+                <div class="key-val"><span>Amount to be Charged</span><strong>₹{{ '%.2f'|format(billing_summary.amount_to_be_charged) }}</strong></div>
+                <div class="key-val"><span>Billing Cycle</span><strong>{{ billing_summary.billing_cycle }}</strong></div>
+            </article>
+
+            <article class="section-card p-3">
+                <h5 class="sub-heading"><i class="bi bi-credit-card-2-front"></i> Payment Method</h5>
+                <div class="key-val"><span>Primary Card</span><strong id="maskedCardNumber">**** **** **** 4821</strong></div>
+                <div class="key-val"><span>UPI</span><strong id="maskedUpi">sanja@upi</strong></div>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button class="btn-soft" type="button" id="addPaymentBtn"><i class="bi bi-plus-circle"></i> Add</button>
+                    <button class="btn-soft" type="button" id="removePaymentBtn"><i class="bi bi-trash3"></i> Remove</button>
+                    <button class="btn-soft" type="button" id="changePaymentBtn"><i class="bi bi-arrow-repeat"></i> Change</button>
+                </div>
+            </article>
+        </section>
+
+        <section class="section-card p-3 mt-3">
+            <h5 class="sub-heading"><i class="bi bi-ticket-perforated"></i> Apply Coupon</h5>
+            <div class="coupon-row">
+                <input type="text" class="form-control" id="couponInput" placeholder="Apply coupon" style="max-width: 320px;">
+                <button type="button" class="btn-gradient" id="applyCouponBtn">Apply</button>
+            </div>
+            <p class="coupon-preview" id="couponPreview">Enter a coupon to see discount preview.</p>
+        </section>
+
+        <section class="section-card p-3 mt-3">
+            <h5 class="sub-heading"><i class="bi bi-clock-history"></i> Billing History</h5>
+            <div class="history-wrap">
+                <table class="table history-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Plan</th>
+                            <th>Amount</th>
+                            <th>Cycle</th>
+                            <th>Status</th>
+                            <th>Invoice</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in subscription_history %}
+                        <tr>
+                            <td>{{ row.date }}</td>
+                            <td>{{ row.plan }}</td>
+                            <td>₹{{ '%.2f'|format(row.amount) }}</td>
+                            <td>{{ row.billing_cycle }}</td>
+                            <td>
+                                <span class="status-pill {% if row.status == 'Active' %}status-active{% else %}status-completed{% endif %}">
+                                    {{ row.status }}
+                                </span>
+                            </td>
+                            <td><a href="/user/monthly-invoice" class="btn-soft btn-sm"><i class="bi bi-download"></i></a></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No billing history available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal fade" id="upgradeConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:16px;">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-arrow-up-circle me-2"></i>Confirm Upgrade</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">You are about to activate:</p>
+                    <div class="section-card p-3" style="box-shadow:none;">
+                        <div class="d-flex justify-content-between"><span>Plan</span><strong id="modalPlanName">-</strong></div>
+                        <div class="d-flex justify-content-between mt-1"><span>Billing</span><strong id="modalBillingCycle">Monthly</strong></div>
+                        <div class="d-flex justify-content-between mt-1"><span>Amount</span><strong id="modalPlanAmount">₹0</strong></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-soft" data-bs-dismiss="modal">Cancel</button>
+                    <a href="#" class="btn-gradient" id="confirmUpgradeBtn">Confirm Upgrade</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/js/theme-toggle.js"></script>
+    <script src="/static/js/flash-alerts.js"></script>
+    <script>
+        (function () {
+            const monthlyBtn = document.getElementById('billingMonthly');
+            const yearlyBtn = document.getElementById('billingYearly');
+            const billingToggle = document.getElementById('billingToggle');
+            const priceBlocks = document.querySelectorAll('[data-price-value]');
+            const savingsBadges = document.querySelectorAll('[data-plan-savings]');
+            const planActions = document.querySelectorAll('.plan-action');
+
+            const couponInput = document.getElementById('couponInput');
+            const couponPreview = document.getElementById('couponPreview');
+            const applyCouponBtn = document.getElementById('applyCouponBtn');
+
+            const maskedCard = document.getElementById('maskedCardNumber');
+            const maskedUpi = document.getElementById('maskedUpi');
+            const addPaymentBtn = document.getElementById('addPaymentBtn');
+            const removePaymentBtn = document.getElementById('removePaymentBtn');
+            const changePaymentBtn = document.getElementById('changePaymentBtn');
+
+            const modalElement = document.getElementById('upgradeConfirmModal');
+            const upgradeModal = modalElement ? new bootstrap.Modal(modalElement) : null;
+            const modalPlanName = document.getElementById('modalPlanName');
+            const modalBillingCycle = document.getElementById('modalBillingCycle');
+            const modalPlanAmount = document.getElementById('modalPlanAmount');
+            const confirmUpgradeBtn = document.getElementById('confirmUpgradeBtn');
+
+            const discounts = {
+                SAVE10: 10,
+                SAVE20: 20,
+                FIRST49: 49
+            };
+
+            let currentCycle = 'monthly';
+
+            function cycleLabel(cycle) {
+                return cycle === 'yearly' ? 'Yearly' : 'Monthly';
+            }
+
+            function updateSavingsBadge() {
+                savingsBadges.forEach((badge) => {
+                    const monthly = Number(badge.getAttribute('data-monthly') || 0);
+                    const yearly = Number(badge.getAttribute('data-yearly') || 0);
+                    const full = monthly * 12;
+                    const save = Math.max(full - yearly, 0);
+                    const pct = full > 0 ? Math.round((save / full) * 100) : 0;
+                    badge.innerHTML = `<i class="bi bi-lightning-charge-fill"></i> Save ${pct}% yearly`;
+                });
+            }
+
+            function applyCycle(cycle) {
+                currentCycle = cycle;
+                if (billingToggle) {
+                    billingToggle.dataset.active = cycle;
+                }
+                if (monthlyBtn && yearlyBtn) {
+                    monthlyBtn.classList.toggle('active', cycle === 'monthly');
+                    yearlyBtn.classList.toggle('active', cycle === 'yearly');
+                }
+
+                priceBlocks.forEach((block) => {
+                    const monthly = Number(block.getAttribute('data-monthly') || 0);
+                    const yearly = Number(block.getAttribute('data-yearly') || 0);
+                    const value = cycle === 'yearly' ? yearly : monthly;
+                    const unit = block.querySelector('[data-price-unit]');
+                    block.classList.add('switching');
+                    window.setTimeout(() => {
+                        block.childNodes[0].nodeValue = `₹${value} `;
+                        if (unit) {
+                            unit.textContent = cycle === 'yearly' ? '/ year' : '/ month';
+                        }
+                        block.classList.remove('switching');
+                    }, 120);
+                });
+
+                planActions.forEach((link) => {
+                    const tier = link.getAttribute('data-tier');
+                    if (tier && !link.hasAttribute('aria-disabled')) {
+                        link.setAttribute('href', `/subscription/payment?tier=${tier}&billing_cycle=${cycle}`);
+                    }
+                });
+            }
+
+            function applyCoupon() {
+                if (!couponInput || !couponPreview) {
+                    return;
+                }
+                const code = (couponInput.value || '').trim().toUpperCase();
+                if (!code) {
+                    couponPreview.textContent = 'Enter a coupon to see discount preview.';
+                    return;
+                }
+
+                if (code in discounts) {
+                    if (code === 'FIRST49') {
+                        couponPreview.textContent = 'Coupon applied: first month billed at ₹49.';
+                    } else {
+                        couponPreview.textContent = `Coupon applied: ${discounts[code]}% discount will be applied at checkout.`;
+                    }
+                    couponPreview.style.color = '#0f8b61';
+                } else {
+                    couponPreview.textContent = 'Invalid coupon code. Try SAVE10, SAVE20 or FIRST49.';
+                    couponPreview.style.color = '#c13b66';
+                }
+            }
+
+            function updatePayment(methodType) {
+                if (!maskedCard || !maskedUpi) {
+                    return;
+                }
+                if (methodType === 'remove') {
+                    maskedCard.textContent = 'No card on file';
+                    maskedUpi.textContent = 'No UPI linked';
+                    return;
+                }
+                if (methodType === 'change') {
+                    maskedCard.textContent = '**** **** **** 9913';
+                    maskedUpi.textContent = 'newpay@upi';
+                    return;
+                }
+                maskedCard.textContent = '**** **** **** 4821';
+                maskedUpi.textContent = 'sanja@upi';
+            }
+
+            planActions.forEach((link) => {
+                if (link.hasAttribute('aria-disabled')) {
+                    return;
+                }
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const tier = (link.getAttribute('data-tier') || '').trim();
+                    const card = link.closest('.plan-card');
+                    const titleNode = card ? card.querySelector('.plan-title') : null;
+                    const priceNode = card ? card.querySelector('[data-price-value]') : null;
+                    const monthly = Number(priceNode ? priceNode.getAttribute('data-monthly') : 0);
+                    const yearly = Number(priceNode ? priceNode.getAttribute('data-yearly') : 0);
+                    const amount = currentCycle === 'yearly' ? yearly : monthly;
+
+                    if (modalPlanName) {
+                        modalPlanName.textContent = titleNode ? titleNode.textContent.trim() : tier;
+                    }
+                    if (modalBillingCycle) {
+                        modalBillingCycle.textContent = cycleLabel(currentCycle);
+                    }
+                    if (modalPlanAmount) {
+                        modalPlanAmount.textContent = `₹${amount}`;
+                    }
+                    if (confirmUpgradeBtn) {
+                        confirmUpgradeBtn.setAttribute('href', `/subscription/payment?tier=${tier}&billing_cycle=${currentCycle}`);
+                    }
+                    if (upgradeModal) {
+                        upgradeModal.show();
+                    }
+                });
+            });
+
+            if (monthlyBtn) {
+                monthlyBtn.addEventListener('click', () => applyCycle('monthly'));
+            }
+            if (yearlyBtn) {
+                yearlyBtn.addEventListener('click', () => applyCycle('yearly'));
+            }
+            if (applyCouponBtn) {
+                applyCouponBtn.addEventListener('click', applyCoupon);
+            }
+            if (couponInput) {
+                couponInput.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        applyCoupon();
+                    }
+                });
+            }
+            if (addPaymentBtn) {
+                addPaymentBtn.addEventListener('click', () => updatePayment('add'));
+            }
+            if (removePaymentBtn) {
+                removePaymentBtn.addEventListener('click', () => updatePayment('remove'));
+            }
+            if (changePaymentBtn) {
+                changePaymentBtn.addEventListener('click', () => updatePayment('change'));
+            }
+
+            updateSavingsBadge();
+            applyCycle('{{ active_cycle if active_subscription else "monthly" }}');
+        }());
+    </script>
+</body>
+
+</html>

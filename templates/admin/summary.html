@@ -4,11 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/static/js/theme-init.js"></script>
     <title>FindMySpot | Admin Dashboard Summary</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/static/css/nav_footer.css">
+    <link rel="stylesheet" href="/static/css/Dark.css">
     <link rel="icon" href="/static/images/logo.png" type="image/png">
 </head>
 
@@ -39,6 +41,12 @@
                     <li class="nav-item mx-2">
                         <a class="nav-link fw-semibold text-primary" href="/admin/summary">Summary</a>
                     </li>
+                    <li class="nav-item mx-2 d-flex align-items-center">
+                        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle dark/light theme">
+                            <i data-lucide="sun" class="icon-sun"></i>
+                            <i data-lucide="moon-star" class="icon-moon"></i>
+                        </button>
+                    </li>
                     <div class="dropdown">
                         <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
@@ -59,6 +67,41 @@
 
     <h2 class="text-center my-4 fw-bold">Summary</h2>
 
+    <div class="container mb-3 text-center">
+        <form action="/admin/send-reminders" method="POST" class="d-inline-block">
+            <button class="btn btn-outline-primary">Send Booking Reminders</button>
+        </form>
+    </div>
+
+    <div class="container mb-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h6>Total Revenue ({{ month_label }})</h6>
+                        <h4>Rs {{ total_revenue }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h6>Most Booked Lot</h6>
+                        <h4>{{ most_booked_lot }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h6>Active Users</h6>
+                        <h4>{{ active_users_count }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card mx-auto my-5 shadow-sm" style="width:40rem">
         <img src="/static/admin/parkinglot_booking_count.png" class="card-img-top" alt="Bookings / Parking Lot">
         <div class="card-body text-center">
@@ -66,10 +109,34 @@
         </div>
     </div>
 
-    <!--Footer-->
-    <div class="footer">
-        <div class="container">
-            <p class="fw-semibold">FindMySpot &COPY; - Copyright 2025 | Made with &#x2665;&#xfe0f; by Mayank Dhangar</p>
+    <div class="card mx-auto my-5 shadow-sm" style="width:40rem">
+        <img src="/static/admin/peak_booking_hours.png" class="card-img-top" alt="Peak Booking Hours">
+        <div class="card-body text-center">
+            <h5 class="card-title">Peak Booking Hours</h5>
+        </div>
+    </div>
+
+    <div class="container my-4">
+        <div class="card shadow-sm">
+            <div class="card-header text-center"><h5 class="mb-0">Average Occupancy Rate Per Lot</h5></div>
+            <div class="card-body">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>Parking Lot</th>
+                            <th>Occupancy Rate (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in occupancy_by_lot %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.rate }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -78,6 +145,8 @@
         crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/js/theme-toggle.js"></script>
 </body>
 
 </html>

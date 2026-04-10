@@ -1,0 +1,1604 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/static/js/theme-init.js"></script>
+    <title>FindMySpot | User Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/static/css/nav_footer.css">
+    <link rel="stylesheet" href="/static/css/Dark.css">
+    <link rel="icon" href="/static/images/logo.png" type="image/png">
+    <style>
+        .profile-dashboard {
+            --saas-bg: #f4f6fb;
+            --saas-surface: #ffffff;
+            --saas-text: #1b2332;
+            --saas-muted: #6a7385;
+            --saas-border: #e8ecf5;
+            --saas-shadow: 0 14px 36px rgba(22, 34, 57, 0.08);
+            --saas-accent: #4f46e5;
+            --saas-accent-soft: rgba(79, 70, 229, 0.12);
+            --saas-danger-bg: #fff3f2;
+            --saas-danger-border: #ffd8d3;
+            background: radial-gradient(circle at 10% 5%, #eef2ff 0%, #f4f6fb 45%, #f8f9fc 100%);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .profile-page-banner {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--saas-border);
+            box-shadow: var(--saas-shadow);
+            margin-bottom: 20px;
+            background: linear-gradient(120deg, #dfe8ff, #eef2ff);
+        }
+
+        .profile-page-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+        }
+
+        .profile-page-banner::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(8, 12, 22, 0.16) 0%, rgba(8, 12, 22, 0.48) 100%);
+            pointer-events: none;
+        }
+
+        .banner-title {
+            position: absolute;
+            left: 18px;
+            bottom: 16px;
+            z-index: 2;
+            color: #f8fbff;
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            text-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+            max-width: calc(100% - 200px);
+        }
+
+        .profile-banner-avatar {
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 136px;
+            height: 136px;
+            border-radius: 999px;
+            border: 4px solid #ffffff;
+            background: #f8fbff;
+            overflow: hidden;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24);
+            z-index: 3;
+        }
+
+        .profile-banner-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .profile-card,
+        .stack-card {
+            background: var(--saas-surface);
+            border: 1px solid var(--saas-border);
+            border-radius: 16px;
+            box-shadow: var(--saas-shadow);
+        }
+
+        .profile-card {
+            padding: 18px;
+            position: sticky;
+            top: 90px;
+        }
+
+        .stack-card {
+            padding: 16px;
+        }
+
+        .stack-card + .stack-card {
+            margin-top: 14px;
+        }
+
+        .section-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 8px;
+        }
+
+        .section-title {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--saas-text);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: var(--saas-accent);
+        }
+
+        .section-muted {
+            margin: 0;
+            color: var(--saas-muted);
+            font-size: 0.84rem;
+        }
+
+        .profile-progress-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            color: var(--saas-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .progress.profile-progress {
+            height: 8px;
+            border-radius: 999px;
+            background: #edf1f8;
+            margin-bottom: 16px;
+        }
+
+        .profile-progress .progress-bar {
+            border-radius: 999px;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+        }
+
+        .profile-main-avatar-wrap {
+            width: 108px;
+            height: 108px;
+            border-radius: 999px;
+            border: 3px solid #e8ecff;
+            margin: 0 auto 14px;
+            box-shadow: 0 10px 22px rgba(39, 52, 89, 0.15);
+            overflow: hidden;
+            background: #f8faff;
+        }
+
+        .profile-main-avatar-wrap .profile-main-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .profile-helper-text {
+            color: var(--saas-muted);
+            font-size: 0.8rem;
+            margin: -6px 0 14px;
+        }
+
+        .completion-percent {
+            font-weight: 700;
+            color: var(--saas-accent);
+        }
+
+        .suggestion-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .suggestion-chip {
+            border: 1px dashed rgba(79, 70, 229, 0.35);
+            border-radius: 999px;
+            font-size: 0.76rem;
+            color: #4f46e5;
+            background: rgba(79, 70, 229, 0.08);
+            padding: 4px 10px;
+            font-weight: 600;
+        }
+
+        .optional-card {
+            border: 1px solid var(--saas-border);
+            border-radius: 14px;
+            background: #fbfcff;
+            padding: 12px;
+            margin-top: 10px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .optional-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .optional-card.is-collapsed .optional-card-head {
+            margin-bottom: 0;
+        }
+
+        .optional-card.incomplete {
+            border-color: rgba(79, 70, 229, 0.3);
+            box-shadow: inset 0 0 0 1px rgba(79, 70, 229, 0.1);
+        }
+
+        .optional-card-title {
+            margin: 0;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--saas-text);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .optional-card-title i {
+            color: var(--saas-accent);
+        }
+
+        .optional-collapse-btn {
+            width: 28px;
+            height: 28px;
+            border: 0;
+            background: transparent;
+            color: var(--saas-muted);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+
+        .optional-collapse-btn:hover,
+        .optional-collapse-btn:focus {
+            color: var(--saas-accent);
+            background: var(--saas-accent-soft);
+            box-shadow: none;
+        }
+
+        .optional-collapse-btn svg,
+        .optional-collapse-btn i {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.25s ease;
+        }
+
+        .optional-card.is-collapsed .optional-collapse-btn svg,
+        .optional-card.is-collapsed .optional-collapse-btn i {
+            transform: rotate(-90deg);
+        }
+
+        .optional-card-body {
+            display: block;
+        }
+
+        .optional-card.is-collapsed .optional-card-body {
+            display: none;
+        }
+
+        .cover-preview {
+            width: 100%;
+            height: 110px;
+            border: 1px dashed #cfd8eb;
+            border-radius: 12px;
+            background: #f3f7ff;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            margin-top: 8px;
+        }
+
+        .crop-hint {
+            color: var(--saas-muted);
+            font-size: 0.74rem;
+            margin-top: 6px;
+        }
+
+        .btn-saas-primary {
+            border: 0;
+            border-radius: 12px;
+            background: linear-gradient(120deg, #4f46e5, #6366f1);
+            color: #fff;
+            font-weight: 600;
+            padding: 0.56rem 0.9rem;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.26);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+
+        .btn-saas-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 24px rgba(79, 70, 229, 0.3);
+            filter: brightness(1.02);
+            color: #fff;
+        }
+
+        .btn-soft {
+            border-radius: 12px;
+            border: 1px solid var(--saas-border);
+            background: #fff;
+            color: var(--saas-text);
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-soft:hover {
+            border-color: #d6dff6;
+            background: #f7f9ff;
+            transform: translateY(-1px);
+        }
+
+        .profile-card .form-control,
+        .stack-card .form-control,
+        .stack-card .form-select {
+            border-radius: 12px;
+            border-color: #dde4f2;
+            min-height: 42px;
+            box-shadow: none;
+        }
+
+        .profile-card .form-control:focus,
+        .stack-card .form-control:focus,
+        .stack-card .form-select:focus {
+            border-color: #8f9dff;
+            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.13);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .info-pill {
+            border: 1px solid var(--saas-border);
+            border-radius: 12px;
+            padding: 10px;
+            background: #fbfcff;
+        }
+
+        .info-label {
+            margin: 0;
+            color: var(--saas-muted);
+            font-size: 0.74rem;
+        }
+
+        .info-value {
+            margin: 4px 0 0;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--saas-text);
+        }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.74rem;
+            font-weight: 700;
+        }
+
+        .status-active {
+            color: #047857;
+            background: #d1fae5;
+        }
+
+        .status-inactive {
+            color: #9f1239;
+            background: #ffe4e6;
+        }
+
+        .feature-list {
+            display: grid;
+            gap: 6px;
+            margin: 0;
+            padding-left: 18px;
+            color: var(--saas-muted);
+            font-size: 0.86rem;
+        }
+
+        .activity-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 8px;
+        }
+
+        .activity-item {
+            border: 1px solid var(--saas-border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            background: #fcfdff;
+        }
+
+        .activity-text {
+            margin: 0;
+            color: var(--saas-text);
+            font-weight: 600;
+            font-size: 0.86rem;
+        }
+
+        .activity-time {
+            margin: 2px 0 0;
+            color: var(--saas-muted);
+            font-size: 0.76rem;
+        }
+
+        .prefs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .pref-box {
+            border: 1px solid var(--saas-border);
+            border-radius: 12px;
+            padding: 10px;
+            background: #fbfcff;
+        }
+
+        .pref-box .form-check-label,
+        .pref-box label {
+            font-size: 0.83rem;
+            font-weight: 700;
+            color: var(--saas-text);
+        }
+
+        .saved-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .saved-chip {
+            border: 1px solid var(--saas-border);
+            border-radius: 12px;
+            padding: 8px 10px;
+            font-size: 0.82rem;
+            color: var(--saas-text);
+            background: #f8faff;
+        }
+
+        .danger-card {
+            border: 1px solid var(--saas-danger-border);
+            background: var(--saas-danger-bg);
+        }
+
+        .danger-card .section-title i,
+        .danger-card .section-muted {
+            color: #b42318;
+        }
+
+        .btn-danger-soft {
+            border-radius: 12px;
+            border: 1px solid #fda29b;
+            background: #ef4444;
+            color: #fff;
+            font-weight: 700;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-danger-soft:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(239, 68, 68, 0.24);
+            color: #fff;
+        }
+
+        .header-notification-toggle {
+            position: relative;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            background: #ffffff;
+            color: #394357;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 18px rgba(18, 28, 45, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .header-notification-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 22px rgba(18, 28, 45, 0.12);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -5px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 4px;
+            border-radius: 999px;
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 18px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.35);
+        }
+
+        .notification-modal .modal-dialog {
+            max-width: 420px;
+            margin: 0;
+            position: fixed;
+            top: var(--notif-top, 76px);
+            left: var(--notif-left, auto);
+            right: var(--notif-right, 92px);
+        }
+
+        .notification-modal .modal-content {
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .notification-modal .modal-header {
+            padding: 12px 16px;
+        }
+
+        .notification-modal .modal-title {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .notification-modal .modal-body {
+            padding: 12px 16px 16px;
+        }
+
+        .notification-modal-body {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .notification-modal .modal-dialog-scrollable .modal-body {
+            overflow-y: hidden;
+        }
+
+        .notification-list {
+            display: grid;
+            gap: 8px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .notification-item {
+            list-style: none;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            background: #ffffff;
+            padding: 10px 12px;
+            font-size: 0.82rem;
+            line-height: 1.35;
+        }
+
+        .notification-item.unread {
+            border-color: rgba(37, 99, 235, 0.35);
+            background: #f8fbff;
+        }
+
+        .notification-topline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+
+        .notification-channel {
+            color: #1f4fd1;
+            text-transform: uppercase;
+        }
+
+        .notification-subject {
+            color: #1f2937;
+        }
+
+        .notification-message {
+            margin: 0 0 4px;
+            color: #4b5563;
+            font-size: 0.8rem;
+        }
+
+        .notification-meta {
+            color: #6b7280;
+            font-size: 0.74rem;
+        }
+
+        .notification-item.unread .notification-topline,
+        .notification-item.unread .notification-message {
+            font-weight: 700;
+        }
+
+        html[data-theme="dark"] .header-notification-toggle {
+            background: #101827;
+            color: #eef3ff;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        html[data-theme="dark"] .profile-dashboard {
+            --saas-bg: #0b111b;
+            --saas-surface: #0f1728;
+            --saas-text: #edf2ff;
+            --saas-muted: #aeb9ce;
+            --saas-border: #253248;
+            --saas-shadow: 0 16px 34px rgba(0, 0, 0, 0.38);
+            --saas-accent: #9f7aea;
+            --saas-accent-soft: rgba(159, 122, 234, 0.22);
+            --saas-danger-bg: #2a1418;
+            --saas-danger-border: #7f1d1d;
+            background: radial-gradient(circle at 12% 0%, #1f1a3a 0%, #0b111b 42%, #0a1020 100%);
+        }
+
+        html[data-theme="dark"] .profile-page-banner {
+            border-color: #2c3952;
+            background: linear-gradient(120deg, #1c2741, #101a31);
+        }
+
+        html[data-theme="dark"] .profile-banner-avatar {
+            border-color: #152238;
+            background: #0f1728;
+        }
+
+        html[data-theme="dark"] .profile-progress.profile-progress {
+            background: #243045;
+        }
+
+        html[data-theme="dark"] .profile-main-avatar-wrap {
+            border-color: #384561;
+            background: #111a2d;
+        }
+
+        html[data-theme="dark"] .btn-soft {
+            border-color: #344460;
+            background: #131f34;
+            color: #e8efff;
+        }
+
+        html[data-theme="dark"] .btn-soft:hover {
+            background: #1a2942;
+            border-color: #4a5f88;
+        }
+
+        html[data-theme="dark"] .profile-card .form-control,
+        html[data-theme="dark"] .stack-card .form-control,
+        html[data-theme="dark"] .stack-card .form-select {
+            background: #111a2b;
+            border-color: #2f3e58;
+            color: #eef3ff;
+        }
+
+        html[data-theme="dark"] .profile-helper-text {
+            color: #b6c2dc;
+        }
+
+        html[data-theme="dark"] .suggestion-chip {
+            border-color: rgba(159, 122, 234, 0.46);
+            color: #ceb7ff;
+            background: rgba(159, 122, 234, 0.16);
+        }
+
+        html[data-theme="dark"] .optional-card {
+            background: #131f34;
+            border-color: #2e3f5b;
+        }
+
+        html[data-theme="dark"] .optional-card.incomplete {
+            border-color: rgba(159, 122, 234, 0.48);
+            box-shadow: inset 0 0 0 1px rgba(159, 122, 234, 0.2);
+        }
+
+        html[data-theme="dark"] .optional-collapse-btn {
+            color: #b7c4de;
+        }
+
+        html[data-theme="dark"] .optional-collapse-btn:hover,
+        html[data-theme="dark"] .optional-collapse-btn:focus {
+            color: #ceb7ff;
+            background: rgba(159, 122, 234, 0.16);
+        }
+
+        html[data-theme="dark"] .cover-preview {
+            border-color: #3c4f71;
+            background: #111a2d;
+        }
+
+        html[data-theme="dark"] .info-pill,
+        html[data-theme="dark"] .pref-box,
+        html[data-theme="dark"] .saved-chip,
+        html[data-theme="dark"] .activity-item {
+            background: #131f34;
+            border-color: #2e3f5b;
+        }
+
+        html[data-theme="dark"] .status-active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        html[data-theme="dark"] .status-inactive {
+            background: rgba(251, 113, 133, 0.2);
+            color: #fda4af;
+        }
+
+        html[data-theme="dark"] .notification-item {
+            background: #101827;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        html[data-theme="dark"] .notification-item.unread {
+            border-color: rgba(143, 176, 255, 0.56);
+            background: #12203a;
+        }
+
+        html[data-theme="dark"] .notification-channel,
+        html[data-theme="dark"] .notification-subject,
+        html[data-theme="dark"] .notification-message,
+        html[data-theme="dark"] .notification-meta,
+        html[data-theme="dark"] .notification-modal .modal-title {
+            color: #eef3ff;
+        }
+
+        html[data-theme="dark"] .notification-meta {
+            color: #b9c6de;
+        }
+
+        html[data-theme="dark"] .notification-channel {
+            color: #8fb0ff;
+        }
+
+        @media (max-width: 1199.98px) {
+            .profile-card {
+                position: static;
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .profile-dashboard {
+                padding: 14px;
+            }
+
+            .profile-page-banner {
+                height: 190px;
+                margin-bottom: 18px;
+            }
+
+            .profile-banner-avatar {
+                width: 110px;
+                height: 110px;
+                right: 18px;
+            }
+
+            .info-grid,
+            .prefs-grid,
+            .saved-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .profile-page-banner {
+                height: 160px;
+                margin-bottom: 14px;
+            }
+
+            .profile-banner-avatar {
+                width: 84px;
+                height: 84px;
+                right: 12px;
+            }
+
+            .banner-title {
+                max-width: calc(100% - 120px);
+            }
+
+            .info-grid,
+            .prefs-grid,
+            .saved-list {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-card,
+            .stack-card {
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg sticky-top shadow-sm light-glass-navbar">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="/" target="_blank">
+                <img src="/static/images/Logo.png" alt="Logo" width="32" height="32" class="me-2">
+                FindMySpot
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item mx-2 dropdown navbar-links-dropdown">
+                        <button class="btn navbar-menu-toggle dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i data-lucide="menu"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/user/dashboard">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="/user/search">Search</a></li>
+                            <li><a class="dropdown-item" href="/user/favorites">Favorites</a></li>
+                            <li><a class="dropdown-item" href="/user/summary">Summary</a></li>
+                            <li><a class="dropdown-item" href="/user/wallet">Wallet</a></li>
+                            <li><a class="dropdown-item" href="/user/subscriptions">Subscriptions</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item mx-2 d-flex align-items-center">
+                        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle dark/light theme">
+                            <i data-lucide="sun" class="icon-sun"></i>
+                            <i data-lucide="moon-star" class="icon-moon"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item mx-2 d-flex align-items-center">
+                        <button class="header-notification-toggle" type="button" data-bs-toggle="modal" data-bs-target="#notificationsModal" aria-label="Open notifications">
+                            <i data-lucide="bell-ring"></i>
+                            {% if unread_count and unread_count > 0 %}
+                            <span class="notification-badge" id="notificationUnreadBadge">+{{ unread_count }}</span>
+                            {% endif %}
+                        </button>
+                    </li>
+                    <li class="nav-item mx-2 dropdown navbar-profile-dropdown">
+                        <button class="btn navbar-profile-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile menu">
+                            {% if current_user.profile_image and current_user.profile_image != 'default.png' %}
+                            <img src="/static/user_profiles/{{ current_user.profile_image }}" alt="Profile" class="profile-avatar" onerror="this.onerror=null;this.src='/static/images/default-avatar.webp';">
+                            {% else %}
+                            <img src="/static/images/default-avatar.webp" alt="Default profile" class="profile-avatar">
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a href="/user/profile" class="dropdown-item">Profile</a></li>
+                            <li><a href="/logout" class="dropdown-item">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="container my-4">
+        {% set basic_filled = namespace(count=0) %}
+        {% if current_user.name %}{% set basic_filled.count = basic_filled.count + 1 %}{% endif %}
+        {% if current_user.phone %}{% set basic_filled.count = basic_filled.count + 1 %}{% endif %}
+        {% if current_user.city %}{% set basic_filled.count = basic_filled.count + 1 %}{% endif %}
+        {% if current_user.pincode %}{% set basic_filled.count = basic_filled.count + 1 %}{% endif %}
+        {% set optional_values = [
+            current_user.date_of_birth,
+            current_user.gender,
+            current_user.bio,
+            current_user.full_address,
+            current_user.state,
+            current_user.landmark,
+            current_user.vehicle_type,
+            current_user.vehicle_number,
+            current_user.preferred_parking_type,
+            current_user.preferred_location,
+            current_user.time_preference,
+            current_user.alternate_phone,
+            current_user.secondary_email,
+            (current_user.profile_image if current_user.profile_image and current_user.profile_image != 'default.png' else ''),
+            current_user.cover_photo
+        ] %}
+        {% set optional_total = optional_values|length %}
+        {% set optional_filled = optional_values|select|list|length %}
+        {% set basic_part = (basic_filled.count / 4.0) * 50 %}
+        {% set optional_part = ((optional_filled / optional_total) * 50) if optional_total else 0 %}
+        {% set profile_percent = (basic_part + optional_part)|round(0, 'floor')|int %}
+        {% set joined_on = active_subscription.start_date if active_subscription else (user_notifications[-1].created_at if user_notifications else 'Not available') %}
+        {% set last_login = user_notifications[0].created_at if user_notifications else 'Not available' %}
+        {% set favorite_count = current_user.favorite_lots|length %}
+        {% set alerts_count = current_user.availability_alerts|length %}
+        {% set notifications_enabled = alerts_count > 0 %}
+        {% set lang_guess = (request.accept_languages.best or 'en')[:2] %}
+
+        <div class="profile-dashboard">
+            <div class="profile-page-banner">
+                {% if current_user.cover_photo %}
+                <img src="/static/user_profiles/{{ current_user.cover_photo }}" alt="Profile cover" id="profileCoverBannerPreview" onerror="this.onerror=null;this.src='/static/images/logo.png';">
+                {% else %}
+                <img src="/static/images/logo.png" alt="Profile cover" id="profileCoverBannerPreview">
+                {% endif %}
+                <p class="banner-title">Profile Header</p>
+                <div class="profile-banner-avatar">
+                    {% if current_user.profile_image and current_user.profile_image != 'default.png' %}
+                    <img src="/static/user_profiles/{{ current_user.profile_image }}" alt="Profile" id="profileBannerAvatarPreview" onerror="this.onerror=null;this.src='/static/images/default-avatar.webp';">
+                    {% else %}
+                    <img src="/static/images/default-avatar.webp" alt="Default profile" id="profileBannerAvatarPreview">
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-4">
+                    <div class="profile-card">
+                        <div class="section-head">
+                            <h5 class="section-title"><i class="bi bi-person-badge"></i>Profile Details</h5>
+                            <small class="section-muted">Manage account info</small>
+                        </div>
+
+                        <div class="profile-progress-label">
+                            <span>Profile Completion</span>
+                            <span class="completion-percent" data-profile-percent>{{ profile_percent }}%</span>
+                        </div>
+                        <div class="progress profile-progress" role="progressbar" aria-label="Profile completion" aria-valuenow="{{ profile_percent }}" aria-valuemin="0" aria-valuemax="100" data-basic-total="4" data-optional-total="{{ optional_total }}">
+                            <div class="progress-bar" data-profile-progress></div>
+                        </div>
+                        <p class="profile-helper-text">Complete your profile to unlock better experience.</p>
+
+                        <div class="suggestion-prompts">
+                            <span class="suggestion-chip" data-suggestion-vehicle>Add vehicle info 🚗</span>
+                            <span class="suggestion-chip" data-suggestion-bio>Add bio ✍️</span>
+                        </div>
+
+                        <img src="{% if current_user.profile_image and current_user.profile_image != 'default.png' %}/static/user_profiles/{{ current_user.profile_image }}{% else %}/static/images/default-avatar.webp{% endif %}" class="profile-main-avatar d-none" alt="Profile" id="profileImagePreview" onerror="this.onerror=null;this.src='/static/images/default-avatar.webp';">
+
+                        <form action="/user/profile" method="POST" enctype="multipart/form-data">
+                            <div class="mb-2">
+                                <label class="form-label">Name</label>
+                                <input class="form-control" name="name" value="{{ current_user.name }}" required data-basic-field>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Phone</label>
+                                <input class="form-control" name="phone" value="{{ current_user.phone }}" required data-basic-field>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">City</label>
+                                <input class="form-control" name="city" value="{{ current_user.city }}" required data-basic-field>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Pincode</label>
+                                <input class="form-control" name="pincode" value="{{ current_user.pincode }}" required data-basic-field>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Profile Picture</label>
+                                <input type="file" class="form-control" name="profile_image" accept="image/*" data-optional-field data-preview-target="profileBannerAvatarPreview,profileImagePreview" data-field-kind="profile-image" data-existing="{{ 1 if current_user.profile_image and current_user.profile_image != 'default.png' else 0 }}">
+                                <p class="crop-hint">Edit/Crop option: uploaded image is auto-cropped in circular preview.</p>
+                            </div>
+
+                            <div class="optional-card" data-optional-section>
+                                <div class="optional-card-head">
+                                    <p class="optional-card-title"><i class="bi bi-person-lines-fill"></i>Personal Info</p>
+                                    <button type="button" class="optional-collapse-btn" data-optional-toggle aria-label="Toggle Personal Info" aria-expanded="true">
+                                        <i data-lucide="chevron-down"></i>
+                                    </button>
+                                </div>
+                                <div class="optional-card-body" data-optional-body>
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <label class="form-label">Date of Birth</label>
+                                        <input type="date" class="form-control" name="date_of_birth" value="{{ current_user.date_of_birth or '' }}" data-optional-field>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Gender</label>
+                                        <select class="form-select" name="gender" data-optional-field>
+                                            <option value="">Select</option>
+                                            <option value="male" {% if current_user.gender == 'male' %}selected{% endif %}>Male</option>
+                                            <option value="female" {% if current_user.gender == 'female' %}selected{% endif %}>Female</option>
+                                            <option value="other" {% if current_user.gender == 'other' %}selected{% endif %}>Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Bio / About Me</label>
+                                        <textarea class="form-control" name="bio" rows="3" maxlength="240" placeholder="Tell us a bit about yourself" data-optional-field id="profileBioField">{{ current_user.bio or '' }}</textarea>
+                                        <small class="section-muted"><span data-bio-count>{{ (current_user.bio or '')|length }}</span>/240</small>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+
+                            <div class="optional-card" data-optional-section>
+                                <div class="optional-card-head">
+                                    <p class="optional-card-title"><i class="bi bi-geo-alt"></i>Address Details</p>
+                                    <button type="button" class="optional-collapse-btn" data-optional-toggle aria-label="Toggle Address Details" aria-expanded="true">
+                                        <i data-lucide="chevron-down"></i>
+                                    </button>
+                                </div>
+                                <div class="optional-card-body" data-optional-body>
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <label class="form-label">Full Address</label>
+                                        <textarea class="form-control" name="full_address" rows="2" data-optional-field>{{ current_user.full_address or '' }}</textarea>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">State</label>
+                                        <input class="form-control" name="state" value="{{ current_user.state or '' }}" data-optional-field>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">Landmark</label>
+                                        <input class="form-control" name="landmark" value="{{ current_user.landmark or '' }}" data-optional-field>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+
+                            <div class="optional-card" data-optional-section>
+                                <div class="optional-card-head">
+                                    <p class="optional-card-title"><i class="bi bi-car-front"></i>Vehicle Information</p>
+                                    <button type="button" class="optional-collapse-btn" data-optional-toggle aria-label="Toggle Vehicle Information" aria-expanded="true">
+                                        <i data-lucide="chevron-down"></i>
+                                    </button>
+                                </div>
+                                <div class="optional-card-body" data-optional-body>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <label class="form-label">Vehicle Type</label>
+                                        <select class="form-select" name="vehicle_type" data-optional-field id="vehicleTypeField">
+                                            <option value="">Select</option>
+                                            <option value="car" {% if current_user.vehicle_type == 'car' %}selected{% endif %}>Car</option>
+                                            <option value="bike" {% if current_user.vehicle_type == 'bike' %}selected{% endif %}>Bike</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">Vehicle Number</label>
+                                        <input class="form-control" name="vehicle_number" value="{{ current_user.vehicle_number or '' }}" data-optional-field>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+
+                            <div class="optional-card" data-optional-section>
+                                <div class="optional-card-head">
+                                    <p class="optional-card-title"><i class="bi bi-sliders"></i>Preferences</p>
+                                    <button type="button" class="optional-collapse-btn" data-optional-toggle aria-label="Toggle Preferences" aria-expanded="true">
+                                        <i data-lucide="chevron-down"></i>
+                                    </button>
+                                </div>
+                                <div class="optional-card-body" data-optional-body>
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <label class="form-label">Preferred Parking Type</label>
+                                        <select class="form-select" name="preferred_parking_type" data-optional-field>
+                                            <option value="">Select</option>
+                                            <option value="covered" {% if current_user.preferred_parking_type == 'covered' %}selected{% endif %}>Covered</option>
+                                            <option value="open" {% if current_user.preferred_parking_type == 'open' %}selected{% endif %}>Open</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Preferred Location</label>
+                                        <input class="form-control" name="preferred_location" value="{{ current_user.preferred_location or '' }}" data-optional-field>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Time Preference</label>
+                                        <select class="form-select" name="time_preference" data-optional-field>
+                                            <option value="">Select</option>
+                                            <option value="morning" {% if current_user.time_preference == 'morning' %}selected{% endif %}>Morning</option>
+                                            <option value="evening" {% if current_user.time_preference == 'evening' %}selected{% endif %}>Evening</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+
+                            <div class="optional-card" data-optional-section>
+                                <div class="optional-card-head">
+                                    <p class="optional-card-title"><i class="bi bi-image"></i>Profile Enhancements</p>
+                                    <button type="button" class="optional-collapse-btn" data-optional-toggle aria-label="Toggle Profile Enhancements" aria-expanded="true">
+                                        <i data-lucide="chevron-down"></i>
+                                    </button>
+                                </div>
+                                <div class="optional-card-body" data-optional-body>
+                                <label class="form-label">Cover Photo</label>
+                                <input type="file" class="form-control" name="cover_photo" accept="image/*" data-optional-field data-preview-target="coverPhotoPreview,profileCoverBannerPreview" data-existing="{{ 1 if current_user.cover_photo else 0 }}">
+                                {% if current_user.cover_photo %}
+                                <img src="/static/user_profiles/{{ current_user.cover_photo }}" class="cover-preview" alt="Cover preview" id="coverPhotoPreview">
+                                {% else %}
+                                <img src="/static/images/logo.png" class="cover-preview" alt="Cover preview" id="coverPhotoPreview">
+                                {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="optional-card" data-optional-section>
+                                <div class="optional-card-head">
+                                    <p class="optional-card-title"><i class="bi bi-telephone-plus"></i>Contact Info (Optional)</p>
+                                    <button type="button" class="optional-collapse-btn" data-optional-toggle aria-label="Toggle Contact Info" aria-expanded="true">
+                                        <i data-lucide="chevron-down"></i>
+                                    </button>
+                                </div>
+                                <div class="optional-card-body" data-optional-body>
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <label class="form-label">Alternate Phone Number</label>
+                                        <input class="form-control" name="alternate_phone" value="{{ current_user.alternate_phone or '' }}" data-optional-field>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Secondary Email</label>
+                                        <input type="email" class="form-control" name="secondary_email" value="{{ current_user.secondary_email or '' }}" data-optional-field>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+
+                            <div class="profile-actions">
+                                <button class="btn btn-saas-primary" type="submit"><i class="bi bi-check2-circle me-1"></i>Update Profile</button>
+                                {% if current_user.profile_image and current_user.profile_image != 'default.png' %}
+                                <button class="btn btn-soft" type="submit" formaction="/user/remove-profile-image" formmethod="POST"><i class="bi bi-trash3 me-1"></i>Remove</button>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-xl-8">
+                    <div class="stack-card">
+                        <div class="section-head">
+                            <h5 class="section-title"><i class="bi bi-person-vcard"></i>Account Info</h5>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input class="form-control" value="{{ current_user.email }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Account Type</label>
+                                <input class="form-control" value="{{ 'Premium' if active_subscription else 'Free' }}" readonly>
+                            </div>
+                        </div>
+                        <div class="info-grid mt-3">
+                            <div class="info-pill">
+                                <p class="info-label">User ID</p>
+                                <p class="info-value">#{{ current_user.id }}</p>
+                            </div>
+                            <div class="info-pill">
+                                <p class="info-label">Joined</p>
+                                <p class="info-value">{{ joined_on }}</p>
+                            </div>
+                            <div class="info-pill">
+                                <p class="info-label">Wallet Balance</p>
+                                <p class="info-value">₹{{ '%.0f'|format(current_user.wallet_balance or 0) }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stack-card">
+                        <div class="section-head">
+                            <h5 class="section-title"><i class="bi bi-stars"></i>Subscription</h5>
+                            <a href="/user/subscriptions" class="btn btn-saas-primary btn-sm"><i class="bi bi-arrow-up-right-circle me-1"></i>Upgrade Plan</a>
+                        </div>
+                        {% if active_subscription %}
+                        <div class="info-grid">
+                            <div class="info-pill">
+                                <p class="info-label">Plan Name</p>
+                                <p class="info-value">{{ 'Advanced' if active_subscription.tier == 'commuter' else active_subscription.tier|title }}</p>
+                            </div>
+                            <div class="info-pill">
+                                <p class="info-label">Status</p>
+                                <p class="info-value"><span class="status-chip status-active">Active</span></p>
+                            </div>
+                            <div class="info-pill">
+                                <p class="info-label">Expiry Date</p>
+                                <p class="info-value">{{ active_subscription.end_date }}</p>
+                            </div>
+                        </div>
+                        {% if active_features %}
+                        <p class="section-muted mt-3 mb-2">Included Features</p>
+                        <ul class="feature-list">
+                            {% for item in active_features %}
+                            <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                        <form action="/subscription/cancel" method="POST" class="mt-3">
+                            <button class="btn btn-soft btn-sm" type="submit"><i class="bi bi-x-circle me-1"></i>Cancel Subscription</button>
+                        </form>
+                        {% else %}
+                        <div class="info-grid">
+                            <div class="info-pill">
+                                <p class="info-label">Plan Name</p>
+                                <p class="info-value">Free</p>
+                            </div>
+                            <div class="info-pill">
+                                <p class="info-label">Status</p>
+                                <p class="info-value"><span class="status-chip status-inactive">Inactive</span></p>
+                            </div>
+                            <div class="info-pill">
+                                <p class="info-label">Expiry Date</p>
+                                <p class="info-value">Not available</p>
+                            </div>
+                        </div>
+                        <p class="section-muted mt-3 mb-0">No active subscription. Upgrade to unlock premium booking benefits.</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="stack-card">
+                        <div class="section-head">
+                            <h5 class="section-title"><i class="bi bi-shield-lock"></i>Security</h5>
+                        </div>
+                        <form action="/user/change-password" method="POST" class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Current Password</label>
+                                <input type="password" class="form-control" name="old_password" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">New Password</label>
+                                <input type="password" class="form-control" name="new_password" required>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-saas-primary btn-sm" type="submit"><i class="bi bi-key me-1"></i>Change Password</button>
+                            </div>
+                        </form>
+                        <div class="info-grid mt-3">
+                            <div class="info-pill">
+                                <p class="info-label">Last Login</p>
+                                <p class="info-value">{{ last_login }}</p>
+                            </div>
+                            <div class="info-pill">
+                                <p class="info-label">2FA</p>
+                                <div class="form-check form-switch mt-1">
+                                    <input class="form-check-input" type="checkbox" id="twoFaToggle" {% if active_subscription %}checked{% endif %} disabled>
+                                    <label class="form-check-label" for="twoFaToggle">Enable 2FA</label>
+                                </div>
+                            </div>
+                            <div class="info-pill d-flex align-items-center justify-content-between gap-2">
+                                <div>
+                                    <p class="info-label">Session Control</p>
+                                    <p class="info-value mb-0">All devices</p>
+                                </div>
+                                <button class="btn btn-soft btn-sm" type="button" disabled>Logout All</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stack-card">
+                        <div class="section-head">
+                            <h5 class="section-title"><i class="bi bi-activity"></i>Activity</h5>
+                            <small class="section-muted">Recent account actions</small>
+                        </div>
+                        {% if user_notifications %}
+                        <ul class="activity-list">
+                            {% for n in user_notifications[:5] %}
+                            <li class="activity-item">
+                                <p class="activity-text">{{ n.subject }} - {{ n.status|title }}</p>
+                                <p class="activity-time"><i class="bi bi-clock me-1"></i>{{ n.created_at }} via {{ n.channel|upper }}</p>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="section-muted mb-0">No recent activity available.</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="stack-card">
+                        <div class="section-head">
+                            <h5 class="section-title"><i class="bi bi-sliders2"></i>Preferences</h5>
+                        </div>
+                        <div class="prefs-grid">
+                            <div class="pref-box">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="profileThemeSwitch">
+                                    <label class="form-check-label" for="profileThemeSwitch">Dark / Light Mode</label>
+                                </div>
+                            </div>
+                            <div class="pref-box">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="profileNotifySwitch" {% if notifications_enabled %}checked{% endif %} disabled>
+                                    <label class="form-check-label" for="profileNotifySwitch">Notifications</label>
+                                </div>
+                            </div>
+                            <div class="pref-box">
+                                <label for="profileLanguage" class="form-label mb-1">Language</label>
+                                <select id="profileLanguage" class="form-select form-select-sm" disabled>
+                                    <option value="en" {% if lang_guess == 'en' %}selected{% endif %}>English</option>
+                                    <option value="hi" {% if lang_guess == 'hi' %}selected{% endif %}>Hindi</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stack-card">
+                        <div class="section-head">
+                            <h5 class="section-title"><i class="bi bi-bookmark-heart"></i>Saved Data</h5>
+                            <small class="section-muted">Favorites and alerts</small>
+                        </div>
+                        <div class="info-grid mb-3">
+                            <div class="info-pill">
+                                <p class="info-label">Saved Locations</p>
+                                <p class="info-value">{{ favorite_count }}</p>
+                            </div>
+                            <div class="info-pill">
+                                <p class="info-label">Active Availability Alerts</p>
+                                <p class="info-value">{{ alerts_count }}</p>
+                            </div>
+                            <div class="info-pill">
+                                <p class="info-label">Quick Access</p>
+                                <p class="info-value"><a href="/user/favorites" class="text-decoration-none">Open Favorites</a></p>
+                            </div>
+                        </div>
+                        {% if current_user.favorite_lots %}
+                        <ul class="saved-list">
+                            {% for lot in current_user.favorite_lots[:6] %}
+                            <li class="saved-chip"><i class="bi bi-geo-alt me-1"></i>Parking Lot #{{ lot.lot_id }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="section-muted mb-0">No saved locations yet.</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="stack-card danger-card">
+                        <div class="section-head">
+                            <h5 class="section-title"><i class="bi bi-exclamation-triangle"></i>Danger Zone</h5>
+                        </div>
+                        <p class="section-muted mb-2">Deleting account permanently removes access to profile, wallet history, and saved data.</p>
+                        <button class="btn btn-danger-soft btn-sm" type="button" disabled><i class="bi bi-trash me-1"></i>Delete Account</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade notification-modal" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationsModalLabel"><i data-lucide="bell-ring" class="me-2"></i>Notifications</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% if user_notifications %}
+                    <div class="notification-modal-body">
+                        <ul class="notification-list">
+                            {% for n in user_notifications %}
+                            <li class="notification-item {% if n.id in unread_ids %}unread{% endif %}">
+                                <div class="notification-topline">
+                                    <span class="notification-channel">{{ n.channel|upper }}</span>
+                                    <span class="notification-subject">{{ n.subject }}</span>
+                                </div>
+                                <p class="notification-message">{{ n.message }}</p>
+                                <div class="notification-meta">{{ n.created_at }} | {{ n.status }}</div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% else %}
+                    <p class="mb-0">No notifications yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/js/theme-toggle.js"></script>
+    <script src="/static/js/flash-alerts.js"></script>
+    <script>
+        (function () {
+            const notificationsModal = document.getElementById('notificationsModal');
+            const notificationToggle = document.querySelector('.header-notification-toggle');
+            const unreadBadge = document.getElementById('notificationUnreadBadge');
+            const profileThemeSwitch = document.getElementById('profileThemeSwitch');
+            const globalThemeToggle = document.querySelector('[data-theme-toggle]');
+            const profileProgress = document.querySelector('[data-profile-progress]');
+            const progressWrap = profileProgress ? profileProgress.closest('.profile-progress') : null;
+            const percentLabel = document.querySelector('[data-profile-percent]');
+            const basicFields = Array.from(document.querySelectorAll('[data-basic-field]'));
+            const optionalFields = Array.from(document.querySelectorAll('[data-optional-field]'));
+            const optionalSections = Array.from(document.querySelectorAll('[data-optional-section]'));
+            const vehicleSuggestion = document.querySelector('[data-suggestion-vehicle]');
+            const bioSuggestion = document.querySelector('[data-suggestion-bio]');
+            const bioField = document.getElementById('profileBioField');
+            const bioCount = document.querySelector('[data-bio-count]');
+            const optionalToggles = Array.from(document.querySelectorAll('[data-optional-toggle]'));
+
+            const hasFieldValue = (field) => {
+                if (!field) {
+                    return false;
+                }
+
+                if (field.type === 'file') {
+                    if (field.files && field.files.length > 0) {
+                        return true;
+                    }
+                    return field.dataset.existing === '1';
+                }
+
+                return Boolean((field.value || '').trim());
+            };
+
+            const updateCompletion = () => {
+                if (!progressWrap || !profileProgress) {
+                    return;
+                }
+
+                const basicTotal = Number(progressWrap.dataset.basicTotal || 4);
+                const optionalTotal = Number(progressWrap.dataset.optionalTotal || 1);
+                const basicFilled = basicFields.filter(hasFieldValue).length;
+                const optionalFilled = optionalFields.filter(hasFieldValue).length;
+                const basicPart = (basicFilled / Math.max(basicTotal, 1)) * 50;
+                const optionalPart = (optionalFilled / Math.max(optionalTotal, 1)) * 50;
+                const percent = Math.max(0, Math.min(100, Math.floor(basicPart + optionalPart)));
+
+                progressWrap.setAttribute('aria-valuenow', String(percent));
+                profileProgress.style.width = `${percent}%`;
+                if (percentLabel) {
+                    percentLabel.textContent = `${percent}%`;
+                }
+
+                optionalSections.forEach((section) => {
+                    const fields = Array.from(section.querySelectorAll('[data-optional-field]'));
+                    const filled = fields.filter(hasFieldValue).length;
+                    section.classList.toggle('incomplete', filled < fields.length);
+                });
+
+                const vehicleTypeField = document.getElementById('vehicleTypeField');
+                const hasVehicle = vehicleTypeField ? hasFieldValue(vehicleTypeField) : false;
+                if (vehicleSuggestion) {
+                    vehicleSuggestion.classList.toggle('d-none', hasVehicle);
+                }
+
+                const hasBio = bioField ? hasFieldValue(bioField) : false;
+                if (bioSuggestion) {
+                    bioSuggestion.classList.toggle('d-none', hasBio);
+                }
+            };
+
+            optionalFields.forEach((field) => {
+                const eventName = field.type === 'file' ? 'change' : 'input';
+                field.addEventListener(eventName, () => {
+                    if (field.type === 'file' && field.files && field.files.length > 0) {
+                        field.dataset.existing = '1';
+                        const previewTargets = (field.dataset.previewTarget || '')
+                            .split(',')
+                            .map((item) => item.trim())
+                            .filter(Boolean);
+                        const previewEls = previewTargets
+                            .map((target) => document.getElementById(target))
+                            .filter((el) => !!el);
+                        if (previewEls.length > 0) {
+                            const file = field.files[0];
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                previewEls.forEach((previewEl) => {
+                                    previewEl.src = e.target && e.target.result ? String(e.target.result) : previewEl.src;
+                                });
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    }
+                    updateCompletion();
+                });
+            });
+
+            basicFields.forEach((field) => {
+                field.addEventListener('input', updateCompletion);
+            });
+
+            if (bioField && bioCount) {
+                const updateBioCount = () => {
+                    bioCount.textContent = String((bioField.value || '').length);
+                };
+                bioField.addEventListener('input', updateBioCount);
+                updateBioCount();
+            }
+
+            if (profileProgress && progressWrap) {
+                const percent = Number(progressWrap.getAttribute('aria-valuenow') || 0);
+                profileProgress.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+            }
+
+            optionalToggles.forEach((toggle) => {
+                toggle.addEventListener('click', () => {
+                    const card = toggle.closest('.optional-card');
+                    if (!card) {
+                        return;
+                    }
+
+                    const collapsed = card.classList.toggle('is-collapsed');
+                    toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                });
+            });
+
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+
+            updateCompletion();
+
+            if (profileThemeSwitch) {
+                const syncThemeSwitch = () => {
+                    profileThemeSwitch.checked = document.documentElement.getAttribute('data-theme') === 'dark';
+                };
+
+                syncThemeSwitch();
+                profileThemeSwitch.addEventListener('change', () => {
+                    if (globalThemeToggle) {
+                        globalThemeToggle.click();
+                    }
+                });
+
+                new MutationObserver(syncThemeSwitch).observe(document.documentElement, {
+                    attributes: true,
+                    attributeFilter: ['data-theme']
+                });
+            }
+
+            if (!notificationsModal || !notificationToggle) {
+                return;
+            }
+
+            notificationsModal.addEventListener('show.bs.modal', () => {
+                const rect = notificationToggle.getBoundingClientRect();
+                const dialog = notificationsModal.querySelector('.modal-dialog');
+                if (!dialog) {
+                    return;
+                }
+
+                dialog.style.setProperty('--notif-top', `${Math.max(rect.bottom + 10, 72)}px`);
+                dialog.style.setProperty('--notif-right', `${Math.max(window.innerWidth - rect.right, 16)}px`);
+                dialog.style.removeProperty('--notif-left');
+
+                if (rect.right + 420 > window.innerWidth) {
+                    dialog.style.setProperty('--notif-right', '16px');
+                }
+            });
+
+            notificationsModal.addEventListener('hidden.bs.modal', () => {
+                fetch('/user/notifications/mark-read', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }).then(() => {
+                    if (unreadBadge) {
+                        unreadBadge.remove();
+                    }
+                    notificationsModal.querySelectorAll('.notification-item.unread').forEach((item) => {
+                        item.classList.remove('unread');
+                    });
+                }).catch(() => {
+                    // Keep UI as-is if request fails.
+                });
+            });
+        }());
+    </script>
+</body>
+
+</html>
