@@ -3,7 +3,7 @@ from flask import render_template, request, redirect, flash, url_for, send_file,
 from .models import db, Admin, User, ParkingLot, ParkingSpot, ReservedParkingSpot, ParkingLotReview, FavoriteParkingLot, NotificationLog, SpotAvailabilityAlert, MonthlySubscription, WalletTransaction
 from flask_login import login_user,logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_, or_, cast, String
+from sqlalchemy import and_
 from datetime import datetime
 from calendar import month_name
 from io import BytesIO, StringIO
@@ -759,6 +759,42 @@ def _build_wallet_distribution_chart(transactions):
         'counts': counts,
     }
 
+@app.context_processor
+def inject_header_notifications():
+    if not getattr(current_user, "is_authenticated", False):
+        return {}
+
+    try:
+        notif_seen_key = f"notif_seen_{current_user.id}"
+        last_seen_notification_id = int(session.get(notif_seen_key, 0) or 0)
+        header_notifications = (
+            db.session.query(NotificationLog)
+            .filter_by(user_id=current_user.id)
+            .order_by(NotificationLog.id.desc())
+            .limit(8)
+            .all()
+        )
+        header_unread_count = (
+            db.session.query(NotificationLog)
+            .filter(
+                NotificationLog.user_id == current_user.id,
+                NotificationLog.id > last_seen_notification_id,
+            )
+            .count()
+        )
+        header_unread_ids = [n.id for n in header_notifications if n.id > last_seen_notification_id]
+        return {
+            "header_notifications": header_notifications,
+            "header_unread_count": header_unread_count,
+            "header_unread_ids": header_unread_ids,
+        }
+    except Exception:
+        return {
+            "header_notifications": [],
+            "header_unread_count": 0,
+            "header_unread_ids": [],
+        }
+
 @app.route("/")
 def index():
     return render_template("home.html")
@@ -1156,12 +1192,41 @@ def user_wallet():
     transactions = db.session.query(WalletTransaction).filter_by(user_id=current_user.id).order_by(WalletTransaction.id.desc()).all()
     active_subscription = _get_active_subscription(current_user.id)
     wallet_chart = _build_wallet_distribution_chart(transactions)
+    now = datetime.now()
+
+    monthly_added = 0.0
+    total_spent = 0.0
+    highest_transaction = 0.0
+
+    for transaction in transactions:
+        amount = float(transaction.amount or 0)
+        highest_transaction = max(highest_transaction, amount)
+        category = _wallet_transaction_category(transaction)
+
+        if category in ["withdraw", "penalty"]:
+            total_spent += amount
+
+        if category == "added":
+            try:
+                created_at = datetime.strptime(transaction.created_at, "%Y-%m-%d %H:%M:%S")
+                if created_at.year == now.year and created_at.month == now.month:
+                    monthly_added += amount
+            except Exception:
+                continue
+
     return render_template(
         "/user/wallet.html",
         wallet_balance=_wallet_balance(current_user),
         transactions=transactions,
         active_subscription=active_subscription,
         wallet_chart=wallet_chart,
+        wallet_insights={
+            "monthly_added": round(monthly_added, 2),
+            "total_spent": round(total_spent, 2),
+            "highest_transaction": round(highest_transaction, 2),
+            "total_added": round(float(wallet_chart["counts"].get("added", 0)), 2),
+        },
+        wallet_last_updated=now.strftime("%d %b %Y, %I:%M %p"),
     )
 
 
@@ -1377,66 +1442,8 @@ def user_favorites():
 @app.route("/user/search", methods = ["GET", "POST"])
 @login_required
 def user_search():
-    all_users = db.session.query(User).all()
-
-    user_histories = {
-        user.id: ReservedParkingSpot.query.filter_by(user_id=user.id).all()
-        for user in all_users
-    }
-
-    if request.method == "GET":
-        return render_template(
-            "/user/search.html",
-            avg_ratings={},
-            favorite_lot_ids=set(),
-            results=[],
-            query_text="",
-        )
-    elif request.method == "POST":
-        type = request.form.get("searchby")
-        query = (request.form.get("search_query") or "").strip()
-        smart_query = (request.form.get("smart_search") or "").strip()
-        query_text = smart_query or query
-        result = []
-
-        if query_text:
-            if type in {"name", "address", "city", "pincode"}:
-                # Legacy radio-based path support.
-                if type == "name":
-                    result = db.session.query(ParkingLot).filter(ParkingLot.prime_location_name.ilike(f"%{query_text}%")).all()
-                elif type == "address":
-                    result = db.session.query(ParkingLot).filter(ParkingLot.address.ilike(f"%{query_text}%")).all()
-                elif type == "city":
-                    result = db.session.query(ParkingLot).filter(ParkingLot.city.ilike(f"%{query_text}%")).all()
-                elif type == "pincode":
-                    result = db.session.query(ParkingLot).filter(cast(ParkingLot.pin_code, String).ilike(f"%{query_text}%")).all()
-            else:
-                # Smart search across key parking attributes.
-                result = (
-                    db.session.query(ParkingLot)
-                    .filter(
-                        or_(
-                            ParkingLot.prime_location_name.ilike(f"%{query_text}%"),
-                            ParkingLot.address.ilike(f"%{query_text}%"),
-                            ParkingLot.city.ilike(f"%{query_text}%"),
-                            cast(ParkingLot.pin_code, String).ilike(f"%{query_text}%"),
-                        )
-                    )
-                    .all()
-                )
-
-        avg_ratings = _build_avg_ratings(result)
-        favorite_lot_ids = _build_favorite_ids(current_user.id)
-        return render_template(
-            "/user/search.html",
-            results=result,
-            type=type or "smart",
-            user_histories=user_histories,
-            request=request,
-            avg_ratings=avg_ratings,
-            favorite_lot_ids=favorite_lot_ids,
-            query_text=query_text,
-        )
+    # Search is unified inside the dashboard page.
+    return redirect("/user/dashboard")
 
 @app.route('/user/summary')
 @login_required

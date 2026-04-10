@@ -1,0 +1,76 @@
+{% set current_path = request.path %}
+<nav class="navbar saas-navbar sticky-top" aria-label="Primary">
+    <div class="container saas-navbar-inner">
+        <a class="saas-brand" href="/" target="_blank">
+            <img src="/static/images/Logo.png" alt="Logo" width="30" height="30" class="saas-brand-logo">
+            <span>FindMySpot</span>
+        </a>
+
+        <div class="saas-nav-shell">
+            <ul class="saas-nav-menu" data-saas-nav>
+                <span class="saas-nav-slider" data-saas-nav-slider aria-hidden="true"></span>
+                <li><a class="saas-nav-link {% if current_path.startswith('/user/dashboard') %}active{% endif %}" href="/user/dashboard">Dashboard</a></li>
+                <li><a class="saas-nav-link {% if current_path.startswith('/user/favorites') %}active{% endif %}" href="/user/favorites">Favorites</a></li>
+                <li><a class="saas-nav-link {% if current_path.startswith('/user/summary') %}active{% endif %}" href="/user/summary">Summary</a></li>
+                <li><a class="saas-nav-link {% if current_path.startswith('/user/wallet') %}active{% endif %}" href="/user/wallet">Wallet</a></li>
+                <li><a class="saas-nav-link {% if current_path.startswith('/user/subscriptions') %}active{% endif %}" href="/user/subscriptions">Subscriptions</a></li>
+            </ul>
+        </div>
+
+        <div class="saas-navbar-right" aria-label="Header controls">
+            <div class="dropdown" data-header-notifications>
+                <button class="btn saas-icon-btn saas-notification-toggle" type="button" data-bs-toggle="dropdown" data-header-notifications-toggle aria-label="Notifications" title="Notifications" aria-expanded="false">
+                    <i class="bi bi-bell"></i>
+                    {% if header_unread_count and header_unread_count > 0 %}
+                    <span class="saas-notification-badge" id="headerNotificationUnreadBadge">{{ header_unread_count if header_unread_count < 100 else '99+' }}</span>
+                    {% endif %}
+                </button>
+                <div class="dropdown-menu dropdown-menu-end saas-notification-menu" data-header-notifications-menu>
+                    <div class="saas-notification-head">
+                        <strong>Notifications</strong>
+                        <button class="btn btn-sm saas-notification-mark-read" type="button" data-mark-notifications-read>Mark all read</button>
+                    </div>
+                    {% if header_notifications %}
+                    <div class="saas-notification-list">
+                        {% for n in header_notifications %}
+                        <div class="saas-notification-item {% if n.id in header_unread_ids %}unread{% endif %}">
+                            <div class="saas-notification-item-top">
+                                <span class="saas-notification-channel">{{ n.channel|upper }}</span>
+                                <span class="saas-notification-time">{{ n.created_at }}</span>
+                            </div>
+                            <div class="saas-notification-subject">{{ n.subject }}</div>
+                            <div class="saas-notification-message">{{ n.message }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="saas-notification-empty">No notifications yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle dark/light theme">
+                <i class="bi bi-sun icon-sun"></i>
+                <i class="bi bi-moon-stars icon-moon"></i>
+            </button>
+
+            <button class="btn saas-icon-btn header-refresh-btn" type="button" id="globalHeaderRefreshBtn" aria-label="Refresh page" title="Refresh page">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+
+            <div class="dropdown navbar-profile-dropdown">
+                <button class="btn navbar-profile-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile menu">
+                    {% if current_user.profile_image and current_user.profile_image != 'default.png' %}
+                    <img src="/static/user_profiles/{{ current_user.profile_image }}" alt="Profile" class="profile-avatar" onerror="this.onerror=null;this.src='/static/images/default-avatar.webp';">
+                    {% else %}
+                    <img src="/static/images/default-avatar.webp" alt="Default profile" class="profile-avatar">
+                    {% endif %}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end saas-profile-menu">
+                    <li><a href="/user/profile" class="dropdown-item">Profile</a></li>
+                    <li><a href="/logout" class="dropdown-item">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>

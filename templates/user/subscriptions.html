@@ -382,53 +382,8 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg sticky-top shadow-sm light-glass-navbar">
-        <div class="container">
-            <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="/" target="_blank">
-                <img src="/static/images/Logo.png" alt="Logo" width="32" height="32" class="me-2">
-                FindMySpot
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav align-items-center">
-                    <li class="nav-item mx-2 dropdown navbar-links-dropdown">
-                        <button class="btn navbar-menu-toggle dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i data-lucide="menu"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/user/dashboard">Dashboard</a></li>
-                            <li><a class="dropdown-item" href="/user/search">Search</a></li>
-                            <li><a class="dropdown-item" href="/user/favorites">Favorites</a></li>
-                            <li><a class="dropdown-item" href="/user/summary">Summary</a></li>
-                            <li><a class="dropdown-item" href="/user/wallet">Wallet</a></li>
-                            <li><a class="dropdown-item" href="/user/subscriptions">Subscriptions</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item mx-2 d-flex align-items-center">
-                        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle dark/light theme">
-                            <i data-lucide="sun" class="icon-sun"></i>
-                            <i data-lucide="moon-star" class="icon-moon"></i>
-                        </button>
-                    </li>
-                    <li class="nav-item mx-2 dropdown navbar-profile-dropdown">
-                        <button class="btn navbar-profile-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Profile menu">
-                            {% if current_user.profile_image and current_user.profile_image != 'default.png' %}
-                            <img src="/static/user_profiles/{{ current_user.profile_image }}" alt="Profile" class="profile-avatar" onerror="this.onerror=null;this.src='/static/images/default-avatar.webp';">
-                            {% else %}
-                            <img src="/static/images/default-avatar.webp" alt="Default profile" class="profile-avatar">
-                            {% endif %}
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a href="/user/profile" class="dropdown-item">Profile</a></li>
-                            <li><a href="/logout" class="dropdown-item">Logout</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    {% include 'user/_saas_navbar.html' %}
+
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -829,6 +784,7 @@
             applyCycle('{{ active_cycle if active_subscription else "monthly" }}');
         }());
     </script>
+    <script src="/static/js/saas-navbar.js?v=20260410c"></script>
 </body>
 
 </html>

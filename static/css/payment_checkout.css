@@ -155,7 +155,28 @@ body.checkout-page {
 
 .summary-sticky {
 	position: sticky;
-	top: 20px;
+	top: 84px;
+}
+
+.card-checkout-layout {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+}
+
+.card-checkout-layout > .payment-form-col {
+	flex: 0 0 68%;
+	max-width: 68%;
+}
+
+.card-checkout-layout > .summary-col {
+	flex: 0 0 32%;
+	max-width: 32%;
+}
+
+.card-checkout-layout .summary-card {
+	border-radius: 16px;
+	box-shadow: 0 14px 28px rgba(56, 44, 118, 0.14);
 }
 
 .refund-accordion .accordion-item {
@@ -250,6 +271,49 @@ body.checkout-page {
 
 .checkout-card {
 	padding: 1rem;
+}
+
+.checkout-form-grid {
+	margin-top: 0.1rem;
+}
+
+.checkout-form-grid .form-label {
+	font-weight: 600;
+	font-size: 0.86rem;
+	margin-bottom: 0.4rem;
+	color: var(--checkout-text);
+}
+
+.checkout-form-grid .form-control {
+	min-height: 44px;
+	padding: 0.62rem 0.8rem;
+	border-radius: 12px;
+	border: 1px solid var(--checkout-border);
+	background: rgba(255, 255, 255, 0.9);
+	color: var(--checkout-text);
+	transition: border-color 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease;
+}
+
+.checkout-form-grid .form-control:focus {
+	border-color: rgba(111, 75, 255, 0.55);
+	box-shadow: 0 0 0 0.2rem rgba(111, 75, 255, 0.14);
+	background: #ffffff;
+}
+
+[data-theme="dark"] .checkout-form-grid .form-control {
+	background: rgba(17, 24, 40, 0.88);
+	color: #edf2ff;
+}
+
+[data-theme="dark"] .checkout-form-grid .form-control:focus {
+	background: rgba(14, 21, 36, 0.95);
+}
+
+.checkout-form-grid #payNowBtn {
+	min-height: 50px;
+	border-radius: 12px;
+	font-weight: 700;
+	letter-spacing: 0.01em;
 }
 
 .pay-mode-title {
@@ -473,6 +537,12 @@ body.checkout-page {
 
 	.checkout-panel-layout>.col-lg-7,
 	.checkout-panel-layout>.col-lg-5 {
+		flex: 0 0 100%;
+		max-width: 100%;
+	}
+
+	.card-checkout-layout > .payment-form-col,
+	.card-checkout-layout > .summary-col {
 		flex: 0 0 100%;
 		max-width: 100%;
 	}
