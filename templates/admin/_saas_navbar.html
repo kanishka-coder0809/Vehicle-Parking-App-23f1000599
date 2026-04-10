@@ -1,0 +1,38 @@
+{% set current_path = request.path %}
+<nav class="navbar saas-navbar sticky-top" aria-label="Admin primary">
+    <div class="container saas-navbar-inner">
+        <a class="saas-brand" href="/" target="_blank">
+            <img src="/static/images/Logo.png" alt="Logo" width="30" height="30" class="saas-brand-logo">
+            <span>FindMySpot</span>
+        </a>
+
+        <div class="saas-nav-shell">
+            <ul class="saas-nav-menu" data-saas-nav>
+                <span class="saas-nav-slider" data-saas-nav-slider aria-hidden="true"></span>
+                <li><a class="saas-nav-link {% if current_path.startswith('/admin/dashboard') %}active{% endif %}" href="/admin/dashboard">Dashboard</a></li>
+                <li><a class="saas-nav-link {% if current_path.startswith('/admin/actions') %}active{% endif %}" href="/admin/actions">Actions</a></li>
+                <li><a class="saas-nav-link {% if current_path.startswith('/admin/summary') %}active{% endif %}" href="/admin/summary">Summary</a></li>
+            </ul>
+        </div>
+
+        <div class="saas-navbar-right" aria-label="Admin controls">
+            <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle dark/light theme">
+                <i class="bi bi-sun icon-sun"></i>
+                <i class="bi bi-moon-stars icon-moon"></i>
+            </button>
+
+            <button class="btn saas-icon-btn header-refresh-btn" type="button" id="globalHeaderRefreshBtn" aria-label="Refresh page" title="Refresh page">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+
+            <div class="dropdown navbar-profile-dropdown">
+                <button class="btn navbar-profile-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Admin menu">
+                    <i class="bi bi-person fs-5"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end saas-profile-menu">
+                    <li><a href="/logout" class="dropdown-item">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>

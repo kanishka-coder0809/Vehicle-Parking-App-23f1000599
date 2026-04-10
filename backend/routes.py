@@ -4,7 +4,8 @@ from .models import db, Admin, User, ParkingLot, ParkingSpot, ReservedParkingSpo
 from flask_login import login_user,logout_user, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
-from datetime import datetime
+from datetime import datetime, timedelta
+from collections import Counter
 from calendar import month_name
 from io import BytesIO, StringIO
 import csv
@@ -256,6 +257,23 @@ def _get_active_subscription(user_id):
             return sub
         sub.is_active = False
     return None
+
+
+def _parse_timestamp(value):
+    if not value or value == "Not yet left":
+        return None
+    try:
+        return datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+    except Exception:
+        return None
+
+
+def _month_key(dt):
+    return dt.strftime("%Y-%m")
+
+
+def _month_label(dt):
+    return dt.strftime("%b %Y")
 
 
 def _get_subscription_plan(tier):
@@ -856,6 +874,12 @@ def login():
             return redirect(url_for('login'))
 
 @app.route("/admin/dashboard")
+@login_required
+def admin_dashboard_blank():
+    return render_template("/admin/blank_dashboard.html")
+
+
+@app.route("/admin/actions")
 @login_required  
 def admin_dash():
     all_par = db.session.query(ParkingLot).all()
@@ -967,6 +991,205 @@ def admin_summary():
             active_users_count=active_users_count,
             occupancy_by_lot=occupancy_by_lot,
         )
+
+
+@app.route("/api/users")
+@login_required
+def api_users():
+    now = datetime.now()
+    cutoff = now - timedelta(hours=24)
+
+    total_users = db.session.query(User).count()
+    active_user_ids = set()
+
+    for booking in db.session.query(ReservedParkingSpot).all():
+        start_dt = _parse_timestamp(booking.parking_timestamp)
+        end_dt = _parse_timestamp(booking.leaving_timestamp)
+        if start_dt and start_dt >= cutoff:
+            active_user_ids.add(booking.user_id)
+        if end_dt and end_dt >= cutoff:
+            active_user_ids.add(booking.user_id)
+
+    return jsonify({
+        "total_users": total_users,
+        "active_users_24h": len(active_user_ids),
+    })
+
+
+@app.route("/api/parking")
+@login_required
+def api_parking():
+    lots = db.session.query(ParkingLot).all()
+    lot_rows = []
+    total_available = 0
+    total_booked = 0
+
+    for lot in lots:
+        occupied = len([spot for spot in lot.spots if spot.status == "O"])
+        available = len([spot for spot in lot.spots if spot.status == "A"])
+        total = len(lot.spots) if lot.spots else lot.maximum_number_of_spots
+        occupancy = round((occupied / total) * 100, 2) if total else 0
+        total_available += available
+        total_booked += occupied
+
+        lot_rows.append({
+            "id": lot.id,
+            "name": lot.prime_location_name,
+            "city": lot.city,
+            "available": available,
+            "occupied": occupied,
+            "total": total,
+            "occupancy": occupancy,
+        })
+
+    lot_rows.sort(key=lambda row: (row["occupied"], row["total"]), reverse=True)
+
+    return jsonify({
+        "total_available_spots": total_available,
+        "total_booked_spots": total_booked,
+        "lots": lot_rows,
+    })
+
+
+@app.route("/api/bookings")
+@login_required
+def api_bookings():
+    now = datetime.now()
+    start_date = (now - timedelta(days=13)).date()
+    daily_buckets = {}
+    duration_buckets = {}
+
+    for offset in range(14):
+        day = start_date + timedelta(days=offset)
+        daily_buckets[day] = 0
+        duration_buckets[day] = []
+
+    bookings = db.session.query(ReservedParkingSpot).all()
+    lot_counts = Counter()
+
+    for booking in bookings:
+        start_dt = _parse_timestamp(booking.parking_timestamp)
+        end_dt = _parse_timestamp(booking.leaving_timestamp)
+        if start_dt is None:
+            continue
+
+        booking_day = start_dt.date()
+        if booking_day in daily_buckets:
+            daily_buckets[booking_day] += 1
+
+        if end_dt and end_dt >= start_dt and booking_day in duration_buckets:
+            duration_hours = max((end_dt - start_dt).total_seconds() / 3600, 0)
+            duration_buckets[booking_day].append(duration_hours)
+
+        lot_counts[booking.lot_id] += 1
+
+    lot_lookup = {lot.id: lot for lot in db.session.query(ParkingLot).all()}
+    popular_lots = []
+    for lot_id, booking_count in lot_counts.most_common(5):
+        lot = lot_lookup.get(lot_id)
+        if not lot:
+            continue
+        occupied = len([spot for spot in lot.spots if spot.status == "O"])
+        available = len([spot for spot in lot.spots if spot.status == "A"])
+        total = len(lot.spots) if lot.spots else lot.maximum_number_of_spots
+        occupancy = round((occupied / total) * 100, 2) if total else 0
+        popular_lots.append({
+            "id": lot.id,
+            "name": lot.prime_location_name,
+            "city": lot.city,
+            "bookings": booking_count,
+            "occupied": occupied,
+            "available": available,
+            "occupancy": occupancy,
+        })
+
+    daily_bookings = []
+    duration_series = []
+    for day, count in daily_buckets.items():
+        durations = duration_buckets.get(day, [])
+        avg_duration = round(sum(durations) / len(durations), 2) if durations else 0
+        daily_bookings.append({
+            "date": day.isoformat(),
+            "label": day.strftime("%d %b"),
+            "count": count,
+            "avg_duration": avg_duration,
+        })
+        duration_series.append({
+            "date": day.isoformat(),
+            "label": day.strftime("%d %b"),
+            "hours": avg_duration,
+        })
+
+    return jsonify({
+        "daily_bookings": daily_bookings,
+        "duration_series": duration_series,
+        "popular_lots": popular_lots,
+    })
+
+
+@app.route("/api/payments")
+@login_required
+def api_payments():
+    transactions = db.session.query(WalletTransaction).all()
+    monthly_totals = {}
+
+    for transaction in transactions:
+        created_dt = _parse_timestamp(transaction.created_at)
+        if not created_dt:
+            continue
+
+        description = (transaction.description or "").lower()
+        transaction_type = (transaction.transaction_type or "").lower()
+        revenue_value = 0.0
+
+        if transaction_type == "refund":
+            revenue_value = -abs(float(transaction.amount or 0))
+        elif transaction_type == "debit" and (
+            "parking payment" in description or
+            "subscription payment" in description or
+            "penalty" in description or
+            "overtime" in description
+        ):
+            revenue_value = float(transaction.amount or 0)
+
+        if revenue_value == 0:
+            continue
+
+        key = _month_key(created_dt)
+        monthly_totals[key] = monthly_totals.get(key, 0) + revenue_value
+
+    if not monthly_totals:
+        completed_bookings = db.session.query(ReservedParkingSpot).filter(
+            ReservedParkingSpot.leaving_timestamp != "Not yet left"
+        ).all()
+        for booking in completed_bookings:
+            end_dt = _parse_timestamp(booking.leaving_timestamp)
+            if not end_dt:
+                continue
+
+            revenue_value = float(booking.total_cost or booking.billed_amount or 0)
+            if revenue_value <= 0:
+                continue
+
+            key = _month_key(end_dt)
+            monthly_totals[key] = monthly_totals.get(key, 0) + revenue_value
+
+    months = []
+    if monthly_totals:
+        sorted_keys = sorted(monthly_totals.keys())
+        for key in sorted_keys:
+            year, month = key.split("-")
+            month_dt = datetime(int(year), int(month), 1)
+            months.append({
+                "key": key,
+                "label": _month_label(month_dt),
+                "revenue": round(monthly_totals[key], 2),
+            })
+
+    return jsonify({
+        "monthly_revenue": months,
+        "total_revenue": round(sum(monthly_totals.values()), 2),
+    })
 
 @app.route("/user/dashboard")
 @login_required
@@ -1475,6 +1698,16 @@ def user_summary():
             # Show planned amount for active bookings where final billing is not yet generated.
             cost_value = float(booking.planned_amount)
 
+        # Calculate refund and penalty for completed bookings
+        refund_amount = 0.0
+        penalty_amount = 0.0
+        
+        if not is_active:
+            unit_price = float(booking.planned_amount if booking.planned_amount is not None else (booking.parkingCost_unitTime or 0))
+            total_cost = float(booking.total_cost or booking.billed_amount or 0)
+            refund_amount = round(max(unit_price - total_cost, 0), 2)
+            penalty_amount = round(max(total_cost - unit_price, 0), 2)
+
         lot_name = booking.Parking_Lot.prime_location_name
         location_counts[lot_name] = location_counts.get(lot_name, 0) + 1
         total_duration_minutes += duration_minutes
@@ -1497,6 +1730,8 @@ def user_summary():
             "vehicle_number": booking.vehicle_number,
             "cost": f"₹{cost_value:.2f}",
             "cost_value": round(cost_value, 2),
+            "refund_amount": refund_amount,
+            "penalty_amount": penalty_amount,
             "status": "Active" if is_active else "Completed",
             "date": in_time.strftime("%Y-%m-%d"),
         })
@@ -1536,7 +1771,7 @@ def user_summary_export_csv():
 
     csv_buffer = StringIO()
     writer = csv.writer(csv_buffer)
-    writer.writerow(["Spot ID", "Lot Name", "Location", "In Time", "Out Time", "Duration", "Vehicle No", "Status", "Cost"])
+    writer.writerow(["Spot ID", "Lot Name", "Location", "In Time", "Out Time", "Duration", "Vehicle No", "Status", "Cost", "Refund", "Penalty"])
 
     now = datetime.now()
     for booking in bookings:
@@ -1549,6 +1784,16 @@ def user_summary_export_csv():
         if is_active and booking.planned_amount is not None:
             cost_value = float(booking.planned_amount)
 
+        # Calculate refund and penalty for completed bookings
+        refund_amount = 0.0
+        penalty_amount = 0.0
+        
+        if not is_active:
+            unit_price = float(booking.planned_amount if booking.planned_amount is not None else (booking.parkingCost_unitTime or 0))
+            total_cost = float(booking.total_cost or booking.billed_amount or 0)
+            refund_amount = round(max(unit_price - total_cost, 0), 2)
+            penalty_amount = round(max(total_cost - unit_price, 0), 2)
+
         writer.writerow([
             booking.spot_id,
             booking.Parking_Lot.prime_location_name,
@@ -1559,6 +1804,8 @@ def user_summary_export_csv():
             booking.vehicle_number,
             "Active" if is_active else "Completed",
             f"{cost_value:.2f}",
+            f"{refund_amount:.2f}" if refund_amount > 0 else "0.00",
+            f"{penalty_amount:.2f}" if penalty_amount > 0 else "0.00",
         ])
 
     output = BytesIO()
@@ -1579,13 +1826,13 @@ def parkingLot():
         parking = db.session.query(ParkingLot).filter_by(prime_location_name=par_name).first()
         if parking:
             flash('Parking Lot Already Existed !!', 'warning')
-            return redirect('/admin/dashboard')
+            return redirect('/admin/actions')
         else:
             new_par = ParkingLot(prime_location_name = par_name, price = par_price, address = par_add, city = par_city, pin_code = par_pin, maximum_number_of_spots = par_max)
             db.session.add(new_par)
             db.session.commit()
             flash('Parking Lot Created !!', 'success')
-            return redirect('/admin/dashboard')
+            return redirect('/admin/actions')
     elif request.args.get("task") == "edit":
         par_name = request.form.get("name")
         par_price = request.form.get("price")
@@ -1620,10 +1867,10 @@ def parkingLot():
                     db.session.delete(spot)
             db.session.commit()
             flash('Parking Lot Edited !!', 'success')
-            return redirect('/admin/dashboard')
+            return redirect('/admin/actions')
         else:
             flash('Parking Lot Does not Exist !!', 'warning')
-            return redirect('/admin/dashboard')
+            return redirect('/admin/actions')
 
 @app.route("/booking", methods=["POST"])
 @login_required
@@ -2173,7 +2420,7 @@ def admin_user_report_pdf(user_id):
     user = db.session.query(User).filter_by(id=user_id).first()
     if not user:
         flash("User not found.", "danger")
-        return redirect("/admin/dashboard")
+        return redirect("/admin/actions")
 
     bookings = db.session.query(ReservedParkingSpot).filter_by(user_id=user.id).all()
     report_rows = []
@@ -2225,18 +2472,18 @@ def delete_parking(lot_id):
 
     if not lot:
         flash("Parking lot not found.", "danger")
-        return redirect("/admin/dashboard")
+        return redirect("/admin/actions")
 
     # Check if any of the spots are booked
     booked_spots = [spot for spot in lot.spots if spot.status == 'O']
     if booked_spots:
         flash("Cannot delete parking lot with active bookings.", "warning")
-        return redirect("/admin/dashboard")
+        return redirect("/admin/actions")
 
     # Also ensure no ReservedParkingSpot exists (historically)
     if lot.reserved_parking_spot:
         flash("Cannot delete parking lot with past reservations.", "warning")
-        return redirect("/admin/dashboard")
+        return redirect("/admin/actions")
 
     # Delete all associated spots first
     for spot in lot.spots:
@@ -2245,4 +2492,4 @@ def delete_parking(lot_id):
     db.session.delete(lot)
     db.session.commit()
     flash("Parking lot deleted successfully.", "success")
-    return redirect("/admin/dashboard")
+    return redirect("/admin/actions")

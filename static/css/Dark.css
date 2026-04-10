@@ -106,8 +106,8 @@ html[data-theme="dark"] .payment-subtext {
 }
 
 html[data-theme="dark"] .payment-brand-logo {
-	background: linear-gradient(135deg, #2563eb, #1e40af);
-	box-shadow: 0 6px 14px rgba(30, 64, 175, 0.4);
+	background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+	box-shadow: 0 6px 14px rgba(139, 92, 246, 0.4);
 }
 
 html[data-theme="dark"] .payment-info-card {
@@ -122,8 +122,8 @@ html[data-theme="dark"] .payment-method {
 }
 
 html[data-theme="dark"] .payment-method.active {
-	background: #1f2937;
-	border-color: #6b7280;
+	background: #1a1a1f;
+	border-color: #8b5cf6;
 	color: #e5e7eb;
 }
 
@@ -143,7 +143,7 @@ html[data-theme="dark"] .navbar .nav-link,
 html[data-theme="dark"] .navbar .dropdown-toggle,
 html[data-theme="dark"] .navbar .text-dark,
 html[data-theme="dark"] .navbar .text-primary {
-	color: #dbeafe !important;
+	color: #e5e7eb !important;
 }
 
 html[data-theme="dark"] .navbar .nav-link.active,
@@ -152,19 +152,19 @@ html[data-theme="dark"] .navbar .nav-link.text-primary {
 }
 
 html[data-theme="dark"] .navbar .dropdown-menu {
-	background-color: #0f172a;
-	border-color: #2b3550;
+	background-color: #111112;
+	border-color: #2e2e34;
 }
 
 html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item {
-	color: #dbeafe;
+	color: #e5e7eb;
 	border-radius: 10px;
 }
 
 html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:hover,
 html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item:focus,
 html[data-theme="dark"] .navbar .dropdown-menu .dropdown-item.active {
-	background: rgba(59, 130, 246, 0.18);
+	background: rgba(139, 92, 246, 0.15);
 	color: #f8fbff;
 }
 
@@ -244,42 +244,43 @@ html[data-theme="dark"] .form-floating > .form-select {
 html[data-theme="dark"] .form-control:focus,
 html[data-theme="dark"] .form-select:focus,
 html[data-theme="dark"] textarea:focus {
-	border-color: #7a7a84;
-	box-shadow: 0 0 0 0.2rem rgba(122, 122, 132, 0.25);
+	border-color: #8b5cf6;
+	box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25);
 }
 
 html[data-theme="dark"] .form-floating > label,
 html[data-theme="dark"] .text-muted {
-	color: #94a3b8 !important;
+	color: #6b7280 !important;
 }
 
 html[data-theme="dark"] .btn-outline-primary {
-	color: #d1d5db;
-	border-color: #6b7280;
+	color: #e5e7eb;
+	border-color: #3a3a42;
 }
 
 html[data-theme="dark"] .btn-outline-primary:hover {
-	background-color: #27272a;
-	color: #fff;
+	background-color: rgba(139, 92, 246, 0.15);
+	color: #ffffff;
+	border-color: #8b5cf6;
 }
 
 html[data-theme="dark"] .btn-outline-dark {
-	color: #cbd5e1;
-	border-color: #52525b;
+	color: #e5e7eb;
+	border-color: #3a3a42;
 }
 
 html[data-theme="dark"] .btn-outline-dark:hover {
-	background-color: #27272a;
-	color: #fff;
+	background-color: #1a1a1f;
+	color: #ffffff;
 }
 
 html[data-theme="dark"] .btn-outline-secondary {
-	color: #cbd5e1;
-	border-color: #6b7280;
+	color: #e5e7eb;
+	border-color: #3a3a42;
 }
 
 html[data-theme="dark"] .alert {
-	border-color: rgba(148, 163, 184, 0.35);
+	border-color: rgba(110, 110, 120, 0.2);
 }
 
 html[data-theme="dark"] .alert-warning {
@@ -299,17 +300,17 @@ html[data-theme="dark"] .alert-success {
 
 html[data-theme="dark"] .alert-info,
 html[data-theme="dark"] .alert-primary {
-	background-color: #1f2937;
-	color: #dbeafe;
+	background-color: #1a1a1f;
+	color: #e5e7eb;
 }
 
 html[data-theme="dark"] .nav-pills .nav-link {
-	color: #cbd5e1;
+	color: #9ca3af;
 }
 
 html[data-theme="dark"] .nav-pills .nav-link.active {
-	background-color: #27272a;
-	color: #fff;
+	background-color: rgba(139, 92, 246, 0.2);
+	color: #ffffff;
 }
 
 html[data-theme="dark"] .badge.bg-success {
@@ -322,12 +323,12 @@ html[data-theme="dark"] .badge.bg-warning {
 }
 
 html[data-theme="dark"] .footer {
-	background: #050505;
-	color: #cbd5e1;
+	background: #0b0b0c;
+	color: #9ca3af;
 }
 
 html[data-theme="dark"] .footer p {
-	color: #cbd5e1;
+	color: #9ca3af;
 }
 
 html[data-theme="dark"] .carousel-caption {
@@ -365,18 +366,18 @@ html[data-theme="dark"] .home-button {
 
 /* Subscriptions / plans page dark mode */
 html[data-theme="dark"] .top-head {
-	border-bottom-color: rgba(84, 98, 127, 0.4);
+	border-bottom-color: rgba(110, 110, 120, 0.3);
 }
 
 html[data-theme="dark"] .brand h1,
 html[data-theme="dark"] .title-wrap h2 {
-	color: #eaf1ff;
+	color: #e5e7eb;
 }
 
 html[data-theme="dark"] .brand p,
 html[data-theme="dark"] .title-wrap p,
 html[data-theme="dark"] .wallet-card-subtitle {
-	color: #9fb0cc;
+	color: #9ca3af;
 }
 
 html[data-theme="dark"] .offer-pill {
@@ -386,35 +387,35 @@ html[data-theme="dark"] .offer-pill {
 }
 
 html[data-theme="dark"] .billing-toggle {
-	background: #0e1628;
-	border-color: #2c3b5c;
+	background: #0d0d0f;
+	border-color: #2e2e34;
 }
 
 html[data-theme="dark"] .billing-toggle button {
-	color: #c8d6ef;
+	color: #9ca3af;
 }
 
 html[data-theme="dark"] .billing-toggle button.active {
-	background: linear-gradient(120deg, #3d66be, #557ed3);
+	background: linear-gradient(120deg, #8b5cf6, #a78bfa);
 	color: #f8fbff;
 }
 
 html[data-theme="dark"] .plan-card {
-	background: #0f172a;
-	border-color: #31415f;
-	box-shadow: 0 12px 24px rgba(0, 0, 0, 0.38);
+	background: #111112;
+	border-color: #2e2e34;
+	box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
 }
 
 html[data-theme="dark"] .plan-card.commuter {
-	border-color: #9e5d3d;
+	border-color: #2e2e34;
 }
 
 html[data-theme="dark"] .price {
-	color: #f2f6ff;
+	color: #e5e7eb;
 }
 
 html[data-theme="dark"] .price small {
-	color: #9fb0cc;
+	color: #9ca3af;
 }
 
 html[data-theme="dark"] .mini-tag {
@@ -424,11 +425,11 @@ html[data-theme="dark"] .mini-tag {
 }
 
 html[data-theme="dark"] .feature-list li {
-	color: #d7e4f9;
+	color: #e5e7eb;
 }
 
 html[data-theme="dark"] .feature-list i {
-	color: #53c27f;
+	color: #8b5cf6;
 }
 
 html[data-theme="dark"] .post-tag {
@@ -451,14 +452,14 @@ html[data-theme="dark"] .active-box ul {
 }
 
 html[data-theme="dark"] .settings-btn {
-	background: #10192b;
-	border-color: #334765;
-	color: #dbeafe;
+	background: #111112;
+	border-color: #2e2e34;
+	color: #e5e7eb;
 }
 
 html[data-theme="dark"] .settings-btn:hover {
-	background: #17243d;
-	color: #f4f8ff;
+	background: #1a1a1f;
+	color: #f8fbff;
 }
 
 /* Smooth transitions */

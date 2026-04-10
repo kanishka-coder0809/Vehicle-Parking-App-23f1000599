@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/static/js/theme-init.js"></script>
+    <title>FindMySpot | Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/static/css/nav_footer.css">
+    <link rel="stylesheet" href="/static/css/Dark.css">
+    <link rel="stylesheet" href="/static/css/admin_dashboard.css">
+    <link rel="icon" href="/static/images/logo.png" type="image/png">
+</head>
+
+<body class="admin-dashboard-page admin-analytics-page">
+    {% include 'admin/_saas_navbar.html' %}
+
+    {% set admin_name = current_user.name if current_user.is_authenticated and current_user.name else 'Admin' %}
+    {% set admin_email = current_user.email if current_user.is_authenticated and current_user.email else 'admin@findmyspot.local' %}
+
+    <main class="admin-analytics-shell">
+        <section class="admin-hero-card admin-surface-card">
+            <div class="admin-hero-copy">
+                <span class="admin-eyebrow">Live backend analytics</span>
+                <h1 class="admin-hero-title">Dashboard</h1>
+                <p class="admin-hero-text">Real-time insights pulled from users, bookings, parking lots and wallet transactions.</p>
+            </div>
+
+            <div class="admin-hero-controls">
+                <label class="admin-search-field" for="adminDashboardSearch">
+                    <i class="bi bi-search"></i>
+                    <input id="adminDashboardSearch" type="search" placeholder="Search parking lots..." aria-label="Search parking lots on dashboard">
+                </label>
+
+                <div class="dropdown">
+                    <button class="admin-icon-chip" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                        <i class="bi bi-bell"></i>
+                        <span class="admin-notification-dot d-none" id="dashboardNotificationDot"></span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end admin-notification-menu p-0 overflow-hidden" id="dashboardNotificationMenu">
+                        <div class="admin-dropdown-head">
+                            <div>
+                                <p class="admin-dropdown-kicker mb-1">Dashboard signals</p>
+                                <h6 class="mb-0">Live backend summary</h6>
+                            </div>
+                        </div>
+                        <div class="admin-dropdown-body" id="dashboardNotificationItems">
+                            <div class="admin-dropdown-empty">Loading metrics...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown">
+                    <button class="admin-profile-chip" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="admin-profile-avatar">{{ admin_name[:1] | upper }}</span>
+                        <span class="admin-profile-meta">
+                            <strong>{{ admin_name }}</strong>
+                            <small>Administrator</small>
+                        </span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end admin-profile-menu p-0 overflow-hidden">
+                        <div class="admin-dropdown-head">
+                            <div>
+                                <p class="admin-dropdown-kicker mb-1">Signed in as</p>
+                                <h6 class="mb-0">{{ admin_name }}</h6>
+                                <small class="text-muted">{{ admin_email }}</small>
+                            </div>
+                        </div>
+                        <div class="admin-dropdown-body">
+                            <a href="/logout" class="admin-dropdown-action">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-grid">
+            <article class="stat-card admin-surface-card">
+                <div class="stat-top">
+                    <span class="stat-label">Total Users</span>
+                    <span class="stat-icon"><i class="bi bi-people"></i></span>
+                </div>
+                <div class="stat-skeleton" data-stat-skeleton></div>
+                <div class="stat-value" data-stat-key="total_users">--</div>
+                <div class="stat-subtext">All registered accounts</div>
+            </article>
+
+            <article class="stat-card admin-surface-card">
+                <div class="stat-top">
+                    <span class="stat-label">Active Users</span>
+                    <span class="stat-icon"><i class="bi bi-lightning-charge"></i></span>
+                </div>
+                <div class="stat-skeleton" data-stat-skeleton></div>
+                <div class="stat-value" data-stat-key="active_users_24h">--</div>
+                <div class="stat-subtext">Booked in the last 24 hours</div>
+            </article>
+
+            <article class="stat-card admin-surface-card">
+                <div class="stat-top">
+                    <span class="stat-label">Available Spots</span>
+                    <span class="stat-icon"><i class="bi bi-p-square"></i></span>
+                </div>
+                <div class="stat-skeleton" data-stat-skeleton></div>
+                <div class="stat-value" data-stat-key="total_available_spots">--</div>
+                <div class="stat-subtext">All unoccupied spaces</div>
+            </article>
+
+            <article class="stat-card admin-surface-card">
+                <div class="stat-top">
+                    <span class="stat-label">Booked Spots</span>
+                    <span class="stat-icon"><i class="bi bi-check2-square"></i></span>
+                </div>
+                <div class="stat-skeleton" data-stat-skeleton></div>
+                <div class="stat-value" data-stat-key="total_booked_spots">--</div>
+                <div class="stat-subtext">Currently occupied spaces</div>
+            </article>
+        </section>
+
+        <section class="analytics-grid">
+            <article class="chart-card admin-surface-card">
+                <div class="chart-head">
+                    <div>
+                        <p class="admin-dropdown-kicker mb-1">Usage</p>
+                        <h3 class="chart-title">Rate of Parking Spots</h3>
+                    </div>
+                    <div class="chart-head-controls">
+                        <span class="chart-chip">Bookings per day</span>
+                        <select class="chart-range-select" data-chart-range="usage" aria-label="Usage chart range">
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly" selected>Monthly</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-loading" data-chart-loading="usage">
+                    <div class="chart-skeleton-bar"></div>
+                    <div class="chart-skeleton-canvas"></div>
+                </div>
+                <div class="chart-empty d-none" data-chart-empty="usage">No booking data available yet.</div>
+                <canvas id="parkingUsageChart" height="140" class="chart-canvas d-none"></canvas>
+            </article>
+
+            <article class="chart-card admin-surface-card">
+                <div class="chart-head">
+                    <div>
+                        <p class="admin-dropdown-kicker mb-1">Revenue</p>
+                        <h3 class="chart-title">Total Revenue</h3>
+                    </div>
+                    <div class="chart-head-controls">
+                        <span class="chart-chip">Monthly income</span>
+                        <select class="chart-range-select" data-chart-range="revenue" aria-label="Revenue chart range">
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly" selected>Monthly</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-loading" data-chart-loading="revenue">
+                    <div class="chart-skeleton-bar"></div>
+                    <div class="chart-skeleton-canvas"></div>
+                </div>
+                <div class="chart-empty d-none" data-chart-empty="revenue">No payment data available yet.</div>
+                <canvas id="revenueChart" height="140" class="chart-canvas d-none"></canvas>
+            </article>
+
+            <article class="chart-card admin-surface-card">
+                <div class="chart-head">
+                    <div>
+                        <p class="admin-dropdown-kicker mb-1">Duration</p>
+                        <h3 class="chart-title">Parking Duration</h3>
+                    </div>
+                    <div class="chart-head-controls">
+                        <span class="chart-chip">Average hours</span>
+                        <select class="chart-range-select" data-chart-range="duration" aria-label="Duration chart range">
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly" selected>Monthly</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-loading" data-chart-loading="duration">
+                    <div class="chart-skeleton-bar"></div>
+                    <div class="chart-skeleton-canvas"></div>
+                </div>
+                <div class="chart-empty d-none" data-chart-empty="duration">No duration data available yet.</div>
+                <canvas id="durationChart" height="140" class="chart-canvas d-none"></canvas>
+            </article>
+
+            <article class="lots-card admin-surface-card">
+                <div class="chart-head">
+                    <div>
+                        <p class="admin-dropdown-kicker mb-1">Performance</p>
+                        <h3 class="chart-title">Popular Used Spots</h3>
+                    </div>
+                    <span class="chart-chip">Top lots by bookings</span>
+                </div>
+                <div class="lots-list" id="popularLotsList">
+                    <div class="lots-loading">
+                        <div class="lots-skeleton"></div>
+                        <div class="lots-skeleton"></div>
+                        <div class="lots-skeleton"></div>
+                    </div>
+                    <div class="lots-empty d-none" id="popularLotsEmpty">No parking lot data available yet.</div>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+    <script src="/static/js/saas-navbar.js?v=20260410c"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="/static/js/theme-toggle.js"></script>
+    <script src="/static/js/flash-alerts.js"></script>
+    <script>
+        (() => {
+            const state = {
+                users: null,
+                parking: null,
+                bookings: null,
+                payments: null,
+            };
+
+            const searchInput = document.getElementById('adminDashboardSearch');
+            const popularLotsList = document.getElementById('popularLotsList');
+            const popularLotsEmpty = document.getElementById('popularLotsEmpty');
+            const notificationItems = document.getElementById('dashboardNotificationItems');
+            const notificationDot = document.getElementById('dashboardNotificationDot');
+
+            const chartInstances = {
+                usage: null,
+                revenue: null,
+                duration: null,
+            };
+            const chartRangeSelects = Array.from(document.querySelectorAll('.chart-range-select'));
+
+            const numberFormatter = new Intl.NumberFormat('en-IN');
+            const currencyFormatter = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 });
+
+            const setLoading = (key, isLoading) => {
+                document.querySelectorAll('[data-stat-skeleton]').forEach((node) => {
+                    node.classList.toggle('d-none', !isLoading);
+                });
+                document.querySelectorAll(`[data-chart-loading="${key}"]`).forEach((node) => node.classList.toggle('d-none', !isLoading));
+                document.querySelectorAll(`[data-chart-empty="${key}"]`).forEach((node) => node.classList.add('d-none'));
+                const canvas = document.getElementById(`${key === 'usage' ? 'parkingUsage' : key}Chart`);
+                if (canvas) {
+                    canvas.classList.toggle('d-none', isLoading);
+                }
+            };
+
+            const showChartEmpty = (key, message) => {
+                const canvas = document.getElementById(`${key === 'usage' ? 'parkingUsage' : key}Chart`);
+                const empty = document.querySelector(`[data-chart-empty="${key}"]`);
+                const loader = document.querySelector(`[data-chart-loading="${key}"]`);
+                if (loader) loader.classList.add('d-none');
+                if (canvas) canvas.classList.add('d-none');
+                if (empty) {
+                    empty.textContent = message;
+                    empty.classList.remove('d-none');
+                }
+            };
+
+            const hideChartEmpty = (key) => {
+                const empty = document.querySelector(`[data-chart-empty="${key}"]`);
+                if (empty) empty.classList.add('d-none');
+            };
+
+            const buildGradient = (context, chartArea, startColor, endColor) => {
+                if (!chartArea) return endColor;
+                const gradient = context.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                gradient.addColorStop(0, startColor);
+                gradient.addColorStop(1, endColor);
+                return gradient;
+            };
+
+            const destroyChart = (key) => {
+                if (chartInstances[key]) {
+                    chartInstances[key].destroy();
+                    chartInstances[key] = null;
+                }
+            };
+
+            const createLineChart = (canvasId, key, labels, datasets, valueFormatter) => {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas || !window.Chart) return;
+                destroyChart(key);
+                hideChartEmpty(key);
+                canvas.classList.remove('d-none');
+
+                const context = canvas.getContext('2d');
+                chartInstances[key] = new Chart(context, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: datasets.map((dataset) => ({
+                            label: dataset.label,
+                            data: dataset.values,
+                            borderColor: dataset.stroke,
+                            backgroundColor: dataset.fill
+                                ? ((ctx) => buildGradient(ctx.chart.ctx, ctx.chart.chartArea, dataset.fill.start, dataset.fill.end))
+                                : dataset.stroke,
+                            pointBackgroundColor: dataset.stroke,
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            fill: Boolean(dataset.fill),
+                            tension: 0.36,
+                            borderWidth: 2.5,
+                        })),
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: datasets.length > 1 },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.92)',
+                                padding: 12,
+                                titleColor: '#fff',
+                                bodyColor: '#e2e8f0',
+                                callbacks: {
+                                    label: (context) => {
+                                        const formattedValue = valueFormatter
+                                            ? valueFormatter(context.parsed.y)
+                                            : currencyFormatter.format(context.parsed.y);
+                                        return `${context.dataset.label || 'Value'}: ${formattedValue}`;
+                                    },
+                                },
+                            },
+                        },
+                        scales: {
+                            x: {
+                                border: { color: '#cbd5e1' },
+                                grid: { color: 'rgba(226, 232, 240, 0.5)' },
+                                ticks: {
+                                    color: '#64748b',
+                                    font: { size: 12 },
+                                    maxRotation: 0,
+                                },
+                            },
+                            y: {
+                                beginAtZero: true,
+                                border: { color: '#cbd5e1' },
+                                grid: { color: 'rgba(226, 232, 240, 0.5)' },
+                                ticks: {
+                                    color: '#64748b',
+                                    font: { size: 12 },
+                                },
+                            },
+                        },
+                    },
+                });
+            };
+
+            const createBarChart = (canvasId, key, labels, values, barColor) => {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas || !window.Chart) return;
+                destroyChart(key);
+                hideChartEmpty(key);
+                canvas.classList.remove('d-none');
+
+                const context = canvas.getContext('2d');
+                chartInstances[key] = new Chart(context, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Average parking duration (hours)',
+                            data: values,
+                            backgroundColor: barColor,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                            categoryPercentage: 0.7,
+                            barPercentage: 0.72,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.92)',
+                                padding: 12,
+                                titleColor: '#fff',
+                                bodyColor: '#e2e8f0',
+                                callbacks: {
+                                    label: (context) => `${currencyFormatter.format(context.parsed.y)} hrs`,
+                                },
+                            },
+                        },
+                        scales: {
+                            x: {
+                                border: { color: '#cbd5e1' },
+                                grid: { color: 'rgba(226, 232, 240, 0.5)' },
+                                ticks: {
+                                    color: '#64748b',
+                                    font: { size: 12 },
+                                },
+                            },
+                            y: {
+                                beginAtZero: true,
+                                border: { color: '#cbd5e1' },
+                                grid: { color: 'rgba(226, 232, 240, 0.5)' },
+                                ticks: {
+                                    color: '#64748b',
+                                    font: { size: 12 },
+                                },
+                            },
+                        },
+                    },
+                });
+            };
+
+            const getRangeValue = (chartKey) => {
+                const select = chartRangeSelects.find((item) => item.getAttribute('data-chart-range') === chartKey);
+                return select?.value || 'monthly';
+            };
+
+            const byRange = (series, chartKey) => {
+                if (!Array.isArray(series)) return [];
+                const range = getRangeValue(chartKey);
+                if (range === 'weekly') {
+                    return series.slice(-7);
+                }
+                return series;
+            };
+
+            const renderStats = () => {
+                const values = {
+                    total_users: state.users?.total_users ?? 0,
+                    active_users_24h: state.users?.active_users_24h ?? 0,
+                    total_available_spots: state.parking?.total_available_spots ?? 0,
+                    total_booked_spots: state.parking?.total_booked_spots ?? 0,
+                };
+
+                Object.entries(values).forEach(([key, value]) => {
+                    const node = document.querySelector(`[data-stat-key="${key}"]`);
+                    if (node) {
+                        node.textContent = numberFormatter.format(value);
+                    }
+                });
+            };
+
+            const renderNotifications = () => {
+                if (!notificationItems) return;
+                const dailyCount = (state.bookings?.daily_bookings || []).reduce((sum, item) => sum + Number(item.count || 0), 0);
+                const monthlyRevenue = state.payments?.total_revenue ?? 0;
+                const items = [
+                    { label: 'Total users', value: numberFormatter.format(state.users?.total_users ?? 0) },
+                    { label: 'Active users', value: numberFormatter.format(state.users?.active_users_24h ?? 0) },
+                    { label: 'Bookings in range', value: numberFormatter.format(dailyCount) },
+                    { label: 'Revenue', value: `Rs ${currencyFormatter.format(monthlyRevenue)}` },
+                ];
+
+                notificationItems.innerHTML = items.map((item) => `
+                    <div class="admin-notification-item">
+                        <span>${item.label}</span>
+                        <strong>${item.value}</strong>
+                    </div>
+                `).join('');
+
+                if (notificationDot) {
+                    notificationDot.classList.remove('d-none');
+                }
+            };
+
+            const renderPopularLots = () => {
+                if (!popularLotsList) return;
+                const lots = state.bookings?.popular_lots || [];
+                const query = (searchInput?.value || '').trim().toLowerCase();
+                const filteredLots = lots.filter((lot) => {
+                    if (!query) return true;
+                    return `${lot.name} ${lot.city}`.toLowerCase().includes(query);
+                });
+
+                if (!filteredLots.length) {
+                    popularLotsList.querySelector('.lots-loading')?.classList.add('d-none');
+                    popularLotsEmpty?.classList.remove('d-none');
+                    popularLotsEmpty.textContent = query ? 'No parking lots match your search.' : 'No parking lot data available yet.';
+                    return;
+                }
+
+                popularLotsEmpty?.classList.add('d-none');
+                const rows = filteredLots.map((lot) => `
+                    <div class="lot-row">
+                        <div class="lot-row-top">
+                            <div>
+                                <h5>${lot.name}</h5>
+                                <small>${lot.city}</small>
+                            </div>
+                            <span>${numberFormatter.format(lot.bookings)} bookings</span>
+                        </div>
+                        <div class="lot-row-meta">
+                            <span>${numberFormatter.format(lot.occupied)} occupied</span>
+                            <span>${numberFormatter.format(lot.available)} available</span>
+                        </div>
+                        <div class="progress lot-progress">
+                            <div class="progress-bar" style="width:${lot.occupancy}%"></div>
+                        </div>
+                    </div>
+                `).join('');
+                popularLotsList.innerHTML = rows;
+            };
+
+            const renderCharts = () => {
+                const usage = byRange(state.bookings?.daily_bookings || [], 'usage');
+                if (usage.length) {
+                    createLineChart(
+                        'parkingUsageChart',
+                        'usage',
+                        usage.map((item) => item.label),
+                        [{
+                            label: 'Bookings',
+                            values: usage.map((item) => Number(item.count || 0)),
+                            stroke: '#7c3aed',
+                            fill: {
+                                start: 'rgba(99, 102, 241, 0.35)',
+                                end: 'rgba(139, 92, 246, 0.03)',
+                            },
+                        }],
+                        (value) => numberFormatter.format(value)
+                    );
+                } else {
+                    showChartEmpty('usage', 'No booking data available yet.');
+                }
+
+                const revenue = byRange(state.payments?.monthly_revenue || [], 'revenue');
+                if (revenue.length) {
+                    const currentRevenue = revenue.map((item) => Number(item.revenue || 0));
+                    const comparisonRevenue = currentRevenue.map((_, index) => {
+                        const prevValue = currentRevenue[index - 1];
+                        return Number(prevValue ?? 0);
+                    });
+                    createLineChart(
+                        'revenueChart',
+                        'revenue',
+                        revenue.map((item) => item.label),
+                        [
+                            {
+                                label: 'Current',
+                                values: currentRevenue,
+                                stroke: '#6366f1',
+                                fill: {
+                                    start: 'rgba(99, 102, 241, 0.30)',
+                                    end: 'rgba(99, 102, 241, 0.02)',
+                                },
+                            },
+                            {
+                                label: 'Comparison',
+                                values: comparisonRevenue,
+                                stroke: '#f59e0b',
+                                fill: null,
+                            },
+                        ],
+                        (value) => `Rs ${currencyFormatter.format(value)}`
+                    );
+                } else {
+                    showChartEmpty('revenue', 'No payment data available yet.');
+                }
+
+                const duration = byRange(state.bookings?.duration_series || [], 'duration');
+                if (duration.length) {
+                    createBarChart(
+                        'durationChart',
+                        'duration',
+                        duration.map((item) => item.label),
+                        duration.map((item) => Number(item.hours || 0)),
+                        'rgba(124, 58, 237, 0.86)'
+                    );
+                } else {
+                    showChartEmpty('duration', 'No duration data available yet.');
+                }
+            };
+
+            const fetchJson = async (url) => {
+                const response = await fetch(url, { headers: { Accept: 'application/json' } });
+                if (!response.ok) {
+                    throw new Error(`Request failed for ${url}`);
+                }
+                return response.json();
+            };
+
+            const loadDashboard = async () => {
+                try {
+                    const [users, parking, bookings, payments] = await Promise.all([
+                        fetchJson('/api/users'),
+                        fetchJson('/api/parking'),
+                        fetchJson('/api/bookings'),
+                        fetchJson('/api/payments'),
+                    ]);
+
+                    state.users = users;
+                    state.parking = parking;
+                    state.bookings = bookings;
+                    state.payments = payments;
+
+                    renderStats();
+                    renderNotifications();
+                    renderPopularLots();
+                    renderCharts();
+
+                    document.querySelectorAll('[data-stat-skeleton]').forEach((node) => node.classList.add('d-none'));
+                    ['usage', 'revenue', 'duration'].forEach((key) => {
+                        document.querySelectorAll(`[data-chart-loading="${key}"]`).forEach((node) => node.classList.add('d-none'));
+                    });
+                } catch (error) {
+                    document.querySelectorAll('[data-stat-skeleton]').forEach((node) => node.classList.add('d-none'));
+                    ['usage', 'revenue', 'duration'].forEach((key) => {
+                        showChartEmpty(key, 'Unable to load data right now.');
+                    });
+                    if (popularLotsEmpty) {
+                        popularLotsEmpty.classList.remove('d-none');
+                        popularLotsEmpty.textContent = 'Unable to load parking lot data right now.';
+                    }
+                    if (notificationItems) {
+                        notificationItems.innerHTML = '<div class="admin-dropdown-empty">Unable to load dashboard metrics.</div>';
+                    }
+                    console.error(error);
+                }
+            };
+
+            searchInput?.addEventListener('input', renderPopularLots);
+            chartRangeSelects.forEach((select) => {
+                select.addEventListener('change', renderCharts);
+            });
+            loadDashboard();
+        })();
+    </script>
+</body>
+
+</html>

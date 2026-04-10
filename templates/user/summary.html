@@ -345,6 +345,8 @@
                             <th class="sort-head" data-sort="vehicle_number">Vehicle <i class="bi bi-arrow-down-up"></i></th>
                             <th>Status</th>
                             <th class="sort-head" data-sort="cost_value">Cost <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sort-head" data-sort="refund_amount">Refund <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sort-head" data-sort="penalty_amount">Penalty <i class="bi bi-arrow-down-up"></i></th>
                         </tr>
                     </thead>
                     <tbody id="summaryTableBody"></tbody>
@@ -499,7 +501,7 @@
                 }
 
                 if (!records.length) {
-                    tableBody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No bookings match the selected filters.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="10" class="text-center text-muted py-4">No bookings match the selected filters.</td></tr>';
                     if (tableCountLabel) {
                         tableCountLabel.textContent = '0 bookings';
                     }
@@ -517,6 +519,8 @@
                         <td>${record.vehicle_number || '-'}</td>
                         <td><span class="status-badge ${statusClass}">${record.status}</span></td>
                         <td>${formatCurrency(record.cost_value)}</td>
+                        <td>${record.refund_amount > 0 ? '<span style="color: #10b981; font-weight: 600;">+' + formatCurrency(record.refund_amount) + '</span>' : '-'}</td>
+                        <td>${record.penalty_amount > 0 ? '<span style="color: #ef4444; font-weight: 600;">-' + formatCurrency(record.penalty_amount) + '</span>' : '-'}</td>
                     </tr>`;
                 }).join('');
 

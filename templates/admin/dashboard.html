@@ -11,60 +11,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/static/css/nav_footer.css">
     <link rel="stylesheet" href="/static/css/Dark.css">
+    <link rel="stylesheet" href="/static/css/admin_dashboard.css">
     <link rel="icon" href="/static/images/logo.png" type="image/png">
 </head>
 
-<body>
+<body class="admin-dashboard-page">
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg sticky-top shadow-sm light-glass-navbar">
-        <div class="container">
-            <!-- Brand -->
-            <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="/" target="_blank">
-                <img src="/static/images/Logo.png" alt="Logo" width="32" height="32" class="me-2">
-                FindMySpot
-            </a>
-
-            <!-- Toggler for mobile -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <!-- Navbar Links -->
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav align-items-center">
-                    <li class="nav-item mx-2">
-                        <a class="nav-link fw-semibold text-primary" href="/admin/dashboard">Dashboard</a>
-                    </li>
-                    <li class="nav-item mx-2">
-                        <a class="nav-link fw-semibold text-dark" href="/admin/search">Search</a>
-                    </li>
-                    <li class="nav-item mx-2">
-                        <a class="nav-link fw-semibold text-dark" href="/admin/summary">Summary</a>
-                    </li>
-                    <li class="nav-item mx-2 d-flex align-items-center">
-                        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme" title="Toggle dark/light theme">
-                            <i data-lucide="sun" class="icon-sun"></i>
-                            <i data-lucide="moon-star" class="icon-moon"></i>
-                        </button>
-                    </li>
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="bi bi-person fs-5"></i>
-                        </button>
-                        <ul class="dropdown-menu" style="min-width: unset; width: auto;">
-                            <li>
-                                <a href="/logout" class="dropdown-item">
-                                    <i class="bi bi-box-arrow-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    {% include 'admin/_saas_navbar.html' %}
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -77,406 +30,448 @@
     {% endif %}
     {% endwith %}
 
-    <ul class="nav nav-pills mb-3 d-flex justify-content-center mt-3" id="pills-tab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home"
-                type="button" role="tab" aria-controls="pills-home" aria-selected="true">Parking Lots</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"
-                type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Registered Users</button>
-        </li>
-    </ul>
+    <div class="admin-tabs-wrap">
+        <ul class="nav nav-pills justify-content-center" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home"
+                    type="button" role="tab" aria-controls="pills-home" aria-selected="true"><span class="admin-tab-icon">🅿️</span>Parking Lots</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"
+                    type="button" role="tab" aria-controls="pills-profile" aria-selected="false"><span class="admin-tab-icon">👤</span>Registered Users</button>
+            </li>
+        </ul>
+    </div>
     <div class="tab-content my-3" id="pills-tabContent">
         <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab"
             tabindex="0">
             <!-- Parking Lots -->
-            <div class="card shadow-sm mx-auto bigger-card" style="width:80%">
-                <div class="card-body">
-                    <div class="card-header align-items-center d-flex bg-transparent pb-3">
-                        <h5 class="card-title fw-semibold">Parking Lots</h5>
+            <div class="card shadow-sm mx-auto admin-panel-card admin-page-shell" style="width:80%">
+                <div class="card-body d-flex flex-column h-100 admin-page-body">
+                    <section class="admin-panel-header mb-3">
+                        <div class="admin-panel-title-wrap">
+                            <div class="admin-panel-icon"><i class="bi bi-p-square"></i></div>
+                            <div>
+                                <h4 class="mb-1 fw-bold">Parking Lots</h4>
+                                <p class="admin-panel-subtitle admin-lots-subtitle">Manage all parking locations</p>
+                            </div>
+                        </div>
 
-                        <!-- Button trigger modal -->
-                        <button type="button" class="btn btn-warning ms-auto" data-bs-toggle="modal"
-                            data-bs-target="#createParking">+ Create</button>
+                        <button type="button" class="admin-primary-btn" data-bs-toggle="modal"
+                            data-bs-target="#createParking">
+                            <i class="bi bi-plus-lg"></i>
+                            <span>Create</span>
+                        </button>
 
-                        <!-- Modal -->
-                        <div class="modal fade" id="createParking" tabindex="-1" aria-labelledby="exampleModalLabel"
-                            aria-hidden="true">
+                        <div class="modal fade admin-modal" id="createParking" tabindex="-1"
+                            aria-labelledby="createParkingLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Create Parking Lot</h1>
+                                        <h1 class="modal-title fs-5" id="createParkingLabel"><i class="bi bi-p-square me-2"></i>Create Parking Lot</h1>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                             aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="/parkingLots?task=create" method="POST">
-
-                                            <div class="form-floating mb-3">
-                                                <input type="text" class="form-control" id="name" placeholder="Name"
+                                        <form action="/parkingLots?task=create" method="POST" class="row g-3">
+                                            <div class="col-12">
+                                                <label class="form-label" for="create-name">Name</label>
+                                                <input type="text" class="form-control admin-form-control" id="create-name" placeholder="Name"
                                                     name="name" required>
-                                                <label for="fullname">Name</label>
                                             </div>
-
-                                            <div class="form-floating mb-3">
-                                                <input type="number" class="form-control" id="price" placeholder="Price"
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="create-price">Price</label>
+                                                <input type="number" class="form-control admin-form-control" id="create-price" placeholder="Price"
                                                     name="price" required>
-                                                <label for="price">Price</label>
                                             </div>
-
-                                            <div class="form-floating mb-3">
-                                                <input type="text" class="form-control" id="address"
-                                                    placeholder="Address" name="address" required>
-                                                <label for="address">Address</label>
-                                            </div>
-
-                                            <div class="form-floating mb-3">
-                                                <input type="text" class="form-control" id="address" placeholder="city"
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="create-city">City</label>
+                                                <input type="text" class="form-control admin-form-control" id="create-city" placeholder="City"
                                                     name="city" required>
-                                                <label for="city">City</label>
                                             </div>
-
-                                            <div class="form-floating mb-3">
-                                                <input type="number" class="form-control" id="pincode"
+                                            <div class="col-12">
+                                                <label class="form-label" for="create-address">Address</label>
+                                                <input type="text" class="form-control admin-form-control" id="create-address"
+                                                    placeholder="Address" name="address" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="create-pincode">Pincode</label>
+                                                <input type="number" class="form-control admin-form-control" id="create-pincode"
                                                     placeholder="Pincode" name="pincode" required>
-                                                <label for="pincode">Pincode</label>
                                             </div>
-
-                                            <div class="form-floating mb-3">
-                                                <input type="number" class="form-control" id="maximum_number_of_spots"
-                                                    placeholder="Maximum number of spots" name="maximum_number_of_spots"
-                                                    required>
-                                                <label for="maximum_number_of_spots">Maximum number of Spots</label>
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="create-spots">Maximum number of spots</label>
+                                                <input type="number" class="form-control admin-form-control" id="create-spots"
+                                                    placeholder="Maximum number of spots" name="maximum_number_of_spots" required>
                                             </div>
-
-                                            <div class="d-grid mb-2">
-                                                <button type="submit" class="btn btn-primary">Create</button>
+                                            <div class="col-12 d-grid">
+                                                <button type="submit" class="admin-primary-btn justify-content-center">Create</button>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </section>
+
+                    <div class="admin-control-row mb-3">
+                        <div class="input-group admin-search-input">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="search" class="form-control" id="parkingLotsSearch" placeholder="Search parking lots..." aria-label="Search parking lots">
+                        </div>
+                        <div class="dropdown">
+                            <button class="admin-filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-funnel"></i>
+                                <span>Filter</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end admin-filter-menu">
+                                <li><button class="dropdown-item admin-filter-option active" type="button" data-parking-filter="all">All lots</button></li>
+                                <li><button class="dropdown-item admin-filter-option" type="button" data-parking-filter="empty">0% occupied</button></li>
+                                <li><button class="dropdown-item admin-filter-option" type="button" data-parking-filter="low">Low occupancy</button></li>
+                                <li><button class="dropdown-item admin-filter-option" type="button" data-parking-filter="medium">Medium occupancy</button></li>
+                                <li><button class="dropdown-item admin-filter-option" type="button" data-parking-filter="high">High occupancy</button></li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="row my-2 g-3 text-center">
+
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 admin-lots-grid" id="parkingLotsGrid">
                         {% for lot in all_par %}
-                        <div class="col-4">
-                            <div class="card shadow-sm custom-card">
-                                <div class="card-body">
-                                    <strong>{{lot.prime_location_name}}</strong>
-                                    <p>(Occupied: {{ lot.spots | selectattr('status', 'equalto', 'O') | list | length
-                                        }}/{{lot.maximum_number_of_spots}})</p>
-                                    <div class="btn-group btn-group-sm" role="group"
-                                        aria-label="Basic outlined example">
-                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
-                                            data-bs-target="#editParking-{{lot.id}}">Edit</button>
-                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
-                                            data-bs-target="#viewParking-{{lot.id}}">View</button>
-                                        <!-- Conditionally show Delete button -->
-                                        {% set occupied_count = lot.spots | selectattr('status', 'equalto', 'O') | list
-                                        |
-                                        length %}
-                                        {% if occupied_count == 0 and lot.reserved_parking_spot|length == 0 %}
-                                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
-                                            data-bs-target="#deleteParking-{{lot.id}}">
-                                            <i class="bi bi-trash-fill"></i>
+                        {% set occupied_count = lot.spots | selectattr('status', 'equalto', 'O') | list | length %}
+                        {% set occupancy_ratio = (occupied_count * 100 / lot.maximum_number_of_spots) if lot.maximum_number_of_spots else 0 %}
+                        <div class="col" data-parking-item data-parking-name="{{ lot.prime_location_name | lower }} {{ lot.address | lower }} {{ lot.city | lower }}">
+                            <div class="card h-100 parking-lot-card shadow-sm" data-occupancy="{{ occupancy_ratio|round(0) }}">
+                                <div class="card-body p-4 d-flex flex-column h-100">
+                                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                                        <div>
+                                            <div class="parking-lot-name fs-5">{{ lot.prime_location_name }}</div>
+                                            <div class="parking-lot-meta mt-2">
+                                                <span><i class="bi bi-geo-alt me-1"></i>{{ lot.city }}</span>
+                                                <span><i class="bi bi-pin-map me-1"></i>{{ lot.pin_code }}</span>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-toggle="modal"
+                                            data-bs-target="#viewParking-{{lot.id}}">
+                                            View
                                         </button>
-                                        {% endif %}
                                     </div>
 
-                                    <!-- Modal for Edit -->
-                                    <div class="modal fade" id="editParking-{{lot.id}}" tabindex="-1"
-                                        aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Parking Lot
-                                                    </h1>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <form action="/parkingLots?task=edit" method="POST">
-
-                                                        <div class="form-floating mb-3">
-                                                            <input type="text" class="form-control" id="name"
-                                                                placeholder="Name" name="name"
-                                                                value="{{lot.prime_location_name}}" required>
-                                                            <label for="fullname">Name</label>
-                                                        </div>
-
-                                                        <div class="form-floating mb-3">
-                                                            <input type="number" class="form-control" id="price"
-                                                                placeholder="Price" name="price" value="{{lot.price}}"
-                                                                required>
-                                                            <label for="price">Price</label>
-                                                        </div>
-
-                                                        <div class="form-floating mb-3">
-                                                            <input type="text" class="form-control" id="address"
-                                                                placeholder="Address" value="{{lot.address}}"
-                                                                name="address" required>
-                                                            <label for="address">Address</label>
-                                                        </div>
-
-                                                        <div class="form-floating mb-3">
-                                                            <input type="text" class="form-control" id="address"
-                                                                placeholder="city" name="city" value="{{lot.city}}"
-                                                                required>
-                                                            <label for="city">City</label>
-                                                        </div>
-
-                                                        <div class="form-floating mb-3">
-                                                            <input type="number" class="form-control" id="pincode"
-                                                                placeholder="Pincode" name="pincode"
-                                                                value="{{lot.pin_code}}" required>
-                                                            <label for="pincode">Pincode</label>
-                                                        </div>
-
-                                                        <div class="form-floating mb-3">
-                                                            <input type="number" class="form-control"
-                                                                id="maximum_number_of_spots"
-                                                                placeholder="Maximum number of spots"
-                                                                name="maximum_number_of_spots"
-                                                                value="{{lot.maximum_number_of_spots}}" required>
-                                                            <label for="maximum_number_of_spots">Maximum number of
-                                                                Spots</label>
-                                                        </div>
-
-                                                        <div class="d-grid mb-2">
-                                                            <button type="submit" class="btn btn-primary">Edit</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div class="mb-2 d-flex justify-content-between align-items-center small text-muted">
+                                        <span>Occupancy</span>
+                                        <span>{{ occupied_count }} / {{ lot.maximum_number_of_spots }} occupied</span>
+                                    </div>
+                                    <div class="progress parking-lot-progress mb-3">
+                                        <div class="progress-bar {% if occupancy_ratio < 35 %}bg-success{% elif occupancy_ratio < 70 %}bg-warning{% else %}bg-danger{% endif %}"
+                                            data-occupancy-width="{{ occupancy_ratio|round(0) }}" role="progressbar" aria-valuenow="{{ occupancy_ratio|round(0) }}" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
 
-                                    <!-- Model for View -->
-                                    <div class="modal fade" id="viewParking-{{lot.id}}" aria-hidden="true"
-                                        aria-labelledby="exampleModalToggleLabel" tabindex="-1">
-                                        <div
-                                            class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h1 class="modal-title fs-4" id="viewParkingLabel-{{lot.id}}">
-                                                        {{lot.prime_location_name}}</h1>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="row">
-                                                        <div class="col-6 d-flex mb-1">
-                                                            <div class="fw-semibold">Price:&nbsp</div>
-                                                            <div>{{lot.price}}</div>
-                                                        </div>
-                                                        <div class="col-6 d-flex mb-1">
-                                                            <div class="fw-semibold">Location:&nbsp</div>
-                                                            <div>{{lot.address}}</div>
-                                                        </div>
-                                                        <div class="col-6 d-flex mb-1">
-                                                            <div class="fw-semibold">City:&nbsp</div>
-                                                            <div>{{lot.city}}</div>
-                                                        </div>
-                                                        <div class="col-6 d-flex mb-1">
-                                                            <div class="fw-semibold">Pincode:&nbsp</div>
-                                                            <div>{{lot.pin_code}}</div>
-                                                        </div>
-                                                        <div class="col-12 d-flex mb-3">
-                                                            <div class="fw-semibold">Maximum Number of Spots:&nbsp</div>
-                                                            <div>{{lot.maximum_number_of_spots}}</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="card mx-auto mb-4" style="width:90%">
-                                                        <div class="card-body">
-                                                            <h5 class="mb-3">Parking Spots</h5>
-                                                            <div class=" row g-2">
-                                                                {% for spot in lot.spots %}
-                                                                <div class="col">
-                                                                    <button
-                                                                        class="btn {% if spot.status == 'A' %}btn-success{% else %}btn-danger{% endif %} rounded-pill"
-                                                                        data-bs-target="#spotModal-{{ lot.id }}-{{ spot.id }}"
-                                                                        data-bs-toggle="modal">
-                                                                        {{ spot.status }}
-                                                                    </button>
-                                                                </div>
-                                                                {% endfor %}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div class="mb-3 small text-muted text-truncate">{{ lot.address }}</div>
+
+                                    <div class="parking-lot-actions mt-auto">
+                                        <button type="button" class="btn btn-outline-primary btn-sm admin-outline-btn" data-bs-toggle="modal"
+                                            data-bs-target="#editParking-{{lot.id}}">Edit</button>
+                                        <button type="button" class="btn btn-secondary btn-sm admin-secondary-btn" data-bs-toggle="modal"
+                                            data-bs-target="#viewParking-{{lot.id}}">View</button>
+                                        <button type="button" class="admin-icon-btn text-danger border-danger" data-bs-toggle="modal"
+                                            data-bs-target="#deleteParking-{{lot.id}}" aria-label="Delete parking lot">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </div>
-
-                                    <!-- Model for Delete -->
-                                    <div class="modal fade" id="deleteParking-{{lot.id}}" aria-hidden="true"
-                                        aria-labelledby="exampleModalToggleLabel" tabindex="-1">
-                                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h1 class="modal-title fs-4" id="deleteParkingLabel-{{lot.id}}">
-                                                        {{lot.prime_location_name}}</h1>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <h6>Are you sure you want to delete this parking lot ??</h6>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <form action="/delete_parking/{{ lot.id }}" method="POST">
-                                                        <button class="btn btn-danger">Yes</button>
-                                                    </form>
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">No</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {% for spot in lot.spots %}
-                                    <div class="modal fade" id="spotModal-{{ lot.id }}-{{ spot.id }}" tabindex="-1"
-                                        aria-labelledby="spotModalLabel-{{ lot.id }}-{{ spot.id }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title"
-                                                        id="spotModalLabel-{{ lot.id }}-{{ spot.id }}">Spot #{{ spot.id
-                                                        }}</h5>
-                                                    <!-- <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button> -->
-                                                    <button type="button" class="btn-close"
-                                                        onclick="closeBothModals('{{ lot.id }}', '{{ spot.id }}')">
-                                                    </button>
-
-                                                </div>
-
-                                                <div class="modal-body">
-                                                    <p><strong>Status:</strong> {{ spot.status }}</p>
-                                                    {% set active_res = spot.reserved_parking_spot |
-                                                    selectattr('leaving_timestamp', 'equalto', 'Not yet left') | list %}
-                                                    {% if active_res %}
-                                                    {% set res = active_res[0] %}
-                                                    <p><strong>Reserved By:</strong> {{ res.user.name }}</p>
-                                                    <p><strong>From:</strong> {{ res.parking_timestamp }}</p>
-                                                    <p><strong>To:</strong> Ongoing</p>
-                                                    <p><strong>Cost Rate:</strong> ₹{{ res.parkingCost_unitTime }}</p>
-                                                    {% else %}
-                                                    <p>This spot is currently available.</p>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-
                                 </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-12">
+                            <div class="admin-empty-card p-5 text-center">
+                                <div class="admin-users-empty-icon"><i class="bi bi-p-square"></i></div>
+                                <h5 class="fw-bold mb-2">No parking lots available</h5>
+                                <p class="text-muted mb-3">Create your first parking location to start managing spots.</p>
+                                <button type="button" class="admin-primary-btn" data-bs-toggle="modal" data-bs-target="#createParking">
+                                    <i class="bi bi-plus-lg"></i>
+                                    <span>Create parking lot</span>
+                                </button>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
+
+                    {% for lot in all_par %}
+                    <div class="modal fade admin-modal" id="editParking-{{lot.id}}" tabindex="-1" aria-labelledby="editParkingLabel-{{lot.id}}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="editParkingLabel-{{lot.id}}"><i class="bi bi-pencil-square me-2"></i>Edit Parking Lot</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="/parkingLots?task=edit" method="POST" class="row g-3">
+                                        <div class="col-12">
+                                            <label class="form-label" for="edit-name-{{lot.id}}">Name</label>
+                                            <input type="text" class="form-control admin-form-control" id="edit-name-{{lot.id}}" name="name" value="{{lot.prime_location_name}}" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="edit-price-{{lot.id}}">Price</label>
+                                            <input type="number" class="form-control admin-form-control" id="edit-price-{{lot.id}}" name="price" value="{{lot.price}}" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="edit-city-{{lot.id}}">City</label>
+                                            <input type="text" class="form-control admin-form-control" id="edit-city-{{lot.id}}" name="city" value="{{lot.city}}" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label" for="edit-address-{{lot.id}}">Address</label>
+                                            <input type="text" class="form-control admin-form-control" id="edit-address-{{lot.id}}" name="address" value="{{lot.address}}" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="edit-pincode-{{lot.id}}">Pincode</label>
+                                            <input type="number" class="form-control admin-form-control" id="edit-pincode-{{lot.id}}" name="pincode" value="{{lot.pin_code}}" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="edit-spots-{{lot.id}}">Maximum number of spots</label>
+                                            <input type="number" class="form-control admin-form-control" id="edit-spots-{{lot.id}}" name="maximum_number_of_spots" value="{{lot.maximum_number_of_spots}}" required>
+                                        </div>
+                                        <div class="col-12 d-grid">
+                                            <button type="submit" class="admin-primary-btn justify-content-center">Save changes</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade admin-modal" id="viewParking-{{lot.id}}" aria-hidden="true" aria-labelledby="viewParkingLabel-{{lot.id}}" tabindex="-1">
+                        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="viewParkingLabel-{{lot.id}}"><i class="bi bi-eye me-2"></i>{{lot.prime_location_name}}</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6"><strong>Price:</strong> ₹{{lot.price}}</div>
+                                        <div class="col-md-6"><strong>Location:</strong> {{lot.address}}</div>
+                                        <div class="col-md-6"><strong>City:</strong> {{lot.city}}</div>
+                                        <div class="col-md-6"><strong>Pincode:</strong> {{lot.pin_code}}</div>
+                                        <div class="col-12"><strong>Maximum Number of Spots:</strong> {{lot.maximum_number_of_spots}}</div>
+                                    </div>
+                                    <div class="card admin-control-card mb-0">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h5 class="mb-0">Parking Spots</h5>
+                                                <div class="admin-parking-spots-legend">
+                                                    <span><i class="bi bi-circle-fill text-success"></i>A = Available</span>
+                                                    <span><i class="bi bi-circle-fill text-danger"></i>O = Occupied</span>
+                                                </div>
+                                            </div>
+                                            <div class="row row-cols-4 row-cols-sm-6 row-cols-md-8 g-2 justify-content-center text-center">
+                                                {% for spot in lot.spots %}
+                                                <div class="col d-flex justify-content-center">
+                                                    <button class="btn {% if spot.status == 'A' %}btn-success{% else %}btn-danger{% endif %} admin-spot-btn"
+                                                        data-bs-target="#spotModal-{{ lot.id }}-{{ spot.id }}" data-bs-toggle="modal" aria-label="Spot {{ spot.id }} status {{ spot.status }}">
+                                                        {{ spot.status }}
+                                                    </button>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade admin-modal" id="deleteParking-{{lot.id}}" aria-hidden="true" aria-labelledby="deleteParkingLabel-{{lot.id}}" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="deleteParkingLabel-{{lot.id}}"><i class="bi bi-trash me-2"></i>Delete Parking Lot?</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="mb-0">Are you sure you want to delete this parking lot? This action cannot be undone.</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <form action="/delete_parking/{{ lot.id }}" method="POST" class="d-inline">
+                                        <button class="btn btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% for spot in lot.spots %}
+                    <div class="modal fade admin-modal" id="spotModal-{{ lot.id }}-{{ spot.id }}" tabindex="-1" aria-labelledby="spotModalLabel-{{ lot.id }}-{{ spot.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="spotModalLabel-{{ lot.id }}-{{ spot.id }}"><i class="bi bi-p-square me-2"></i>Spot #{{ spot.id }}</h5>
+                                    <button type="button" class="btn-close" onclick="closeBothModals('{{ lot.id }}', '{{ spot.id }}')"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p><strong>Status:</strong> {{ spot.status }}</p>
+                                    {% set active_res = spot.reserved_parking_spot | selectattr('leaving_timestamp', 'equalto', 'Not yet left') | list %}
+                                    {% if active_res %}
+                                    {% set res = active_res[0] %}
+                                    <p><strong>Reserved By:</strong> {{ res.user.name }}</p>
+                                    <p><strong>From:</strong> {{ res.parking_timestamp }}</p>
+                                    <p><strong>To:</strong> Ongoing</p>
+                                    <p><strong>Cost Rate:</strong> ₹{{ res.parkingCost_unitTime }}</p>
+                                    {% else %}
+                                    <p>This spot is currently available.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% endfor %}
                 </div>
             </div>
         </div>
         <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
             <!-- Registered Users -->
-            <div class="card shadow-sm mx-auto" style="width:80%">
-                <div class="card-body">
-                    <div class="card-header text-center">
-                        <h5 class="card-title">Registered Users</h5>
+            <div class="card shadow-sm mx-auto admin-panel-card admin-users-shell" style="width:80%">
+                <div class="card-body d-flex flex-column h-100">
+                    <section class="admin-panel-header mb-3">
+                        <div class="admin-panel-title-wrap">
+                            <div class="admin-panel-icon"><i class="bi bi-people"></i></div>
+                            <div>
+                                <h4 class="mb-1 fw-bold">Registered Users</h4>
+                                <p class="admin-panel-subtitle admin-users-subtitle mb-0">Browse all user accounts and history</p>
+                            </div>
+                        </div>
+
+                        <div class="dropdown">
+                            <button class="admin-filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-sliders"></i>
+                                <span>Filters</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end admin-filter-menu">
+                                <li><button class="dropdown-item admin-filter-option active" type="button" data-user-filter="all">All users</button></li>
+                                <li><button class="dropdown-item admin-filter-option" type="button" data-user-filter="recent">Recent only</button></li>
+                                <li><button class="dropdown-item admin-filter-option" type="button" data-user-filter="has-history">With history</button></li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <div class="admin-control-row mb-3">
+                        <div class="input-group admin-search-input">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="search" class="form-control" id="usersSearch" placeholder="Search users by name, email, city..." aria-label="Search users">
+                        </div>
+                        <div class="dropdown">
+                            <button class="admin-filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-sort-down"></i>
+                                <span>Sort</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end admin-filter-menu">
+                                <li><button class="dropdown-item admin-filter-option active" type="button" data-user-sort="newest">Newest first</button></li>
+                                <li><button class="dropdown-item admin-filter-option" type="button" data-user-sort="oldest">Oldest first</button></li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th scope="col">ID</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Email</th>
-                                <th scope="col">Phone</th>
-                                <th scope="col">City</th>
-                                <th scope="col">Pincode</th>
-                                <th scope="col" class="text-center">History</th>
-                                <th scope="col" class="text-center">Report</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user in all_users %}
-                            <tr>
-                                <th scope="row">{{user.id}}</th>
-                                <td>{{user.name}}</td>
-                                <td>{{user.email}}</td>
-                                <td>{{user.phone}}</td>
-                                <td>{{user.city}}</td>
-                                <td>{{user.pincode}}</td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal"
-                                        data-bs-target="#historyModal-{{ user.id }}">
-                                        <i class="bi bi-hourglass"></i>
-                                    </button>
-
-                                    <!-- modal for each user history-->
-                                    <div class="modal fade" id="historyModal-{{ user.id }}" tabindex="-1"
-                                        aria-labelledby="historyModalLabel-{{ user.id }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="historyModalLabel-{{ user.id }}">
-                                                        Parking History - {{ user.name }}
-                                                    </h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
+                    <div class="admin-users-table-wrap admin-table-card">
+                        <table class="table table-hover align-middle mb-0 admin-users-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">S.no</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Phone</th>
+                                    <th scope="col">City</th>
+                                    <th scope="col">Pincode</th>
+                                    <th scope="col" class="text-center">History</th>
+                                    <th scope="col" class="text-center">Report</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in all_users %}
+                                <tr data-user-row data-user-name="{{ user.name | lower }} {{ user.email | lower }} {{ user.city | lower }}" data-user-id="{{ user.id }}" data-history-count="{{ user_histories[user.id] | length }}">
+                                    <td class="admin-user-seq">{{ loop.index }}</td>
+                                    <th scope="row">{{user.id}}</th>
+                                    <td>
+                                        <div class="admin-user-cell">
+                                            <div>
+                                                <div class="admin-user-name-row">
+                                                    <span class="admin-user-name">{{user.name}}</span>
+                                                    <span class="admin-user-badge active">Active user</span>
                                                 </div>
-                                                <div class="modal-body">
-                                                    {% if user_histories[user.id] %}
-                                                    <table class="table table-bordered">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Lot</th>
-                                                                <th>Spot</th>
-                                                                <th>City</th>
-                                                                <th>Start</th>
-                                                                <th>End</th>
-                                                                <th>Vehicle</th>
-                                                                <th>Status</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {% for booking in user_histories[user.id] %}
-                                                            <tr>
-                                                                <td>{{ booking.Parking_Lot.prime_location_name }}
-                                                                </td>
-                                                                <td>{{ booking.Parking_Spot.id }}</td>
-                                                                <td>{{ booking.Parking_Lot.city }}</td>
-                                                                <td>{{ booking.parking_timestamp }}</td>
-                                                                <td>{{ booking.leaving_timestamp }}</td>
-                                                                <td>{{ booking.vehicle_number }}</td>
-                                                                <td>
-                                                                    {% if booking.leaving_timestamp == 'Not yet left' %}
-                                                                    <span class="badge bg-warning">Active</span>
-                                                                    {% else %}
-                                                                    <span class="badge bg-success">Completed</span>
-                                                                    {% endif %}
-                                                                </td>
-                                                            </tr>
-                                                            {% endfor %}
-                                                        </tbody>
-                                                    </table>
-                                                    {% else %}
-                                                    <p>No history found for this user.</p>
-                                                    {% endif %}
+                                                <div class="admin-user-subtext">Joined account</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="admin-user-email">{{user.email}}</td>
+                                    <td>{{user.phone}}</td>
+                                    <td>{{user.city}}</td>
+                                    <td>{{user.pincode}}</td>
+                                    <td class="text-center">
+                                        <button type="button" class="admin-user-history-btn" data-bs-toggle="modal"
+                                            data-bs-target="#historyModal-{{ user.id }}" aria-label="View parking history">
+                                            <i data-lucide="clock-3"></i>
+                                        </button>
+
+                                        <div class="modal fade admin-modal" id="historyModal-{{ user.id }}" tabindex="-1"
+                                            aria-labelledby="historyModalLabel-{{ user.id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="historyModalLabel-{{ user.id }}"><i class="bi bi-clock-history me-2"></i>Parking History - {{ user.name }}</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        {% if user_histories[user.id] %}
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Lot</th>
+                                                                    <th>Spot</th>
+                                                                    <th>City</th>
+                                                                    <th>Start</th>
+                                                                    <th>End</th>
+                                                                    <th>Vehicle</th>
+                                                                    <th>Status</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for booking in user_histories[user.id] %}
+                                                                <tr>
+                                                                    <td>{{ booking.Parking_Lot.prime_location_name }}</td>
+                                                                    <td>{{ booking.Parking_Spot.id }}</td>
+                                                                    <td>{{ booking.Parking_Lot.city }}</td>
+                                                                    <td>{{ booking.parking_timestamp }}</td>
+                                                                    <td>{{ booking.leaving_timestamp }}</td>
+                                                                    <td>{{ booking.vehicle_number }}</td>
+                                                                    <td>
+                                                                        {% if booking.leaving_timestamp == 'Not yet left' %}
+                                                                        <span class="badge bg-warning">Active</span>
+                                                                        {% else %}
+                                                                        <span class="badge bg-success">Completed</span>
+                                                                        {% endif %}
+                                                                    </td>
+                                                                </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                        {% else %}
+                                                        <p>No history found for this user.</p>
+                                                        {% endif %}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    <a href="/admin/user-report-pdf/{{ user.id }}" class="btn btn-outline-primary btn-sm">PDF</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="/admin/user-report-pdf/{{ user.id }}" class="admin-user-report-btn btn-sm" aria-label="Download PDF" title="PDF">
+                                            <i data-lucide="file-text"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -486,9 +481,131 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
         crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/saas-navbar.js?v=20260410c"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        (() => {
+            const parkingSearch = document.getElementById('parkingLotsSearch');
+            const parkingItems = Array.from(document.querySelectorAll('[data-parking-item]'));
+            const parkingFilters = Array.from(document.querySelectorAll('[data-parking-filter]'));
+            const userSearch = document.getElementById('usersSearch');
+            const userRows = Array.from(document.querySelectorAll('[data-user-row]'));
+            const userFilterButtons = Array.from(document.querySelectorAll('[data-user-filter]'));
+            const userSortButtons = Array.from(document.querySelectorAll('[data-user-sort]'));
+
+            let parkingFilter = 'all';
+            let userFilter = 'all';
+            let userSort = 'newest';
+
+            const setActive = (buttons, attribute, value) => {
+                buttons.forEach((button) => {
+                    button.classList.toggle('active', button.getAttribute(attribute) === value);
+                });
+            };
+
+            const getParkingBucket = (percent) => {
+                if (percent <= 0) return 'empty';
+                if (percent < 35) return 'low';
+                if (percent < 70) return 'medium';
+                return 'high';
+            };
+
+            const applyParkingFilters = () => {
+                const query = (parkingSearch?.value || '').trim().toLowerCase();
+                parkingItems.forEach((item) => {
+                    const card = item.querySelector('[data-occupancy]');
+                    const name = item.getAttribute('data-parking-name') || '';
+                    const occupancy = Number(card?.getAttribute('data-occupancy') || '0');
+                    const bucket = getParkingBucket(occupancy);
+                    const matchesQuery = !query || name.includes(query);
+                    const matchesFilter = parkingFilter === 'all' || bucket === parkingFilter;
+                    item.classList.toggle('d-none', !(matchesQuery && matchesFilter));
+                });
+            };
+
+            document.querySelectorAll('.progress-bar[data-occupancy-width]').forEach((bar) => {
+                bar.style.width = `${bar.getAttribute('data-occupancy-width') || '0'}%`;
+            });
+
+            const sortUserRows = () => {
+                const ordered = [...userRows].sort((left, right) => {
+                    const leftId = Number(left.getAttribute('data-user-id') || '0');
+                    const rightId = Number(right.getAttribute('data-user-id') || '0');
+                    return userSort === 'oldest' ? leftId - rightId : rightId - leftId;
+                });
+
+                const tbody = userRows[0]?.parentElement;
+                if (tbody) {
+                    ordered.forEach((row) => tbody.appendChild(row));
+                }
+
+                return ordered;
+            };
+
+            const renumberVisibleRows = (rows) => {
+                let sequence = 1;
+                rows.forEach((row) => {
+                    if (row.classList.contains('d-none')) {
+                        return;
+                    }
+                    const seqCell = row.querySelector('.admin-user-seq');
+                    if (seqCell) {
+                        seqCell.textContent = String(sequence);
+                    }
+                    sequence += 1;
+                });
+            };
+
+            const applyUserFilters = () => {
+                const query = (userSearch?.value || '').trim().toLowerCase();
+                const orderedRows = sortUserRows();
+                const recentThreshold = Math.max(0, orderedRows.length - 5);
+
+                orderedRows.forEach((row, index) => {
+                    const name = row.getAttribute('data-user-name') || '';
+                    const historyCount = Number(row.getAttribute('data-history-count') || '0');
+                    const matchesQuery = !query || name.includes(query);
+                    const matchesFilter = userFilter === 'all'
+                        || (userFilter === 'has-history' && historyCount > 0)
+                        || (userFilter === 'recent' && index >= recentThreshold);
+                    row.classList.toggle('d-none', !(matchesQuery && matchesFilter));
+                });
+
+                renumberVisibleRows(orderedRows);
+            };
+
+            parkingSearch?.addEventListener('input', applyParkingFilters);
+            parkingFilters.forEach((button) => {
+                button.addEventListener('click', () => {
+                    parkingFilter = button.getAttribute('data-parking-filter') || 'all';
+                    setActive(parkingFilters, 'data-parking-filter', parkingFilter);
+                    applyParkingFilters();
+                });
+            });
+
+            userSearch?.addEventListener('input', applyUserFilters);
+            userFilterButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    userFilter = button.getAttribute('data-user-filter') || 'all';
+                    setActive(userFilterButtons, 'data-user-filter', userFilter);
+                    applyUserFilters();
+                });
+            });
+            userSortButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    userSort = button.getAttribute('data-user-sort') || 'newest';
+                    setActive(userSortButtons, 'data-user-sort', userSort);
+                    applyUserFilters();
+                });
+            });
+
+            applyParkingFilters();
+            applyUserFilters();
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        })();
+    </script>
     <script src="/static/js/theme-toggle.js"></script>
     <script src="/static/js/flash-alerts.js"></script>
 </body>
