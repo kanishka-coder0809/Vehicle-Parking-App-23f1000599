@@ -1,8 +1,10 @@
 .admin-dashboard-page {
 	min-height: 100vh;
-	overflow: hidden;
+	overflow-y: auto;
+	overflow-x: hidden;
 	display: flex;
 	flex-direction: column;
+	padding-bottom: 40px;
 	background:
 		radial-gradient(circle at top left, rgba(139, 92, 246, 0.12), transparent 28%),
 		radial-gradient(circle at top right, rgba(91, 141, 239, 0.10), transparent 24%),
@@ -19,12 +21,12 @@ html[data-theme="dark"] .admin-dashboard-page {
 .admin-dashboard-page .tab-content {
 	flex: 1;
 	min-height: 0;
-	overflow: hidden;
+	overflow: visible;
 }
 
 .admin-dashboard-page .tab-pane {
 	min-height: 0;
-	overflow: hidden;
+	overflow: visible;
 }
 
 .admin-tabs-wrap {
@@ -89,6 +91,161 @@ html[data-theme="dark"] .admin-tabs-wrap .nav-pills {
 	flex-direction: column;
 	gap: 0.95rem;
 	overflow: hidden;
+}
+
+.admin-lots-shell {
+	height: auto;
+	min-height: auto;
+	overflow: visible;
+	padding-bottom: 1.4rem;
+}
+
+.parking-hero-card {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1rem;
+	padding: 1.15rem 1.2rem;
+	border-radius: 18px;
+	background: linear-gradient(135deg, rgba(111, 75, 255, 0.96), rgba(170, 95, 255, 0.9));
+	color: #f9f7ff;
+	box-shadow: 0 18px 34px rgba(90, 56, 188, 0.3);
+}
+
+.parking-hero-kicker {
+	font-size: 0.76rem;
+	font-weight: 700;
+	padding: 0.22rem 0.65rem;
+	display: inline-flex;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.15);
+}
+
+.parking-hero-subtitle {
+	opacity: 0.88;
+}
+
+.parking-hero-right {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+.parking-quick-stats {
+	display: flex;
+	gap: 0.55rem;
+	flex-wrap: wrap;
+}
+
+.parking-quick-stat {
+	padding: 0.45rem 0.65rem;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.15);
+	display: grid;
+	gap: 0.1rem;
+	min-width: 88px;
+}
+
+.parking-quick-stat span {
+	font-size: 0.7rem;
+	opacity: 0.86;
+}
+
+.parking-quick-stat strong {
+	font-size: 0.95rem;
+}
+
+.parking-create-btn {
+	background: linear-gradient(135deg, #ffffff, #f2e9ff);
+	color: #5b33d6;
+	box-shadow: 0 10px 20px rgba(43, 24, 108, 0.22);
+}
+
+.parking-create-btn:hover {
+	color: #4b27c5;
+}
+
+.parking-search-filter {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 0.8rem;
+	align-items: center;
+}
+
+.parking-search-full .form-control,
+.parking-search-full .input-group-text {
+	min-height: 46px;
+}
+
+.parking-filter-btn {
+	min-width: 120px;
+}
+
+.parking-filter-panel {
+	min-width: 320px;
+	max-width: 360px;
+}
+
+.parking-filter-panel .form-select,
+.parking-filter-panel .form-range {
+	border-color: rgba(111, 75, 255, 0.16);
+}
+
+.admin-lots-skeleton-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 1rem;
+	margin-bottom: 0.4rem;
+}
+
+.admin-lot-skeleton-card {
+	padding: 1rem;
+	border-radius: 16px;
+	border: 1px solid rgba(111, 75, 255, 0.12);
+	background: rgba(255, 255, 255, 0.82);
+	box-shadow: 0 10px 22px rgba(91, 141, 239, 0.08);
+}
+
+.admin-lot-skeleton-line,
+.admin-lot-skeleton-bar,
+.admin-lot-skeleton-actions span {
+	display: block;
+	height: 12px;
+	border-radius: 999px;
+	background: linear-gradient(90deg, rgba(148, 163, 184, 0.12), rgba(148, 163, 184, 0.22), rgba(148, 163, 184, 0.12));
+	background-size: 200% 100%;
+	animation: adminShimmer 1.2s linear infinite;
+	margin-bottom: 0.6rem;
+}
+
+.admin-lot-skeleton-line.w-60 {
+	width: 60%;
+}
+
+.admin-lot-skeleton-line.w-35 {
+	width: 35%;
+}
+
+.admin-lot-skeleton-line.w-80 {
+	width: 80%;
+}
+
+.admin-lot-skeleton-bar {
+	height: 10px;
+	margin-top: 0.4rem;
+}
+
+.admin-lot-skeleton-actions {
+	display: flex;
+	gap: 0.35rem;
+}
+
+.admin-lot-skeleton-actions span {
+	width: 34%;
+	height: 28px;
+	margin-bottom: 0;
 }
 
 .admin-panel-card,
@@ -232,19 +389,20 @@ html[data-theme="dark"] .admin-lots-subtitle {
 .admin-lots-grid {
 	flex: 1;
 	min-height: 0;
-	overflow: auto;
+	overflow: visible;
 	padding-right: 0.2rem;
 	margin-bottom: 0;
 }
 
 .parking-lot-card {
-	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+	border-radius: 18px;
+	transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
 }
 
 .parking-lot-card:hover {
-	transform: translateY(-3px);
+	transform: translateY(-4px);
 	border-color: rgba(111, 75, 255, 0.32);
-	box-shadow: 0 18px 30px rgba(91, 141, 239, 0.18);
+	box-shadow: 0 22px 34px rgba(91, 141, 239, 0.2);
 }
 
 .parking-lot-name {
@@ -261,13 +419,121 @@ html[data-theme="dark"] .admin-lots-subtitle {
 }
 
 .parking-lot-progress {
-	height: 8px;
+	height: 9px;
 	border-radius: 999px;
 	background-color: #edf2ff;
 }
 
 .parking-lot-progress .progress-bar {
 	border-radius: 999px;
+	transition: width 0.55s ease;
+}
+
+.parking-lot-progress .progress-bar.occ-low {
+	background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.parking-lot-progress .progress-bar.occ-medium {
+	background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.parking-lot-progress .progress-bar.occ-full {
+	background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.parking-view-pill {
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	background: rgba(111, 75, 255, 0.14);
+	color: #6f4bff;
+	font-size: 0.75rem;
+	font-weight: 700;
+	padding: 0.28rem 0.7rem;
+	border-radius: 999px;
+}
+
+.parking-lot-address {
+	font-size: 0.85rem;
+	color: #66748f;
+	line-height: 1.35;
+}
+
+.parking-lot-badges {
+	display: flex;
+	gap: 0.45rem;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.parking-status-badge,
+.parking-priority-badge {
+	font-size: 0.72rem;
+	font-weight: 700;
+	padding: 0.22rem 0.55rem;
+	border-radius: 999px;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+}
+
+.parking-status-badge.status-active {
+	background: rgba(34, 197, 94, 0.16);
+	color: #15803d;
+}
+
+.parking-status-badge.status-full {
+	background: rgba(239, 68, 68, 0.16);
+	color: #b91c1c;
+}
+
+.parking-status-badge.status-maintenance {
+	background: rgba(234, 179, 8, 0.2);
+	color: #a16207;
+}
+
+.parking-priority-badge {
+	background: rgba(111, 75, 255, 0.14);
+	color: #6f4bff;
+}
+
+.parking-mini-sparkline {
+	display: flex;
+	align-items: flex-end;
+	gap: 0.28rem;
+	height: 38px;
+}
+
+.parking-mini-sparkline span {
+	width: 8px;
+	border-radius: 999px;
+	background: linear-gradient(180deg, rgba(170, 95, 255, 0.95), rgba(111, 75, 255, 0.55));
+	opacity: 0.9;
+}
+
+.parking-delete-btn {
+	border-color: rgba(239, 68, 68, 0.28);
+	color: #dc2626;
+}
+
+.parking-delete-btn:hover {
+	border-color: rgba(239, 68, 68, 0.42);
+	box-shadow: 0 12px 20px rgba(239, 68, 68, 0.18);
+}
+
+.parking-empty-state {
+	border-style: dashed;
+}
+
+.parking-empty-illustration {
+	width: 76px;
+	height: 76px;
+	margin: 0 auto 0.9rem;
+	border-radius: 22px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.8rem;
+	color: #6f4bff;
+	background: rgba(111, 75, 255, 0.12);
 }
 
 .parking-lot-actions {
@@ -1126,6 +1392,28 @@ html[data-theme="dark"] .lot-row {
 }
 
 @media (max-width: 1199.98px) {
+	.admin-lots-shell {
+		height: auto !important;
+		overflow: visible;
+	}
+
+	.admin-lots-skeleton-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.parking-hero-card {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.parking-hero-right {
+		justify-content: flex-start;
+	}
+
+	.parking-search-filter {
+		grid-template-columns: 1fr;
+	}
+
 	.stats-grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
@@ -1136,6 +1424,23 @@ html[data-theme="dark"] .lot-row {
 }
 
 @media (max-width: 767.98px) {
+	.admin-lots-shell {
+		height: auto !important;
+		overflow: visible;
+	}
+
+	.admin-lots-skeleton-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.parking-quick-stats {
+		width: 100%;
+	}
+
+	.parking-filter-panel {
+		min-width: min(310px, 92vw);
+	}
+
 	.admin-hero-card {
 		flex-direction: column;
 		align-items: flex-start;
@@ -1178,6 +1483,11 @@ html[data-theme="dark"] .lot-row {
 }
 
 @media (max-width: 991.98px) {
+	.admin-lots-shell {
+		height: auto !important;
+		overflow: visible;
+	}
+
 	.admin-control-row {
 		grid-template-columns: 1fr;
 	}
@@ -1194,6 +1504,11 @@ html[data-theme="dark"] .lot-row {
 }
 
 @media (max-width: 767.98px) {
+	.admin-lots-shell {
+		height: auto !important;
+		overflow: visible;
+	}
+
 	.admin-page-shell,
 	.admin-users-shell {
 		height: calc(100vh - 118px);

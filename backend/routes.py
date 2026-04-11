@@ -1,3 +1,4 @@
+## Coupon page and related routes removed as per user request. Only keep unrelated imports and helper code below.
 from app import app
 from flask import render_template, request, redirect, flash, url_for, send_file, jsonify, session
 from .models import db, Admin, User, ParkingLot, ParkingSpot, ReservedParkingSpot, ParkingLotReview, FavoriteParkingLot, NotificationLog, SpotAvailabilityAlert, MonthlySubscription, WalletTransaction
@@ -274,6 +275,287 @@ def _month_key(dt):
 
 def _month_label(dt):
     return dt.strftime("%b %Y")
+
+
+def _lot_type_from_price(price):
+    value = float(price or 0)
+    if value >= 150:
+        return "Premium"
+    if value >= 80:
+        return "Standard"
+    return "Economy"
+
+
+def _booking_status_from_timestamps(start_dt, end_dt):
+    if start_dt is None:
+        return "Cancelled"
+    if end_dt is None:
+        return "Active"
+    if end_dt < start_dt:
+        return "Cancelled"
+    return "Completed"
+
+
+def _booking_revenue_value(booking, start_dt, end_dt):
+    if booking.total_cost is not None:
+        return round(float(booking.total_cost), 2)
+    if booking.billed_amount is not None:
+        return round(float(booking.billed_amount), 2)
+    if booking.planned_amount is not None and end_dt is None:
+        return round(float(booking.planned_amount), 2)
+    if start_dt and end_dt and end_dt >= start_dt:
+        duration_hours = max((end_dt - start_dt).total_seconds(), 0) / 3600
+        return round(duration_hours * float(booking.parkingCost_unitTime or 0), 2)
+    return 0.0
+
+
+def _payment_status_for_booking(status, revenue):
+    if status == "Active":
+        return "Pending"
+    if status == "Cancelled":
+        return "Failed"
+    return "Paid" if float(revenue or 0) > 0 else "Settled"
+
+
+def _safe_percent_change(current_value, previous_value):
+    current_value = float(current_value or 0)
+    previous_value = float(previous_value or 0)
+    if previous_value <= 0:
+        if current_value <= 0:
+            return 0.0
+        return 100.0
+    return round(((current_value - previous_value) / previous_value) * 100.0, 1)
+
+
+def _admin_summary_payload(range_key="30d", start_date_str=None, end_date_str=None, selected_locations=None, selected_zones=None, selected_lot_types=None):
+    now = datetime.now()
+    default_start = (now - timedelta(days=29)).date()
+    default_end = now.date()
+
+    if start_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+        except Exception:
+            start_date = default_start
+    else:
+        start_date = default_start
+
+    if end_date_str:
+        try:
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+        except Exception:
+            end_date = default_end
+    else:
+        end_date = default_end
+
+    if range_key == "7d" and not start_date_str:
+        start_date = now.date() - timedelta(days=6)
+    elif range_key == "30d" and not start_date_str:
+        start_date = now.date() - timedelta(days=29)
+
+    if end_date < start_date:
+        start_date, end_date = end_date, start_date
+
+    lots = db.session.query(ParkingLot).all()
+    lot_lookup = {lot.id: lot for lot in lots}
+    users_lookup = {user.id: user for user in db.session.query(User).all()}
+
+    location_options = sorted({lot.prime_location_name for lot in lots})
+    zone_options = sorted({lot.city for lot in lots if lot.city})
+    lot_type_options = ["Economy", "Standard", "Premium"]
+
+    selected_locations = set(selected_locations or [])
+    selected_zones = set(selected_zones or [])
+    selected_lot_types = set(selected_lot_types or [])
+
+    all_bookings = db.session.query(ReservedParkingSpot).all()
+    filtered_rows = []
+    revenue_trend_map = {}
+    previous_revenue_map = {}
+    peak_hours_map = {hour: 0 for hour in range(24)}
+    top_location_counts = Counter()
+    status_distribution = {"Completed": 0, "Cancelled": 0, "Active": 0}
+    revenue_by_location = Counter()
+    previous_total_bookings = 0
+    previous_active_users = set()
+    active_users = set()
+
+    period_days = max((end_date - start_date).days + 1, 1)
+    previous_end = start_date - timedelta(days=1)
+    previous_start = previous_end - timedelta(days=period_days - 1)
+
+    for booking in all_bookings:
+        lot = lot_lookup.get(booking.lot_id)
+        if not lot:
+            continue
+
+        lot_name = lot.prime_location_name
+        zone = lot.city or "-"
+        lot_type = _lot_type_from_price(lot.price)
+
+        if selected_locations and lot_name not in selected_locations:
+            continue
+        if selected_zones and zone not in selected_zones:
+            continue
+        if selected_lot_types and lot_type not in selected_lot_types:
+            continue
+
+        start_dt = _parse_timestamp(booking.parking_timestamp)
+        end_dt = _parse_timestamp(booking.leaving_timestamp)
+        status = _booking_status_from_timestamps(start_dt, end_dt)
+        revenue_value = _booking_revenue_value(booking, start_dt, end_dt)
+
+        booking_date = (start_dt.date() if start_dt else None)
+        relevant_date = end_dt.date() if end_dt else booking_date
+
+        in_current_period = relevant_date is not None and start_date <= relevant_date <= end_date
+        in_previous_period = relevant_date is not None and previous_start <= relevant_date <= previous_end
+
+        if in_previous_period:
+            previous_total_bookings += 1
+            if status == "Active":
+                previous_active_users.add(booking.user_id)
+            if status == "Completed":
+                previous_revenue_map[relevant_date.isoformat()] = previous_revenue_map.get(relevant_date.isoformat(), 0) + revenue_value
+
+        if not in_current_period:
+            continue
+
+        if status == "Active":
+            active_users.add(booking.user_id)
+
+        status_distribution[status] = status_distribution.get(status, 0) + 1
+        top_location_counts[lot_name] += 1
+        if status == "Completed":
+            revenue_by_location[lot_name] += revenue_value
+            if relevant_date:
+                revenue_trend_map[relevant_date.isoformat()] = revenue_trend_map.get(relevant_date.isoformat(), 0) + revenue_value
+
+        if start_dt:
+            peak_hours_map[start_dt.hour] = peak_hours_map.get(start_dt.hour, 0) + 1
+
+        duration_minutes = 0
+        if start_dt and end_dt and end_dt >= start_dt:
+            duration_minutes = int((end_dt - start_dt).total_seconds() // 60)
+        elif start_dt and status == "Active":
+            duration_minutes = int(max((now - start_dt).total_seconds(), 0) // 60)
+
+        user_record = users_lookup.get(booking.user_id)
+        filtered_rows.append({
+            "booking_id": booking.id,
+            "user": user_record.name if user_record else f"User #{booking.user_id}",
+            "location": lot_name,
+            "zone": zone,
+            "lot_type": lot_type,
+            "in_time": booking.parking_timestamp,
+            "out_time": booking.leaving_timestamp if end_dt else "In Progress",
+            "duration_minutes": duration_minutes,
+            "duration": _duration_label(duration_minutes) if duration_minutes > 0 else "--",
+            "status": status,
+            "revenue": round(revenue_value, 2),
+            "payment_status": _payment_status_for_booking(status, revenue_value),
+        })
+
+    filtered_rows.sort(key=lambda row: row["in_time"], reverse=True)
+
+    total_revenue = round(sum(row["revenue"] for row in filtered_rows if row["status"] == "Completed"), 2)
+    total_bookings = len(filtered_rows)
+    most_booked_location = top_location_counts.most_common(1)[0][0] if top_location_counts else "N/A"
+
+    previous_total_revenue = round(sum(previous_revenue_map.values()), 2)
+
+    kpi_trends = {
+        "total_revenue": _safe_percent_change(total_revenue, previous_total_revenue),
+        "total_bookings": _safe_percent_change(total_bookings, previous_total_bookings),
+        "active_users": _safe_percent_change(len(active_users), len(previous_active_users)),
+        "most_booked_location": 0.0,
+    }
+
+    peak_hour = max(peak_hours_map, key=peak_hours_map.get) if peak_hours_map else 0
+
+    occupancy_by_location = []
+    for lot in lots:
+        if selected_locations and lot.prime_location_name not in selected_locations:
+            continue
+        if selected_zones and lot.city not in selected_zones:
+            continue
+        if selected_lot_types and _lot_type_from_price(lot.price) not in selected_lot_types:
+            continue
+
+        total_spots = len(lot.spots) if lot.spots else int(lot.maximum_number_of_spots or 0)
+        occupied = len([spot for spot in lot.spots if spot.status == "O"])
+        occupancy = round((occupied / total_spots) * 100, 2) if total_spots else 0
+        occupancy_by_location.append({
+            "location": lot.prime_location_name,
+            "occupancy": occupancy,
+        })
+
+    occupancy_by_location.sort(key=lambda row: row["occupancy"], reverse=True)
+    revenue_location_series = [
+        {"location": key, "revenue": round(value, 2)}
+        for key, value in revenue_by_location.most_common()
+    ]
+    top_locations_series = [
+        {"location": key, "bookings": value}
+        for key, value in top_location_counts.most_common(8)
+    ]
+
+    trend_labels = []
+    trend_values = []
+    cursor = start_date
+    while cursor <= end_date:
+        label = cursor.strftime("%d %b")
+        key = cursor.isoformat()
+        trend_labels.append(label)
+        trend_values.append(round(revenue_trend_map.get(key, 0), 2))
+        cursor += timedelta(days=1)
+
+    low_occupancy = [row["location"] for row in occupancy_by_location if row["occupancy"] < 35][:3]
+    insights = {
+        "revenue_change": kpi_trends["total_revenue"],
+        "most_active_location": most_booked_location,
+        "peak_usage_time": f"{peak_hour:02d}:00",
+        "low_occupancy_zones": low_occupancy,
+    }
+
+    return {
+        "meta": {
+            "range": {
+                "key": range_key,
+                "start_date": start_date.isoformat(),
+                "end_date": end_date.isoformat(),
+            },
+            "filters": {
+                "location_options": location_options,
+                "zone_options": zone_options,
+                "lot_type_options": lot_type_options,
+            },
+        },
+        "kpis": {
+            "total_revenue": total_revenue,
+            "total_bookings": total_bookings,
+            "active_users": len(active_users),
+            "most_booked_location": most_booked_location,
+            "trends": kpi_trends,
+        },
+        "charts": {
+            "revenue_trend": {
+                "labels": trend_labels,
+                "values": trend_values,
+            },
+            "peak_booking_hours": {
+                "labels": [f"{hour:02d}" for hour in range(24)],
+                "values": [peak_hours_map.get(hour, 0) for hour in range(24)],
+                "peak_hour": peak_hour,
+            },
+            "top_locations": top_locations_series,
+            "status_distribution": status_distribution,
+            "occupancy_by_location": occupancy_by_location,
+            "revenue_by_location": revenue_location_series,
+        },
+        "bookings": filtered_rows,
+        "insights": insights,
+    }
 
 
 def _get_subscription_plan(tier):
@@ -926,71 +1208,154 @@ def admin_search():
 @app.route("/admin/summary")
 @login_required
 def admin_summary():
-    if request.method == "GET":
-        parkings = db.session.query(ParkingLot).all()
-        park_names = []
-        book_count = []
-        for parking in parkings:
-            park_names.append(parking.prime_location_name)
-            book_count.append(len(parking.reserved_parking_spot))
-        plt.barh(y = park_names, width = book_count)
-        plt.savefig("./static/admin/parkinglot_booking_count.png", bbox_inches='tight', pad_inches=0.5)
-        plt.close()
+    initial_payload = _admin_summary_payload(range_key="30d")
+    return render_template("/admin/summary.html", summary_payload=initial_payload)
 
-        # Peak booking hour graph
-        hourly_count = {h: 0 for h in range(24)}
-        all_bookings = db.session.query(ReservedParkingSpot).all()
-        for booking in all_bookings:
-            hour = datetime.strptime(booking.parking_timestamp, '%Y-%m-%d %H:%M:%S').hour
-            hourly_count[hour] += 1
 
-        plt.figure(figsize=(8, 4))
-        plt.plot(list(hourly_count.keys()), list(hourly_count.values()), marker='o')
-        plt.xlabel("Hour of Day")
-        plt.ylabel("Bookings")
-        plt.title("Peak Booking Hours")
-        plt.savefig("./static/admin/peak_booking_hours.png", bbox_inches='tight', pad_inches=0.5)
-        plt.close()
+@app.route("/api/admin/summary")
+@login_required
+def api_admin_summary():
+    range_key = request.args.get("range", "30d")
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
 
-        # KPI metrics
-        now = datetime.now()
-        month_bookings = []
-        for booking in all_bookings:
-            if booking.leaving_timestamp == "Not yet left":
-                continue
-            leaving_dt = datetime.strptime(booking.leaving_timestamp, '%Y-%m-%d %H:%M:%S')
-            if leaving_dt.year == now.year and leaving_dt.month == now.month:
-                month_bookings.append(booking)
+    locations = [item for item in request.args.get("locations", "").split(",") if item]
+    zones = [item for item in request.args.get("zones", "").split(",") if item]
+    lot_types = [item for item in request.args.get("lot_types", "").split(",") if item]
 
-        total_revenue = 0
-        for booking in month_bookings:
-            if booking.total_cost is not None:
-                total_revenue += booking.total_cost
-            else:
-                in_time = datetime.strptime(booking.parking_timestamp, '%Y-%m-%d %H:%M:%S')
-                out_time = datetime.strptime(booking.leaving_timestamp, '%Y-%m-%d %H:%M:%S')
-                total_revenue += (out_time - in_time).total_seconds() / 3600 * booking.parkingCost_unitTime
+    payload = _admin_summary_payload(
+        range_key=range_key,
+        start_date_str=start_date,
+        end_date_str=end_date,
+        selected_locations=locations,
+        selected_zones=zones,
+        selected_lot_types=lot_types,
+    )
+    return jsonify(payload)
 
-        lot_booking_counts = {
-            lot.prime_location_name: len(lot.reserved_parking_spot) for lot in parkings
-        }
-        most_booked_lot = max(lot_booking_counts, key=lot_booking_counts.get) if lot_booking_counts else "N/A"
-        active_users_count = db.session.query(ReservedParkingSpot).filter_by(leaving_timestamp="Not yet left").count()
 
-        occupancy_by_lot = []
-        for lot in parkings:
-            occupied = len([spot for spot in lot.spots if spot.status == 'O'])
-            rate = round((occupied / lot.maximum_number_of_spots) * 100, 2) if lot.maximum_number_of_spots else 0
-            occupancy_by_lot.append({"name": lot.prime_location_name, "rate": rate})
+@app.route("/admin/summary/export-csv")
+@login_required
+def admin_summary_export_csv():
+    payload = _admin_summary_payload(
+        range_key=request.args.get("range", "30d"),
+        start_date_str=request.args.get("start_date"),
+        end_date_str=request.args.get("end_date"),
+        selected_locations=[item for item in request.args.get("locations", "").split(",") if item],
+        selected_zones=[item for item in request.args.get("zones", "").split(",") if item],
+        selected_lot_types=[item for item in request.args.get("lot_types", "").split(",") if item],
+    )
 
-        return render_template(
-            "/admin/summary.html",
-            total_revenue=round(total_revenue, 2),
-            month_label=f"{month_name[now.month]} {now.year}",
-            most_booked_lot=most_booked_lot,
-            active_users_count=active_users_count,
-            occupancy_by_lot=occupancy_by_lot,
-        )
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Booking ID",
+        "User",
+        "Location",
+        "Zone",
+        "Lot Type",
+        "In Time",
+        "Out Time",
+        "Duration",
+        "Status",
+        "Revenue",
+        "Payment Status",
+    ])
+    for row in payload["bookings"]:
+        writer.writerow([
+            row["booking_id"],
+            row["user"],
+            row["location"],
+            row["zone"],
+            row["lot_type"],
+            row["in_time"],
+            row["out_time"],
+            row["duration"],
+            row["status"],
+            round(float(row["revenue"] or 0), 2),
+            row["payment_status"],
+        ])
+    output.seek(0)
+
+    csv_bytes = BytesIO(output.getvalue().encode("utf-8"))
+    csv_bytes.seek(0)
+    return send_file(csv_bytes, as_attachment=True, download_name="admin_summary.csv", mimetype="text/csv")
+
+
+@app.route("/admin/summary/export-pdf")
+@login_required
+def admin_summary_export_pdf():
+    payload = _admin_summary_payload(
+        range_key=request.args.get("range", "30d"),
+        start_date_str=request.args.get("start_date"),
+        end_date_str=request.args.get("end_date"),
+        selected_locations=[item for item in request.args.get("locations", "").split(",") if item],
+        selected_zones=[item for item in request.args.get("zones", "").split(",") if item],
+        selected_lot_types=[item for item in request.args.get("lot_types", "").split(",") if item],
+    )
+
+    rows = []
+    for row in payload["bookings"][:250]:
+        rows.append([
+            row["booking_id"],
+            row["user"],
+            row["location"],
+            row["in_time"],
+            row["out_time"],
+            f"Rs {round(float(row['revenue'] or 0), 2)}",
+            row["status"],
+        ])
+
+    if not rows:
+        rows = [["-", "No data", "-", "-", "-", "Rs 0.00", "-"]]
+
+    pdf_buffer = _build_pdf_bytes(
+        "Admin Summary Report",
+        ["Booking", "User", "Location", "In Time", "Out Time", "Revenue", "Status"],
+        rows,
+        [
+            ["Date Range", f"{payload['meta']['range']['start_date']} to {payload['meta']['range']['end_date']}"],
+            ["Total Revenue", f"Rs {payload['kpis']['total_revenue']}"],
+            ["Total Bookings", payload['kpis']['total_bookings']],
+            ["Active Users", payload['kpis']['active_users']],
+            ["Most Booked Location", payload['kpis']['most_booked_location']],
+        ],
+    )
+    return send_file(pdf_buffer, as_attachment=True, download_name="admin_summary.pdf", mimetype="application/pdf")
+
+
+@app.route("/admin/summary/email-report", methods=["POST"])
+@login_required
+def admin_summary_email_report():
+    payload = _admin_summary_payload(
+        range_key=request.form.get("range", "30d"),
+        start_date_str=request.form.get("start_date"),
+        end_date_str=request.form.get("end_date"),
+        selected_locations=[item for item in (request.form.get("locations", "").split(",")) if item],
+        selected_zones=[item for item in (request.form.get("zones", "").split(",")) if item],
+        selected_lot_types=[item for item in (request.form.get("lot_types", "").split(",")) if item],
+    )
+
+    subject = "FindMySpot Admin Summary Report"
+    body = (
+        f"Date Range: {payload['meta']['range']['start_date']} to {payload['meta']['range']['end_date']}\n"
+        f"Total Revenue: Rs {payload['kpis']['total_revenue']}\n"
+        f"Total Bookings: {payload['kpis']['total_bookings']}\n"
+        f"Active Users: {payload['kpis']['active_users']}\n"
+        f"Most Booked Location: {payload['kpis']['most_booked_location']}\n"
+    )
+
+    if MAIL_AVAILABLE and getattr(current_user, "email", None):
+        try:
+            message = Message(subject=subject, recipients=[current_user.email], body=body)
+            mail.send(message)
+            flash("Summary report emailed successfully.", "success")
+        except Exception:
+            flash("Email sending failed. Report details are available in dashboard export options.", "warning")
+    else:
+        flash("Email service is not configured. Use PDF/CSV export instead.", "warning")
+
+    return redirect(url_for("admin_summary"))
 
 
 @app.route("/api/users")
@@ -1864,6 +2229,8 @@ def parkingLot():
                 # Remove extra spots (Only remove available ones to avoid deleting reserved)
                 removable_spots = [spot for spot in current_spots if spot.status == 'A']
                 for spot in removable_spots[:current_count - par_max]:
+                    # Delete all ReservedParkingSpot records for this spot
+                    ReservedParkingSpot.query.filter_by(spot_id=spot.id).delete(synchronize_session=False)
                     db.session.delete(spot)
             db.session.commit()
             flash('Parking Lot Edited !!', 'success')
@@ -2485,7 +2852,12 @@ def delete_parking(lot_id):
         flash("Cannot delete parking lot with past reservations.", "warning")
         return redirect("/admin/actions")
 
-    # Delete all associated spots first
+    # Delete all ReservedParkingSpot records for this lot's spots first
+    spot_ids = [spot.id for spot in lot.spots]
+    if spot_ids:
+        ReservedParkingSpot.query.filter(ReservedParkingSpot.spot_id.in_(spot_ids)).delete(synchronize_session=False)
+
+    # Delete all associated spots
     for spot in lot.spots:
         db.session.delete(spot)
 

@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="/static/css/nav_footer.css">
     <link rel="stylesheet" href="/static/css/Dark.css">
     <link rel="stylesheet" href="/static/css/wallet.css?v=20260410b">
+    <link rel="stylesheet" href="/static/css/toast.css?v=20260411">
     <link rel="icon" href="/static/images/logo.png" type="image/png">
 </head>
 
@@ -19,18 +20,16 @@
     {% include 'user/_saas_navbar.html' %}
 
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="wallet-flash-stack" aria-live="polite" aria-atomic="true">
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show wallet-flash auto-dismiss" role="alert" data-auto-dismiss="5000">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
+        {# Modern Toasts: messages block for JS only #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="toast-messages" style="display:none">
+                    {% for category, message in messages %}
+                        <div data-toast-category="{{ category }}" data-toast-message="{{ message|e }}"></div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
 
     <main class="wallet-page">
         <div class="wallet-shell">
@@ -282,7 +281,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="/static/js/theme-toggle.js?v=20260410b"></script>
-    <script src="/static/js/flash-alerts.js?v=20260410b"></script>
+    <script src="/static/js/toast.js?v=20260411"></script>
     <script id="walletChartCounts" type="application/json">{{ wallet_chart.counts|tojson }}</script>
     <script>
         (function () {

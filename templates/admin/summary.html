@@ -9,97 +9,301 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="/static/css/nav_footer.css">
     <link rel="stylesheet" href="/static/css/Dark.css">
+    <link rel="stylesheet" href="/static/css/admin_summary.css">
+    <link rel="stylesheet" href="/static/css/toast.css?v=20260411">
     <link rel="icon" href="/static/images/logo.png" type="image/png">
 </head>
 
 <body>
     {% include 'admin/_saas_navbar.html' %}
+        {# Modern Toasts: messages block for JS only #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="toast-messages" style="display:none">
+                    {% for category, message in messages %}
+                        <div data-toast-category="{{ category }}" data-toast-message="{{ message|e }}"></div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
 
-    <h2 class="text-center my-4 fw-bold">Summary</h2>
+        <main class="container admin-summary-page">
+                <section class="admin-hero d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+            <div>
+                <h2 class="mb-1 fw-bold">Admin Analytics Dashboard</h2>
+                <p class="subtitle">Monitor revenue, usage, and parking performance</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <select class="form-select form-select-sm" id="rangePreset" style="min-width: 130px;">
+                    <option value="7d">Last 7 days</option>
+                    <option value="30d" selected>Last 30 days</option>
+                    <option value="all">All time</option>
+                </select>
+                <form id="sendReminderForm" action="/admin/send-reminders" method="POST">
+                    <button class="btn-admin-primary" type="submit"><i class="bi bi-bell-fill"></i> Send Booking Reminders</button>
+                </form>
+            </div>
+        </section>
 
-    <div class="container mb-3 text-center">
-        <form action="/admin/send-reminders" method="POST" class="d-inline-block">
-            <button class="btn btn-outline-primary">Send Booking Reminders</button>
-        </form>
-    </div>
 
-    <div class="container mb-4">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-body text-center">
-                        <h6>Total Revenue ({{ month_label }})</h6>
-                        <h4>Rs {{ total_revenue }}</h4>
-                    </div>
+
+        <section class="kpi-grid mb-3">
+            <article class="admin-card kpi-card">
+                <div class="kpi-icon"><i class="bi bi-cash-stack"></i></div>
+                <div>
+                    <p class="kpi-label">Total Revenue</p>
+                    <h3 class="kpi-value" id="kpiRevenue">Rs 0.00</h3>
+                    <div id="trendRevenue" class="kpi-trend">0%</div>
+                </div>
+            </article>
+            <article class="admin-card kpi-card">
+                <div class="kpi-icon"><i class="bi bi-journal-check"></i></div>
+                <div>
+                    <p class="kpi-label">Total Bookings</p>
+                    <h3 class="kpi-value" id="kpiBookings">0</h3>
+                    <div id="trendBookings" class="kpi-trend">0%</div>
+                </div>
+            </article>
+            <article class="admin-card kpi-card">
+                <div class="kpi-icon"><i class="bi bi-people-fill"></i></div>
+                <div>
+                    <p class="kpi-label">Active Users</p>
+                    <h3 class="kpi-value" id="kpiUsers">0</h3>
+                    <div id="trendUsers" class="kpi-trend">0%</div>
+                </div>
+            </article>
+            <article class="admin-card kpi-card">
+                <div class="kpi-icon"><i class="bi bi-geo-alt-fill"></i></div>
+                <div>
+                    <p class="kpi-label">Most Booked Location</p>
+                    <h3 class="kpi-value text-truncate" id="kpiLocation">N/A</h3>
+                    <div id="trendLocation" class="kpi-trend">0%</div>
+                </div>
+            </article>
+        </section>
+
+        <section class="admin-card filter-card mb-3">
+            <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                <h5 class="mb-0 fw-bold">Filters</h5>
+                <div class="d-flex gap-2">
+                    <button class="btn-admin-soft" id="resetFilters" type="button"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                    <button class="btn-admin-apply" id="applyFilters" type="button"><i class="bi bi-funnel-fill"></i> Apply</button>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-body text-center">
-                        <h6>Most Booked Lot</h6>
-                        <h4>{{ most_booked_lot }}</h4>
+            <div class="filter-grid">
+                <div>
+                    <label class="form-label mb-1" for="dateRangePicker">Date Range</label>
+                    <input type="text" class="form-control" id="dateRangePicker" placeholder="Select date range" readonly>
+                </div>
+                <div>
+                    <label class="form-label mb-1" for="locationFilterTrigger">Location</label>
+                    <div class="filter-select" id="locationFilter" data-filter-key="locations">
+                        <button type="button" class="filter-select-trigger" id="locationFilterTrigger">
+                            <span class="value">All Locations</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="filter-select-panel" id="locationFilterPanel">
+                            <div class="filter-select-head">
+                                <input type="search" class="form-control form-control-sm filter-search" id="locationFilterSearch" placeholder="Search location">
+                                <button type="button" class="btn btn-sm btn-link filter-clear" data-clear="locations">Clear</button>
+                            </div>
+                            <div class="filter-select-options" id="locationFilterOptions"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-body text-center">
-                        <h6>Active Users</h6>
-                        <h4>{{ active_users_count }}</h4>
+                <div>
+                    <label class="form-label mb-1" for="zoneFilterTrigger">Zone</label>
+                    <div class="filter-select" id="zoneFilter" data-filter-key="zones">
+                        <button type="button" class="filter-select-trigger" id="zoneFilterTrigger">
+                            <span class="value">All Zones</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="filter-select-panel" id="zoneFilterPanel">
+                            <div class="filter-select-head justify-content-end">
+                                <button type="button" class="btn btn-sm btn-link filter-clear" data-clear="zones">Clear</button>
+                            </div>
+                            <div class="filter-select-options" id="zoneFilterOptions"></div>
+                        </div>
                     </div>
                 </div>
+                <div>
+                    <label class="form-label mb-1" for="lotTypeFilterTrigger">Parking Lot Type</label>
+                    <div class="filter-select" id="lotTypeFilter" data-filter-key="lot_types">
+                        <button type="button" class="filter-select-trigger" id="lotTypeFilterTrigger">
+                            <span class="value">All Types</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="filter-select-panel" id="lotTypeFilterPanel">
+                            <div class="filter-select-head justify-content-end">
+                                <button type="button" class="btn btn-sm btn-link filter-clear" data-clear="lot_types">Clear</button>
+                            </div>
+                            <div class="filter-select-options" id="lotTypeFilterOptions"></div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label mb-1" for="pageSize">Rows</label>
+                    <select id="pageSize" class="form-select">
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <div class="card mx-auto my-5 shadow-sm" style="width:40rem">
-        <img src="/static/admin/parkinglot_booking_count.png" class="card-img-top" alt="Bookings / Parking Lot">
-        <div class="card-body text-center">
-            <h5 class="card-title">No. of Bookings / Parking Lot</h5>
-        </div>
-    </div>
+        <section class="admin-chart-grid mb-3">
+            <article class="admin-card chart-card">
+                <div class="chart-head">
+                    <h6 class="chart-title">Revenue Trend</h6>
+                    <p class="chart-sub">Daily revenue progression</p>
+                </div>
+                <div class="chart-wrap"><canvas id="revenueTrendChart"></canvas></div>
+            </article>
+            <article class="admin-card chart-card">
+                <div class="chart-head">
+                    <h6 class="chart-title">Peak Booking Hours</h6>
+                    <p class="chart-sub">Hourly booking load with peak highlight</p>
+                </div>
+                <div class="chart-wrap"><canvas id="peakHoursChart"></canvas></div>
+            </article>
+            <article class="admin-card chart-card">
+                <div class="chart-head">
+                    <h6 class="chart-title">Top Parking Locations</h6>
+                    <p class="chart-sub">Most booked parking areas</p>
+                </div>
+                <div class="chart-wrap"><canvas id="topLocationsChart"></canvas></div>
+            </article>
+            <article class="admin-card chart-card">
+                <div class="chart-head">
+                    <h6 class="chart-title">Booking Status Distribution</h6>
+                    <p class="chart-sub">Completed, cancelled, and active split</p>
+                </div>
+                <div class="chart-wrap"><canvas id="statusDonutChart"></canvas></div>
+            </article>
+            <article class="admin-card chart-card">
+                <div class="chart-head">
+                    <h6 class="chart-title">Occupancy Rate</h6>
+                    <p class="chart-sub">Color intensity by occupancy percentage</p>
+                </div>
+                <div class="chart-wrap"><canvas id="occupancyChart"></canvas></div>
+            </article>
+            <article class="admin-card chart-card">
+                <div class="chart-head">
+                    <h6 class="chart-title">Revenue by Location</h6>
+                    <p class="chart-sub">Earnings contribution per lot</p>
+                </div>
+                <div class="chart-wrap"><canvas id="revenueByLocationChart"></canvas></div>
+            </article>
+        </section>
 
-    <div class="card mx-auto my-5 shadow-sm" style="width:40rem">
-        <img src="/static/admin/peak_booking_hours.png" class="card-img-top" alt="Peak Booking Hours">
-        <div class="card-body text-center">
-            <h5 class="card-title">Peak Booking Hours</h5>
-        </div>
-    </div>
+        <section class="admin-card table-card mb-3">
+            <div class="table-toolbar">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <h5 class="mb-0 fw-bold">Bookings</h5>
+                    <small id="tableCountLabel" class="text-muted"></small>
+                    <small id="tableRangeLabel" class="text-muted"></small>
+                </div>
+                <div class="table-actions-right">
+                    <input type="search" id="tableSearch" class="form-control search-input" placeholder="Search by booking, user, location, status...">
+                    <select id="tableCommonFilter" class="form-select common-filter-select">
+                        <option value="all">All Records</option>
+                        <option value="status:completed">Completed</option>
+                        <option value="status:active">Active</option>
+                        <option value="status:cancelled">Cancelled</option>
+                        <option value="payment:paid">Paid</option>
+                        <option value="payment:pending">Pending</option>
+                        <option value="payment:failed">Failed</option>
+                    </select>
+                </div>
+            </div>
 
-    <div class="container my-4">
-        <div class="card shadow-sm">
-            <div class="card-header text-center"><h5 class="mb-0">Average Occupancy Rate Per Lot</h5></div>
-            <div class="card-body">
-                <table class="table table-striped mb-0">
+            <div class="table-shell">
+                <table class="table admin-table align-middle mb-0">
                     <thead>
                         <tr>
-                            <th>Parking Lot</th>
-                            <th>Occupancy Rate (%)</th>
+                            <th class="sort-head" data-sort="booking_id">Booking ID <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sort-head" data-sort="user">User <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sort-head" data-sort="location">Location <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sort-head" data-sort="in_time">In Time <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sort-head" data-sort="out_time">Out Time <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sort-head" data-sort="duration_minutes">Duration <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sort-head" data-sort="status">Status <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sort-head" data-sort="revenue">Revenue <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sort-head" data-sort="payment_status">Payment <i class="bi bi-arrow-down-up"></i></th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for item in occupancy_by_lot %}
-                        <tr>
-                            <td>{{ item.name }}</td>
-                            <td>{{ item.rate }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+                    <tbody id="adminSummaryTableBody"></tbody>
                 </table>
             </div>
-        </div>
-    </div>
+
+            <div class="pagination-wrap">
+                <button class="btn-admin-soft" id="prevPage" type="button"><i class="bi bi-arrow-left"></i> Prev</button>
+                <button class="btn-admin-soft" id="nextPage" type="button">Next <i class="bi bi-arrow-right"></i></button>
+            </div>
+        </section>
+
+        <section class="row g-3 mb-3">
+            <div class="col-lg-7">
+                <article class="admin-card insight-card h-100">
+                    <h5 class="fw-bold mb-2">Admin Insights</h5>
+                    <div class="insights-grid">
+                        <div class="insight-mini">
+                            <p>Revenue changed</p>
+                            <h6 id="insightRevenue">0%</h6>
+                        </div>
+                        <div class="insight-mini">
+                            <p>Most active location</p>
+                            <h6 id="insightLocation">N/A</h6>
+                        </div>
+                        <div class="insight-mini">
+                            <p>Peak usage time</p>
+                            <h6 id="insightPeakTime">--:--</h6>
+                        </div>
+                        <div class="insight-mini">
+                            <p>Low occupancy zones</p>
+                            <h6 id="insightLowOccupancy">N/A</h6>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-lg-5">
+                <article class="admin-card export-card h-100">
+                    <h5 class="fw-bold mb-2">Export Reports</h5>
+                    <p class="text-muted mb-3">Download or send analytics for operations and finance teams.</p>
+                    <div class="export-actions">
+                        <a class="export-primary" id="exportPdfBtn" href="/admin/summary/export-pdf"><i class="bi bi-file-earmark-pdf"></i> Download PDF</a>
+                        <a class="btn-admin-soft" id="exportCsvBtn" href="/admin/summary/export-csv"><i class="bi bi-filetype-csv"></i> Export CSV</a>
+                        <form id="emailReportForm" action="/admin/summary/email-report" method="POST" class="d-inline-flex">
+                            <input type="hidden" name="range" value="30d">
+                            <input type="hidden" name="start_date" value="">
+                            <input type="hidden" name="end_date" value="">
+                            <input type="hidden" name="locations" value="">
+                            <input type="hidden" name="zones" value="">
+                            <input type="hidden" name="lot_types" value="">
+                            <button class="btn-admin-soft" type="submit"><i class="bi bi-envelope-paper"></i> Email Report</button>
+                        </form>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
         crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="/static/js/saas-navbar.js?v=20260410c"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="/static/js/theme-toggle.js"></script>
+    <script id="adminSummaryInitialData" type="application/json">{{ summary_payload|tojson }}</script>
+    <script src="/static/js/admin-summary.js"></script>
 </body>
 
+    <script src="/static/js/toast.js?v=20260411"></script>
 </html>

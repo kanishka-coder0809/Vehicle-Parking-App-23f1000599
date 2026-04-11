@@ -1,6 +1,7 @@
 from flask_restful import Resource, Api, request
 from .models import *
 
+
 api = Api()
 
 class ParkingLotResource(Resource):

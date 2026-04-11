@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="/static/css/nav_footer.css">
     <link rel="stylesheet" href="/static/css/Dark.css">
     <link rel="icon" href="/static/images/logo.png" type="image/png">
+    <link rel="stylesheet" href="/static/css/toast.css?v=20260411">
     <style>
         .dashboard-page {
             min-height: 100vh;
@@ -557,16 +558,18 @@
     {% include 'user/_saas_navbar.html' %}
 
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
+        {# Modern Toasts: messages block for JS only #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="toast-messages" style="display:none">
+                    {% for category, message in messages %}
+                        <div data-toast-category="{{ category }}" data-toast-message="{{ message|e }}"></div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+</body>
+<script src="/static/js/toast.js?v=20260411"></script>
 
     {% set active_bookings_count = booking_history | selectattr('leaving_timestamp', 'equalto', 'Not yet left') | list | length %}
     {% set completed_bookings_count = booking_history|length - active_bookings_count %}

@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="/static/css/nav_footer.css">
     <link rel="stylesheet" href="/static/css/Dark.css">
     <link rel="stylesheet" href="/static/css/admin_dashboard.css">
+    <link rel="stylesheet" href="/static/css/toast.css?v=20260411">
     <link rel="icon" href="/static/images/logo.png" type="image/png">
 </head>
 
@@ -19,16 +20,16 @@
 
     {% include 'admin/_saas_navbar.html' %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
+        {# Modern Toasts: messages block for JS only #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="toast-messages" style="display:none">
+                    {% for category, message in messages %}
+                        <div data-toast-category="{{ category }}" data-toast-message="{{ message|e }}"></div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
 
     <div class="admin-tabs-wrap">
         <ul class="nav nav-pills justify-content-center" id="pills-tab" role="tablist">
@@ -46,148 +47,226 @@
         <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab"
             tabindex="0">
             <!-- Parking Lots -->
-            <div class="card shadow-sm mx-auto admin-panel-card admin-page-shell" style="width:80%">
+            <div class="card shadow-sm mx-auto admin-panel-card admin-page-shell admin-lots-shell" style="width:80%">
                 <div class="card-body d-flex flex-column h-100 admin-page-body">
-                    <section class="admin-panel-header mb-3">
-                        <div class="admin-panel-title-wrap">
-                            <div class="admin-panel-icon"><i class="bi bi-p-square"></i></div>
-                            <div>
-                                <h4 class="mb-1 fw-bold">Parking Lots</h4>
-                                <p class="admin-panel-subtitle admin-lots-subtitle">Manage all parking locations</p>
+                    {% set lots_count = all_par | length %}
+                    {% set lots_ns = namespace(total_capacity=0, total_occupied=0) %}
+                    {% for lot in all_par %}
+                        {% set occupied_count = lot.spots | selectattr('status', 'equalto', 'O') | list | length %}
+                        {% set lots_ns.total_capacity = lots_ns.total_capacity + (lot.maximum_number_of_spots or 0) %}
+                        {% set lots_ns.total_occupied = lots_ns.total_occupied + occupied_count %}
+                    {% endfor %}
+                    {% set overall_occupancy = ((lots_ns.total_occupied * 100 / lots_ns.total_capacity) if lots_ns.total_capacity else 0) | round(1) %}
+
+                    <section class="parking-hero-card mb-3">
+                        <div class="parking-hero-copy">
+                            <p class="parking-hero-kicker mb-2">Admin Actions</p>
+                            <h3 class="mb-1 fw-bold">Parking Lot Management</h3>
+                            <p class="mb-0 parking-hero-subtitle">Manage and monitor all parking locations</p>
+                        </div>
+                        <div class="parking-hero-right">
+                            <div class="parking-quick-stats">
+                                <div class="parking-quick-stat">
+                                    <span>Total Lots</span>
+                                    <strong>{{ lots_count }}</strong>
+                                </div>
+                                <div class="parking-quick-stat">
+                                    <span>Total Capacity</span>
+                                    <strong>{{ lots_ns.total_capacity }}</strong>
+                                </div>
+                                <div class="parking-quick-stat">
+                                    <span>Occupancy</span>
+                                    <strong>{{ overall_occupancy }}%</strong>
+                                </div>
+                            </div>
+                            <button type="button" class="admin-primary-btn parking-create-btn" data-bs-toggle="modal"
+                                data-bs-target="#createParking">
+                                <i class="bi bi-plus-lg"></i>
+                                <span>Create Parking Lot</span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <div class="modal fade admin-modal" id="createParking" tabindex="-1"
+                        aria-labelledby="createParkingLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="createParkingLabel"><i class="bi bi-p-square me-2"></i>Create Parking Lot</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="/parkingLots?task=create" method="POST" class="row g-3">
+                                        <div class="col-12">
+                                            <label class="form-label" for="create-name">Name</label>
+                                            <input type="text" class="form-control admin-form-control" id="create-name" placeholder="Name"
+                                                name="name" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="create-price">Price</label>
+                                            <input type="number" class="form-control admin-form-control" id="create-price" placeholder="Price"
+                                                name="price" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="create-city">City</label>
+                                            <input type="text" class="form-control admin-form-control" id="create-city" placeholder="City"
+                                                name="city" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label" for="create-address">Address</label>
+                                            <input type="text" class="form-control admin-form-control" id="create-address"
+                                                placeholder="Address" name="address" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="create-pincode">Pincode</label>
+                                            <input type="number" class="form-control admin-form-control" id="create-pincode"
+                                                placeholder="Pincode" name="pincode" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="create-spots">Maximum number of spots</label>
+                                            <input type="number" class="form-control admin-form-control" id="create-spots"
+                                                placeholder="Maximum number of spots" name="maximum_number_of_spots" required>
+                                        </div>
+                                        <div class="col-12 d-grid">
+                                            <button type="submit" class="admin-primary-btn justify-content-center">Create</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <button type="button" class="admin-primary-btn" data-bs-toggle="modal"
-                            data-bs-target="#createParking">
-                            <i class="bi bi-plus-lg"></i>
-                            <span>Create</span>
-                        </button>
+                    <section class="parking-search-filter mb-3">
+                        <div class="input-group admin-search-input parking-search-full">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="search" class="form-control" id="parkingLotsSearch" placeholder="Search parking lots by name, address, city..." aria-label="Search parking lots">
+                        </div>
 
-                        <div class="modal fade admin-modal" id="createParking" tabindex="-1"
-                            aria-labelledby="createParkingLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5" id="createParkingLabel"><i class="bi bi-p-square me-2"></i>Create Parking Lot</h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form action="/parkingLots?task=create" method="POST" class="row g-3">
-                                            <div class="col-12">
-                                                <label class="form-label" for="create-name">Name</label>
-                                                <input type="text" class="form-control admin-form-control" id="create-name" placeholder="Name"
-                                                    name="name" required>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label" for="create-price">Price</label>
-                                                <input type="number" class="form-control admin-form-control" id="create-price" placeholder="Price"
-                                                    name="price" required>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label" for="create-city">City</label>
-                                                <input type="text" class="form-control admin-form-control" id="create-city" placeholder="City"
-                                                    name="city" required>
-                                            </div>
-                                            <div class="col-12">
-                                                <label class="form-label" for="create-address">Address</label>
-                                                <input type="text" class="form-control admin-form-control" id="create-address"
-                                                    placeholder="Address" name="address" required>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label" for="create-pincode">Pincode</label>
-                                                <input type="number" class="form-control admin-form-control" id="create-pincode"
-                                                    placeholder="Pincode" name="pincode" required>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label" for="create-spots">Maximum number of spots</label>
-                                                <input type="number" class="form-control admin-form-control" id="create-spots"
-                                                    placeholder="Maximum number of spots" name="maximum_number_of_spots" required>
-                                            </div>
-                                            <div class="col-12 d-grid">
-                                                <button type="submit" class="admin-primary-btn justify-content-center">Create</button>
-                                            </div>
-                                        </form>
-                                    </div>
+                        <div class="dropdown">
+                            <button class="admin-filter-btn parking-filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-sliders2"></i>
+                                <span>Filter</span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end admin-filter-menu parking-filter-panel p-3">
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" for="parkingLocationFilter">Location</label>
+                                    <select class="form-select" id="parkingLocationFilter">
+                                        <option value="all" selected>All locations</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" for="parkingZoneFilter">Zone</label>
+                                    <select class="form-select" id="parkingZoneFilter">
+                                        <option value="all" selected>All zones</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" for="parkingOccupancyFilter">Occupancy Status</label>
+                                    <select class="form-select" id="parkingOccupancyFilter">
+                                        <option value="all" selected>All</option>
+                                        <option value="low">Low</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="full">Full</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" for="parkingCapacityFilter">Capacity Range</label>
+                                    <input type="range" class="form-range" min="0" max="1000" value="0" id="parkingCapacityFilter">
+                                    <small class="text-muted" id="parkingCapacityLabel">Minimum capacity: 0</small>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2 mt-3">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="parkingFiltersReset">Reset</button>
+                                    <button type="button" class="btn btn-sm admin-primary-btn px-3" id="parkingFiltersApply">Apply</button>
                                 </div>
                             </div>
                         </div>
                     </section>
 
-                    <div class="admin-control-row mb-3">
-                        <div class="input-group admin-search-input">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="search" class="form-control" id="parkingLotsSearch" placeholder="Search parking lots..." aria-label="Search parking lots">
+                    <div class="admin-lots-skeleton-grid" id="parkingLotsSkeleton" aria-hidden="true">
+                        {% for _ in range(6) %}
+                        <div class="admin-lot-skeleton-card">
+                            <div class="admin-lot-skeleton-line w-60"></div>
+                            <div class="admin-lot-skeleton-line w-35"></div>
+                            <div class="admin-lot-skeleton-line w-80"></div>
+                            <div class="admin-lot-skeleton-bar"></div>
+                            <div class="admin-lot-skeleton-actions">
+                                <span></span><span></span><span></span>
+                            </div>
                         </div>
-                        <div class="dropdown">
-                            <button class="admin-filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-funnel"></i>
-                                <span>Filter</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end admin-filter-menu">
-                                <li><button class="dropdown-item admin-filter-option active" type="button" data-parking-filter="all">All lots</button></li>
-                                <li><button class="dropdown-item admin-filter-option" type="button" data-parking-filter="empty">0% occupied</button></li>
-                                <li><button class="dropdown-item admin-filter-option" type="button" data-parking-filter="low">Low occupancy</button></li>
-                                <li><button class="dropdown-item admin-filter-option" type="button" data-parking-filter="medium">Medium occupancy</button></li>
-                                <li><button class="dropdown-item admin-filter-option" type="button" data-parking-filter="high">High occupancy</button></li>
-                            </ul>
-                        </div>
+                        {% endfor %}
                     </div>
 
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 admin-lots-grid" id="parkingLotsGrid">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 admin-lots-grid d-none" id="parkingLotsGrid">
                         {% for lot in all_par %}
                         {% set occupied_count = lot.spots | selectattr('status', 'equalto', 'O') | list | length %}
                         {% set occupancy_ratio = (occupied_count * 100 / lot.maximum_number_of_spots) if lot.maximum_number_of_spots else 0 %}
-                        <div class="col" data-parking-item data-parking-name="{{ lot.prime_location_name | lower }} {{ lot.address | lower }} {{ lot.city | lower }}">
-                            <div class="card h-100 parking-lot-card shadow-sm" data-occupancy="{{ occupancy_ratio|round(0) }}">
+                        {% set occupancy_bucket = 'low' if occupancy_ratio < 35 else ('medium' if occupancy_ratio < 85 else 'full') %}
+                        {% set status_label = 'Maintenance' if lot.maximum_number_of_spots == 0 else ('Full' if occupancy_ratio >= 95 else 'Active') %}
+                        {% set is_priority = occupancy_ratio >= 75 %}
+                        <div class="col" data-parking-item data-parking-name="{{ lot.prime_location_name | lower }} {{ lot.address | lower }} {{ lot.city | lower }}"
+                            data-parking-location="{{ lot.prime_location_name }}" data-parking-zone="{{ lot.city }}"
+                            data-parking-bucket="{{ occupancy_bucket }}" data-parking-capacity="{{ lot.maximum_number_of_spots or 0 }}">
+                            <article class="card h-100 parking-lot-card shadow-sm" data-occupancy="{{ occupancy_ratio|round(0) }}">
                                 <div class="card-body p-4 d-flex flex-column h-100">
                                     <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
                                         <div>
-                                            <div class="parking-lot-name fs-5">{{ lot.prime_location_name }}</div>
-                                            <div class="parking-lot-meta mt-2">
+                                            <h5 class="parking-lot-name mb-1">{{ lot.prime_location_name }}</h5>
+                                            <div class="parking-lot-meta">
                                                 <span><i class="bi bi-geo-alt me-1"></i>{{ lot.city }}</span>
                                                 <span><i class="bi bi-pin-map me-1"></i>{{ lot.pin_code }}</span>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-light rounded-pill px-3" data-bs-toggle="modal"
-                                            data-bs-target="#viewParking-{{lot.id}}">
-                                            View
-                                        </button>
+                                        <button type="button" class="parking-view-pill" data-bs-toggle="modal" data-bs-target="#viewParking-{{lot.id}}">View</button>
                                     </div>
 
-                                    <div class="mb-2 d-flex justify-content-between align-items-center small text-muted">
-                                        <span>Occupancy</span>
+                                    <p class="parking-lot-address mb-3">{{ lot.address }}</p>
+
+                                    <div class="d-flex justify-content-between align-items-center mb-2 small text-muted">
                                         <span>{{ occupied_count }} / {{ lot.maximum_number_of_spots }} occupied</span>
+                                        <span>{{ occupancy_ratio|round(1) }}%</span>
                                     </div>
                                     <div class="progress parking-lot-progress mb-3">
-                                        <div class="progress-bar {% if occupancy_ratio < 35 %}bg-success{% elif occupancy_ratio < 70 %}bg-warning{% else %}bg-danger{% endif %}"
+                                        <div class="progress-bar {% if occupancy_ratio < 35 %}occ-low{% elif occupancy_ratio < 85 %}occ-medium{% else %}occ-full{% endif %}"
                                             data-occupancy-width="{{ occupancy_ratio|round(0) }}" role="progressbar" aria-valuenow="{{ occupancy_ratio|round(0) }}" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
 
-                                    <div class="mb-3 small text-muted text-truncate">{{ lot.address }}</div>
+                                    <div class="parking-lot-badges mb-3">
+                                        <span class="parking-status-badge status-{{ status_label | lower }}">{{ status_label }}</span>
+                                        {% if is_priority %}
+                                        <span class="parking-priority-badge"><i class="bi bi-star-fill"></i> Priority</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="parking-mini-sparkline mb-3" aria-hidden="true">
+                                        {% for i in range(6) %}
+                                        {% set spark_height = 14 + (i * 3) + ((occupancy_ratio / 9) | int) %}
+                                        <span style="height: {{ spark_height ~ 'px' }}"></span>
+                                        {% endfor %}
+                                    </div>
 
                                     <div class="parking-lot-actions mt-auto">
                                         <button type="button" class="btn btn-outline-primary btn-sm admin-outline-btn" data-bs-toggle="modal"
                                             data-bs-target="#editParking-{{lot.id}}">Edit</button>
-                                        <button type="button" class="btn btn-secondary btn-sm admin-secondary-btn" data-bs-toggle="modal"
+                                        <button type="button" class="btn btn-primary btn-sm admin-secondary-btn" data-bs-toggle="modal"
                                             data-bs-target="#viewParking-{{lot.id}}">View</button>
-                                        <button type="button" class="admin-icon-btn text-danger border-danger" data-bs-toggle="modal"
+                                        <button type="button" class="admin-icon-btn parking-delete-btn" data-bs-toggle="modal"
                                             data-bs-target="#deleteParking-{{lot.id}}" aria-label="Delete parking lot">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
                                 </div>
-                            </div>
+                            </article>
                         </div>
                         {% else %}
                         <div class="col-12">
-                            <div class="admin-empty-card p-5 text-center">
-                                <div class="admin-users-empty-icon"><i class="bi bi-p-square"></i></div>
-                                <h5 class="fw-bold mb-2">No parking lots available</h5>
-                                <p class="text-muted mb-3">Create your first parking location to start managing spots.</p>
+                            <div class="admin-empty-card parking-empty-state p-5 text-center">
+                                <div class="parking-empty-illustration"><i class="bi bi-building-fill-lock"></i></div>
+                                <h5 class="fw-bold mb-2">No parking lots found</h5>
+                                <p class="text-muted mb-3">Start by creating your first parking location.</p>
                                 <button type="button" class="admin-primary-btn" data-bs-toggle="modal" data-bs-target="#createParking">
                                     <i class="bi bi-plus-lg"></i>
-                                    <span>Create parking lot</span>
+                                    <span>Create New Lot</span>
                                 </button>
                             </div>
                         </div>
@@ -487,13 +566,26 @@
         (() => {
             const parkingSearch = document.getElementById('parkingLotsSearch');
             const parkingItems = Array.from(document.querySelectorAll('[data-parking-item]'));
-            const parkingFilters = Array.from(document.querySelectorAll('[data-parking-filter]'));
+            const parkingGrid = document.getElementById('parkingLotsGrid');
+            const parkingSkeleton = document.getElementById('parkingLotsSkeleton');
+            const parkingLocationFilter = document.getElementById('parkingLocationFilter');
+            const parkingZoneFilter = document.getElementById('parkingZoneFilter');
+            const parkingOccupancyFilter = document.getElementById('parkingOccupancyFilter');
+            const parkingCapacityFilter = document.getElementById('parkingCapacityFilter');
+            const parkingCapacityLabel = document.getElementById('parkingCapacityLabel');
+            const parkingFiltersApply = document.getElementById('parkingFiltersApply');
+            const parkingFiltersReset = document.getElementById('parkingFiltersReset');
             const userSearch = document.getElementById('usersSearch');
             const userRows = Array.from(document.querySelectorAll('[data-user-row]'));
             const userFilterButtons = Array.from(document.querySelectorAll('[data-user-filter]'));
             const userSortButtons = Array.from(document.querySelectorAll('[data-user-sort]'));
 
-            let parkingFilter = 'all';
+            const parkingState = {
+                occupancy: 'all',
+                location: 'all',
+                zone: 'all',
+                minCapacity: 0,
+            };
             let userFilter = 'all';
             let userSort = 'newest';
 
@@ -503,11 +595,17 @@
                 });
             };
 
-            const getParkingBucket = (percent) => {
-                if (percent <= 0) return 'empty';
-                if (percent < 35) return 'low';
-                if (percent < 70) return 'medium';
-                return 'high';
+            const normalizeOccupancy = (bucket, percent) => {
+                if (bucket === 'full') {
+                    return 'full';
+                }
+                if (percent >= 85) {
+                    return 'full';
+                }
+                if (bucket === 'medium') {
+                    return 'medium';
+                }
+                return 'low';
             };
 
             const applyParkingFilters = () => {
@@ -515,12 +613,54 @@
                 parkingItems.forEach((item) => {
                     const card = item.querySelector('[data-occupancy]');
                     const name = item.getAttribute('data-parking-name') || '';
+                    const location = item.getAttribute('data-parking-location') || '';
+                    const zone = item.getAttribute('data-parking-zone') || '';
+                    const rawBucket = item.getAttribute('data-parking-bucket') || 'low';
                     const occupancy = Number(card?.getAttribute('data-occupancy') || '0');
-                    const bucket = getParkingBucket(occupancy);
+                    const capacity = Number(item.getAttribute('data-parking-capacity') || '0');
+                    const bucket = normalizeOccupancy(rawBucket, occupancy);
                     const matchesQuery = !query || name.includes(query);
-                    const matchesFilter = parkingFilter === 'all' || bucket === parkingFilter;
-                    item.classList.toggle('d-none', !(matchesQuery && matchesFilter));
+                    const matchesLocation = parkingState.location === 'all' || location === parkingState.location;
+                    const matchesZone = parkingState.zone === 'all' || zone === parkingState.zone;
+                    const matchesOccupancy = parkingState.occupancy === 'all' || bucket === parkingState.occupancy;
+                    const matchesCapacity = capacity >= parkingState.minCapacity;
+                    item.classList.toggle('d-none', !(matchesQuery && matchesLocation && matchesZone && matchesOccupancy && matchesCapacity));
                 });
+            };
+
+            const buildParkingFilterOptions = () => {
+                const locationValues = new Set();
+                const zoneValues = new Set();
+
+                parkingItems.forEach((item) => {
+                    const loc = item.getAttribute('data-parking-location');
+                    const zone = item.getAttribute('data-parking-zone');
+                    if (loc) locationValues.add(loc);
+                    if (zone) zoneValues.add(zone);
+                });
+
+                if (parkingLocationFilter) {
+                    [...locationValues].sort((a, b) => a.localeCompare(b)).forEach((value) => {
+                        const option = document.createElement('option');
+                        option.value = value;
+                        option.textContent = value;
+                        parkingLocationFilter.appendChild(option);
+                    });
+                }
+
+                if (parkingZoneFilter) {
+                    [...zoneValues].sort((a, b) => a.localeCompare(b)).forEach((value) => {
+                        const option = document.createElement('option');
+                        option.value = value;
+                        option.textContent = value;
+                        parkingZoneFilter.appendChild(option);
+                    });
+                }
+            };
+
+            const syncCapacityLabel = () => {
+                if (!parkingCapacityFilter || !parkingCapacityLabel) return;
+                parkingCapacityLabel.textContent = `Minimum capacity: ${parkingCapacityFilter.value}`;
             };
 
             document.querySelectorAll('.progress-bar[data-occupancy-width]').forEach((bar) => {
@@ -575,12 +715,28 @@
             };
 
             parkingSearch?.addEventListener('input', applyParkingFilters);
-            parkingFilters.forEach((button) => {
-                button.addEventListener('click', () => {
-                    parkingFilter = button.getAttribute('data-parking-filter') || 'all';
-                    setActive(parkingFilters, 'data-parking-filter', parkingFilter);
-                    applyParkingFilters();
-                });
+            parkingCapacityFilter?.addEventListener('input', syncCapacityLabel);
+
+            parkingFiltersApply?.addEventListener('click', () => {
+                parkingState.location = parkingLocationFilter?.value || 'all';
+                parkingState.zone = parkingZoneFilter?.value || 'all';
+                parkingState.occupancy = parkingOccupancyFilter?.value || 'all';
+                parkingState.minCapacity = Number(parkingCapacityFilter?.value || '0');
+                applyParkingFilters();
+            });
+
+            parkingFiltersReset?.addEventListener('click', () => {
+                parkingState.location = 'all';
+                parkingState.zone = 'all';
+                parkingState.occupancy = 'all';
+                parkingState.minCapacity = 0;
+
+                if (parkingLocationFilter) parkingLocationFilter.value = 'all';
+                if (parkingZoneFilter) parkingZoneFilter.value = 'all';
+                if (parkingOccupancyFilter) parkingOccupancyFilter.value = 'all';
+                if (parkingCapacityFilter) parkingCapacityFilter.value = '0';
+                syncCapacityLabel();
+                applyParkingFilters();
             });
 
             userSearch?.addEventListener('input', applyUserFilters);
@@ -599,7 +755,18 @@
                 });
             });
 
-            applyParkingFilters();
+            buildParkingFilterOptions();
+            syncCapacityLabel();
+
+            if (parkingGrid && parkingSkeleton) {
+                setTimeout(() => {
+                    parkingSkeleton.classList.add('d-none');
+                    parkingGrid.classList.remove('d-none');
+                    applyParkingFilters();
+                }, 320);
+            } else {
+                applyParkingFilters();
+            }
             applyUserFilters();
             if (window.lucide) {
                 lucide.createIcons();
@@ -607,7 +774,7 @@
         })();
     </script>
     <script src="/static/js/theme-toggle.js"></script>
-    <script src="/static/js/flash-alerts.js"></script>
+    <script src="/static/js/toast.js?v=20260411"></script>
 </body>
 
 </html>
