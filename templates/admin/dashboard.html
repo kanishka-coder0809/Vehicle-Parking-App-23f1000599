@@ -1,41 +1,21 @@
-<!doctype html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="/static/js/theme-init.js"></script>
-    <title>FindMySpot | Admin Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="/static/css/nav_footer.css">
-    <link rel="stylesheet" href="/static/css/Dark.css">
-    <link rel="stylesheet" href="/static/css/admin_dashboard.css">
-    <link rel="stylesheet" href="/static/css/toast.css?v=20260411">
-    <link rel="icon" href="/static/images/logo.png" type="image/png">
-</head>
-
-<body class="admin-dashboard-page">
-
+{% extends 'admin/base.html' %}
+{% block content %}
     {% include 'admin/_saas_navbar.html' %}
-
-        {# Modern Toasts: messages block for JS only #}
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div id="toast-messages" style="display:none">
-                    {% for category, message in messages %}
-                        <div data-toast-category="{{ category }}" data-toast-message="{{ message|e }}"></div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-
+    {# Modern Toasts: messages block for JS only #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="toast-messages" style="display:none">
+                {% for category, message in messages %}
+                    <div data-toast-category="{{ category }}" data-toast-message="{{ message|e }}"></div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
     <div class="admin-tabs-wrap">
         <ul class="nav nav-pills justify-content-center" id="pills-tab" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home"
-                    type="button" role="tab" aria-controls="pills-home" aria-selected="true"><span class="admin-tab-icon">🅿️</span>Parking Lots</button>
+                    type="button" role="tab" aria-controls="pills-home" aria-selected="true"><span class="admin-tab-icon"></span>Parking Lots</button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"
@@ -562,6 +542,8 @@
         crossorigin="anonymous"></script>
     <script src="/static/js/saas-navbar.js?v=20260410c"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chatbot UI -->
+    <script src="/static/js/chatbot.js?v=20260411"></script>
     <script>
         (() => {
             const parkingSearch = document.getElementById('parkingLotsSearch');
@@ -775,6 +757,4 @@
     </script>
     <script src="/static/js/theme-toggle.js"></script>
     <script src="/static/js/toast.js?v=20260411"></script>
-</body>
-
-</html>
+{% endblock %}

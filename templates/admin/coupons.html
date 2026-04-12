@@ -1,97 +1,182 @@
 {% extends 'admin/base.html' %}
+
+{% block scripts %}
+<link rel="stylesheet" href="/static/css/coupons_admin.css">
+<script src="/static/js/coupons.js"></script>
+<script src="/static/js/saas-navbar.js"></script>
+<script src="/static/js/theme-toggle.js"></script>
+{% endblock %}
+
+
 {% block content %}
-<!-- HEADER -->
-<section class="coupons-hero-card mb-4 rounded-xl shadow-lg gradient-bg-card d-flex align-items-center justify-content-between flex-wrap gap-3 p-4">
-    <div>
-        <h2 class="fw-bold mb-1">Coupon Management</h2>
-        <p class="subtitle mb-0">Create and manage discount offers</p>
-    </div>
-    <div class="d-flex flex-wrap gap-3 align-items-center">
-        <div class="coupons-stat-card">
-            <span class="coupons-stat-label">Total Coupons</span>
-            <span class="coupons-stat-value">{{ stats.total }}</span>
-        </div>
-        <div class="coupons-stat-card">
-            <span class="coupons-stat-label">Active</span>
-            <span class="coupons-stat-value">{{ stats.active }}</span>
-        </div>
-        <div class="coupons-stat-card">
-            <span class="coupons-stat-label">Expired</span>
-            <span class="coupons-stat-value">{{ stats.expired }}</span>
-        </div>
-        <button class="btn btn-admin-gradient" id="createCouponBtn"><i class="bi bi-plus-lg"></i> Create Coupon</button>
-    </div>
-</section>
+<div class="dashboard-shell">
+    {% include 'admin/_saas_navbar.html' %}
 
-<!-- SEARCH + FILTER BAR -->
-<div class="coupons-action-bar d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-    <div class="coupons-search-wrap flex-grow-1">
-        <div class="input-group coupons-search-input">
+    <!-- HEADER: Flex row, left-aligned -->
+    <section class="saas-card animate-fade-in" style="padding:12px 18px 12px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="display:flex;flex-direction:column;gap:2px;">
+            <h2 class="fw-bold mb-0" style="font-size:20px;letter-spacing:-0.5px;line-height:1.1;">Coupon Management</h2>
+            <p class="subtitle mb-0" style="font-size:13px;opacity:.92;line-height:1.2;">Manage and control discount system</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div class="coupons-stat-card text-center">
+                <span class="coupons-stat-label">Total</span>
+                <div class="coupons-stat-value">{{ stats.total }}</div>
+            </div>
+            <div class="coupons-stat-card text-center">
+                <span class="coupons-stat-label">Active</span>
+                <div class="coupons-stat-value">{{ stats.active }}</div>
+            </div>
+            <div class="coupons-stat-card text-center">
+                <span class="coupons-stat-label">Expired</span>
+                <div class="coupons-stat-value">{{ stats.expired }}</div>
+            </div>
+            <button class="btn btn-admin-gradient fw-bold shadow-glow" id="createCouponBtn" style="font-size:14px;padding:6px 12px;border-radius:8px;">
+                <i class="bi bi-plus-lg"></i> Create Coupon
+            </button>
+        </div>
+    </section>
+
+    <!-- FILTERS: Compact row, left-aligned -->
+    <div class="saas-card animate-fade-in" style="padding:10px 18px 10px 18px;min-height:44px;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
+        <div class="input-group" style="max-width:320px;">
             <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input type="search" class="form-control" id="couponsSearch" placeholder="Search by coupon code..." aria-label="Search coupons">
+            <input type="search" class="form-control" id="couponsSearch" placeholder="Search by code..." aria-label="Search coupons" style="font-size:14px;min-height:32px;">
         </div>
-    </div>
-    <div class="d-flex gap-2 align-items-center">
-        <select class="form-select" id="filterStatus">
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="expired">Expired</option>
-            <option value="disabled">Disabled</option>
-        </select>
-        <select class="form-select" id="filterType">
-            <option value="all">All Types</option>
-            <option value="flat">Flat</option>
-            <option value="percent">Percentage</option>
-        </select>
-        <input type="date" class="form-control" id="filterStartDate">
-        <input type="date" class="form-control" id="filterEndDate">
-    </div>
-</div>
-
-<!-- COUPON LIST -->
-<div class="coupons-list-container">
-    {% if coupons %}
-    <div class="row g-4">
-        {% for coupon in coupons %}
-        <div class="col-md-6 col-lg-4">
-            <div class="coupon-card rounded-xl shadow-sm p-4 d-flex flex-column gap-2">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <div class="coupon-code fw-bold fs-4">{{ coupon.code }}</div>
-                    <span class="badge coupon-status-badge coupon-status-{{ coupon.status|lower }}">{{ coupon.status|title }}</span>
+        <div class="dropdown">
+            <button class="admin-filter-btn coupons-filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-height:32px;font-size:14px;padding:6px 12px;border-radius:8px;">
+                <i class="bi bi-sliders2"></i>
+                <span>Filter</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end admin-filter-menu coupons-filter-panel p-3 animate-dropdown" style="min-width:220px;padding:10px 16px;">
+                <div class="mb-2">
+                    <label class="form-label mb-1" for="filterStatus">Status</label>
+                    <select class="form-select" id="filterStatus" style="font-size:13px;min-height:28px;">
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="expired">Expired</option>
+                    </select>
                 </div>
-                <div class="coupon-discount fs-5 mb-1">
-                    {% if coupon.discount_type == 'flat' %}
-                        ₹{{ coupon.discount_value }} OFF
-                    {% else %}
-                        {{ coupon.discount_value }}% OFF
-                    {% endif %}
+                <div class="mb-2">
+                    <label class="form-label mb-1" for="filterType">Type</label>
+                    <select class="form-select" id="filterType" style="font-size:13px;min-height:28px;">
+                        <option value="all">All Types</option>
+                        <option value="flat">Flat</option>
+                        <option value="percent">Percentage</option>
+                    </select>
                 </div>
-                <div class="coupon-conditions text-muted small mb-2">
-                    Min spend: ₹{{ coupon.min_amount }}<br>
-                    Valid till: {{ coupon.expiry_date }}<br>
-                    Usage limit: {{ coupon.usage_limit }}
+                <div class="mb-2 row g-2">
+                    <div class="col">
+                        <label class="form-label mb-1" for="filterStartDate">From</label>
+                        <input type="date" class="form-control" id="filterStartDate" style="font-size:13px;min-height:28px;">
+                    </div>
+                    <div class="col">
+                        <label class="form-label mb-1" for="filterEndDate">To</label>
+                        <input type="date" class="form-control" id="filterEndDate" style="font-size:13px;min-height:28px;">
+                    </div>
                 </div>
-                <div class="coupon-usage text-primary small mb-2">{{ coupon.usage_count }} / {{ coupon.usage_limit }} used</div>
-                <div class="d-flex gap-2 mt-auto">
-                    <button class="btn btn-outline-primary btn-sm coupon-edit-btn" data-id="{{ coupon.id }}">Edit</button>
-                    {% if coupon.status == 'Active' %}
-                    <button class="btn btn-outline-warning btn-sm coupon-disable-btn" data-id="{{ coupon.id }}">Disable</button>
-                    {% else %}
-                    <button class="btn btn-outline-success btn-sm coupon-enable-btn" data-id="{{ coupon.id }}">Enable</button>
-                    {% endif %}
-                    <button class="btn btn-outline-danger btn-sm coupon-delete-btn" data-id="{{ coupon.id }}">Delete</button>
-                    <button class="btn btn-outline-secondary btn-sm coupon-usage-btn" data-id="{{ coupon.id }}">View Usage</button>
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="resetFiltersBtn" style="font-size:13px;padding:4px 10px;border-radius:7px;">Reset</button>
+                    <button type="button" class="btn btn-sm btn-primary" id="applyFiltersBtn" style="font-size:13px;padding:4px 10px;border-radius:7px;"><i class="bi bi-funnel"></i> Apply Filters</button>
                 </div>
             </div>
         </div>
-        {% endfor %}
     </div>
+
+
+    <!-- COUPONS GRID SECTION -->
+    <div class="coupons-list-container animate-fade-in" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;">
+        {% if coupons and coupons|length > 0 %}
+            {% for coupon in coupons %}
+            <div>
+                <div class="coupon-card animate-coupon-card h-100 d-flex flex-column" style="padding:14px;border-radius:16px;gap:8px;font-size:14px;">
+                    <!-- Header -->
+                    <div class="coupon-card-header mb-1" style="margin-bottom:4px;">
+                        <div class="coupon-title" style="font-size:15px;font-weight:600;">{{ coupon.code }}</div>
+                        <span class="coupon-status-tag {{ 'active' if coupon.status == 'Active' else 'expired' }}" style="font-size:12px;padding:2px 8px;min-width:40px;">
+                            <span class="coupon-status-dot"></span>
+                            {{ coupon.status|title }}
+                        </span>
+                    </div>
+                    <!-- Info Grid -->
+                    <div class="coupon-info-grid" style="gap:6px 10px;margin-bottom:2px;">
+                        <div class="coupon-info-box" style="border-radius:7px;padding:4px 10px;min-height:22px;">
+                            <div class="coupon-info-label" style="font-size:11px;">Discount</div>
+                            <div class="coupon-info-value coupon-discount-main" style="font-size:13px;font-weight:600;">
+                                {% if coupon.discount_type == 'flat' %}
+                                    ₹{{ coupon.discount_value }} OFF
+                                {% else %}
+                                    {{ coupon.discount_value }}% OFF
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="coupon-info-box" style="border-radius:7px;padding:4px 10px;min-height:22px;">
+                            <div class="coupon-info-label" style="font-size:11px;">Min Spend</div>
+                            <div class="coupon-info-value" style="font-size:13px;font-weight:600;">₹{{ coupon.min_amount }}</div>
+                        </div>
+                        <div class="coupon-info-box" style="border-radius:7px;padding:4px 10px;min-height:22px;">
+                            <div class="coupon-info-label" style="font-size:11px;">Type</div>
+                            <div class="coupon-info-value" style="font-size:13px;font-weight:600;">{{ coupon.discount_type|title }}</div>
+                        </div>
+                        <div class="coupon-info-box" style="border-radius:7px;padding:4px 10px;min-height:22px;">
+                            <div class="coupon-info-label" style="font-size:11px;">Expiry</div>
+                            <div class="coupon-info-value" style="font-size:13px;font-weight:600;">{{ coupon.expiry_date }}</div>
+                        </div>
+                    </div>
+                    <!-- Actions -->
+                    <div class="coupon-card-actions mt-auto" style="gap:6px;margin-top:2px;display:flex;align-items:center;">
+                        <button class="btn btn-admin-gradient coupon-edit-btn" data-id="{{ coupon.id }}" style="font-size:13px;padding:6px 12px;border-radius:7px;">Edit</button>
+                        {% if coupon.status == 'Active' %}
+                        <button class="icon-btn coupon-disable-btn" data-id="{{ coupon.id }}" title="Disable" style="width:32px;height:32px;font-size:15px;"><i class="bi bi-bell-slash"></i></button>
+                        {% else %}
+                        <button class="icon-btn coupon-enable-btn" data-id="{{ coupon.id }}" title="Enable" style="width:32px;height:32px;font-size:15px;"><i class="bi bi-bell"></i></button>
+                        {% endif %}
+                        <button class="icon-btn coupon-delete-btn" data-id="{{ coupon.id }}" title="Delete" style="width:32px;height:32px;font-size:15px;"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <!-- EMPTY STATE SECTION -->
+        <div class="d-flex flex-column align-items-center justify-content-center coupons-empty-state animate-fade-in" style="min-height: 180px;">
+            <div class="glass-card p-5 text-center animate-fade-in" style="max-width: 260px; border-radius:10px;padding:1.1rem 0.7rem 0.7rem 0.7rem !important;">
+                <div class="mb-2">
+                    <i class="bi bi-ticket-perforated" style="font-size:2.2rem; color:#a78bfa; filter: drop-shadow(0 2px 12px #a78bfa66);"></i>
+                </div>
+                <div class="fw-bold mb-1" style="font-size:1.01rem;">No coupons available</div>
+                <div class="text-muted mb-2" style="font-size:0.93rem;">Start by creating your first coupon for users!</div>
+                <button class="btn btn-admin-gradient px-4 py-2 fw-bold shadow-glow" id="emptyCreateCouponBtn" style="font-size:13px;padding:6px 12px;border-radius:7px;">
+                    <i class="bi bi-plus-lg"></i> Create Coupon
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- C. TOP COUPONS SECTION -->
+{% if coupons and coupons|length > 0 %}
+{% set top_coupons = coupons|sort(attribute='usage_count', reverse=True) %}
+
+{% endif %}
+
+<!-- D. COUPONS GRID SECTION -->
+<div class="coupons-list-container animate-fade-in">
+    {% if coupons and coupons|length > 0 %}
+    
     {% else %}
-    <div class="coupons-empty-state text-center py-5">
-        <div class="mb-3"><i class="bi bi-ticket-perforated" style="font-size:3rem; color:#a78bfa;"></i></div>
-        <div class="fw-bold mb-1">No coupons created yet</div>
-        <div class="text-muted mb-2">Start by creating your first coupon for users!</div>
-        <button class="btn btn-admin-gradient" id="emptyCreateCouponBtn"><i class="bi bi-plus-lg"></i> Create Coupon</button>
+    <!-- E. EMPTY STATE SECTION -->
+    <div class="d-flex flex-column align-items-center justify-content-center animate-fade-in" style="min-height: 340px;">
+        <div class="glass-card p-5 text-center animate-fade-in" style="max-width: 420px; border-radius:2rem;">
+            <div class="mb-3">
+                <i class="bi bi-ticket-perforated" style="font-size:4rem; color:#a78bfa; filter: drop-shadow(0 2px 12px #a78bfa66);"></i>
+            </div>
+            <div class="fw-bold mb-1" style="font-size:1.3rem;">No coupons available</div>
+            <div class="text-muted mb-3">Start by creating your first coupon for users!</div>
+            <button class="btn btn-admin-gradient px-4 py-2 fw-bold shadow-glow" id="emptyCreateCouponBtn" style="font-size:1.1rem;">
+                <i class="bi bi-plus-lg"></i> Create Coupon
+            </button>
+        </div>
     </div>
     {% endif %}
 </div>
@@ -169,4 +254,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+    {% endblock %}

@@ -24,6 +24,94 @@ if db.session.query(User).count() == 0:
     db.session.add(U8)
     db.session.commit()
 
+from .models import Coupon
+
+if db.session.query(Coupon).count() == 0:
+    import datetime
+    today = datetime.date.today()
+    coupons = [
+        Coupon(
+            code="WELCOME50",
+            discount_type="percentage",
+            discount_value=50,
+            min_amount=100,
+            max_discount=100,
+            expiry_date=str(today + datetime.timedelta(days=30)),
+            usage_limit=100,
+            used_count=0,
+            usage_limit_per_user=1,
+            applicable_on="booking",
+            is_active=True
+        ),
+        Coupon(
+            code="FLAT30",
+            discount_type="flat",
+            discount_value=30,
+            min_amount=150,
+            max_discount=None,
+            expiry_date=str(today + datetime.timedelta(days=60)),
+            usage_limit=200,
+            used_count=0,
+            usage_limit_per_user=None,
+            applicable_on="booking",
+            is_active=True
+        ),
+        Coupon(
+            code="WEEKEND10",
+            discount_type="percentage",
+            discount_value=10,
+            min_amount=200,
+            max_discount=50,
+            expiry_date=str(today + datetime.timedelta(days=90)),
+            usage_limit=500,
+            used_count=0,
+            usage_limit_per_user=None,
+            applicable_on="booking",
+            is_active=True
+        ),
+        Coupon(
+            code="NIGHTOWL",
+            discount_type="flat",
+            discount_value=40,
+            min_amount=100,
+            max_discount=None,
+            expiry_date=str(today + datetime.timedelta(days=45)),
+            usage_limit=100,
+            used_count=0,
+            usage_limit_per_user=None,
+            applicable_on="booking",
+            is_active=True
+        ),
+        Coupon(
+            code="FESTIVE25",
+            discount_type="percentage",
+            discount_value=25,
+            min_amount=250,
+            max_discount=75,
+            expiry_date=str(today + datetime.timedelta(days=15)),
+            usage_limit=300,
+            used_count=0,
+            usage_limit_per_user=None,
+            applicable_on="booking",
+            is_active=True
+        ),
+        Coupon(
+            code="LOYALTY100",
+            discount_type="flat",
+            discount_value=100,
+            min_amount=500,
+            max_discount=None,
+            expiry_date=str(today + datetime.timedelta(days=120)),
+            usage_limit=50,
+            used_count=0,
+            usage_limit_per_user=None,
+            applicable_on="booking",
+            is_active=True
+        ),
+    ]
+    db.session.add_all(coupons)
+    db.session.commit()
+
 if db.session.query(ParkingLot).count() == 0:
     P1 = ParkingLot(prime_location_name="Ambience Mall", price=800, address="DLF Phase 3, Sector-24", city="Gurugram", pin_code=122002, maximum_number_of_spots=250)
     db.session.add(P1)

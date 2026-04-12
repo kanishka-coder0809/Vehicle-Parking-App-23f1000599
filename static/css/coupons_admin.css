@@ -1,0 +1,411 @@
+/* --- COMPACT DASHBOARD-LIKE COUPONS PAGE REFINEMENTS --- */
+
+/* Slim header */
+.coupons-hero-card {
+    min-height: unset;
+    padding: 0.7rem 1.1rem 0.7rem 1.1rem;
+    font-size: 0.98rem;
+}
+.coupons-hero-card h2 {
+    font-size: 1.18rem;
+    margin-bottom: 0.1rem;
+    font-weight: 700;
+}
+.coupons-hero-card .subtitle {
+    font-size: 0.97rem;
+    margin-bottom: 0;
+}
+.coupons-hero-card .d-flex {
+    gap: 0.7rem !important;
+}
+
+/* Stat cards inline, smaller */
+.coupons-stat-card {
+    min-width: 60px;
+    padding: 0.18rem 0.5rem;
+    font-size: 0.93rem;
+    border-radius: 8px;
+    margin-right: 0.3rem;
+}
+.coupons-stat-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.1rem;
+}
+.coupons-stat-value {
+    font-size: 1.01rem;
+    font-weight: 600;
+}
+
+/* Compact search/filter bar */
+.coupons-action-bar {
+    padding: 0.18rem 0.7rem 0.18rem 0.7rem;
+    min-height: 44px;
+    margin-bottom: 0.7rem;
+}
+.coupons-action-bar .input-group {
+    max-width: 320px;
+}
+.coupons-action-bar .form-control,
+.coupons-action-bar .form-select {
+    min-height: 32px;
+    font-size: 0.95rem;
+    padding: 0.18rem 0.6rem;
+}
+.coupons-action-bar .input-group-text {
+    font-size: 1rem;
+    padding: 0.18rem 0.5rem;
+}
+.coupons-action-bar .admin-filter-btn {
+    min-height: 32px;
+    font-size: 0.95rem;
+    padding: 0.18rem 0.7rem;
+    border-radius: 8px;
+}
+.coupons-filter-panel {
+    min-width: 220px;
+    padding: 0.7rem 1rem;
+}
+
+/* Coupon cards: compact, dashboard style */
+.coupons-list-container {
+    padding: 0 0.1rem 0.7rem 0.1rem;
+}
+.coupons-list-container .row.g-4 {
+    --bs-gutter-x: 0.7rem;
+    --bs-gutter-y: 0.7rem;
+}
+.coupons-list-container .coupon-card {
+    min-height: 120px;
+    padding: 0.7rem 0.7rem 0.6rem 0.7rem;
+    gap: 0.3rem;
+    font-size: 0.95rem;
+}
+.coupon-card-header {
+    margin-bottom: 0.05rem;
+}
+.coupon-title {
+    font-size: 0.98rem;
+    font-weight: 600;
+}
+.coupon-status-tag {
+    font-size: 0.85rem;
+    padding: 0.04em 0.4em;
+    min-width: 44px;
+}
+.coupon-info-grid {
+    gap: 0.18rem 0.4rem;
+    margin-bottom: 0.1rem;
+}
+.coupon-info-box {
+    border-radius: 7px;
+    padding: 0.18em 0.5em 0.15em 0.5em;
+    min-height: 22px;
+}
+.coupon-info-label {
+    font-size: 0.68rem;
+}
+.coupon-info-value, .coupon-discount-main {
+    font-size: 0.93rem;
+    font-weight: 600;
+}
+.coupon-discount-main {
+    color: #6f4bff;
+}
+.coupon-card-actions {
+    gap: 0.18rem;
+    margin-top: 0.05rem;
+}
+.coupon-card-actions .btn, .coupon-card-actions .btn-admin-gradient {
+    font-size: 0.93rem;
+    padding: 0.18em 0.7em;
+    border-radius: 7px;
+}
+.coupon-card-actions .icon-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 0.93rem;
+    border-radius: 7px;
+}
+
+/* Top coupons: slim chips */
+.top-used-coupons .glass-card {
+    min-width: 80px;
+    max-width: 120px;
+    border-left: 2px solid #a78bfa;
+    background: #f7f9ff;
+    color: #6f4bff;
+    font-weight: 600;
+    border-radius: 7px;
+    padding: 0.18rem 0.7rem;
+    margin-right: 0.3rem;
+    font-size: 0.93rem;
+    box-shadow: 0 1px 4px 0 #a78bfa08;
+}
+
+/* Empty state: compact */
+.coupons-empty-state .glass-card {
+    padding: 1.1rem 0.7rem 0.7rem 0.7rem !important;
+    max-width: 260px;
+    border-radius: 10px;
+}
+.coupons-empty-state .glass-card i {
+    font-size: 2.2rem !important;
+    margin-bottom: 0.2rem;
+}
+.coupons-empty-state .fw-bold {
+    font-size: 1.01rem !important;
+    margin-bottom: 0.1rem;
+}
+.coupons-empty-state .text-muted {
+    font-size: 0.93rem !important;
+    margin-bottom: 0.2rem;
+}
+.coupons-empty-state .btn {
+    font-size: 0.93rem !important;
+    padding: 0.18em 0.7em !important;
+    border-radius: 7px !important;
+}
+/* Coupons Admin Page - Modern SaaS Glassmorphism Theme */
+}
+.coupons-action-bar .input-group-text {
+    background: transparent;
+    border: none;
+    color: #6f4bff;
+}
+.coupons-list-container {
+    padding: 0 0.5rem 1.5rem 0.5rem;
+}
+.coupons-list-container .row.g-4 {
+    --bs-gutter-x: 2.2rem;
+    --bs-gutter-y: 2.2rem;
+}
+.coupons-list-container .col-md-6,
+.coupons-list-container .col-lg-4 {
+    display: flex;
+}
+.coupons-list-container .coupon-card {
+    background: #fff;
+    border-radius: 18px;
+    border: 1.5px solid rgba(111,75,255,0.10);
+    box-shadow: 0 8px 24px 0 rgba(111,75,255,0.07);
+    transition: box-shadow .18s, transform .18s, border-color .18s;
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1.5rem 1.3rem 1.3rem 1.3rem;
+    gap: 1.1rem;
+    position: relative;
+}
+.coupon-card:hover {
+    box-shadow: 0 16px 32px 0 #a78bfa22, 0 2px 12px 0 #6f4bff22;
+    border-color: #a78bfa;
+    transform: translateY(-3px) scale(1.025);
+}
+
+/* Coupon Card Header */
+.coupon-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+.coupon-title {
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: #1f2f52;
+    margin-bottom: 0.1rem;
+    letter-spacing: 0.5px;
+}
+.coupon-status-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: 0.98rem;
+    font-weight: 500;
+    padding: 0.18em 0.7em;
+    border-radius: 999px;
+    background: #f3f6ff;
+    color: #6f4bff;
+    min-width: 80px;
+    justify-content: flex-end;
+}
+.coupon-status-tag.active {
+    background: #e7fbe9;
+    color: #22c55e;
+}
+.coupon-status-tag.expired {
+    background: #f3f4f6;
+    color: #b91c1c;
+}
+.coupon-status-dot {
+    width: 0.7em;
+    height: 0.7em;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.2em;
+    background: #bdbdbd;
+}
+.coupon-status-tag.active .coupon-status-dot {
+    background: #22c55e;
+}
+.coupon-status-tag.expired .coupon-status-dot {
+    background: #b91c1c;
+}
+
+/* Coupon Info Grid */
+.coupon-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem 1.1rem;
+    margin-bottom: 0.7rem;
+}
+.coupon-info-box {
+    background: #f7f9ff;
+    border-radius: 12px;
+    padding: 0.7em 1em 0.6em 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    min-height: 54px;
+    box-shadow: none;
+    border: 1px solid #f0f1fa;
+}
+.coupon-info-label {
+    font-size: 0.82rem;
+    color: #7b8190;
+    margin-bottom: 0.18em;
+    font-weight: 500;
+}
+.coupon-info-value {
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #1f2f52;
+}
+.coupon-discount-main {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #6f4bff;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.1em;
+}
+
+/* Coupon Card Actions */
+.coupon-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-top: 0.7rem;
+}
+.coupon-card-actions .btn {
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.5em 1.2em;
+    box-shadow: 0 2px 8px rgba(111,75,255,0.07);
+    transition: box-shadow .18s, background .18s, color .18s;
+}
+.coupon-card-actions .btn-primary, .coupon-card-actions .btn-admin-gradient {
+    background: linear-gradient(90deg,#a78bfa,#6f4bff);
+    color: #fff;
+    border: none;
+}
+.coupon-card-actions .btn-outline-primary {
+    border: 1.5px solid #a78bfa;
+    color: #6f4bff;
+    background: #fff;
+}
+.coupon-card-actions .btn-outline-primary:hover {
+    background: #f3f6ff;
+    color: #6f4bff;
+}
+.coupon-card-actions .icon-btn {
+    background: #f7f9ff;
+    border: 1px solid #e0e7ff;
+    color: #6f4bff;
+    border-radius: 12px;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.18rem;
+    transition: background .18s, color .18s, border .18s;
+    padding: 0;
+}
+.coupon-card-actions .icon-btn:hover {
+    background: #e7e9ff;
+    color: #4b5d80;
+    border-color: #a78bfa;
+}
+.coupon-card:hover {
+    box-shadow: 0 12px 36px 0 #a78bfa44, 0 2px 12px 0 #6f4bff33;
+    transform: scale(1.025);
+}
+.coupon-status-badge {
+    font-size: .95rem;
+    border-radius: 1rem;
+    padding: 0.35em 1.1em;
+    font-weight: 600;
+}
+.coupon-status-active {
+    background: linear-gradient(90deg,#a78bfa,#6f4bff);
+    color: #fff;
+}
+.coupon-status-expired {
+    background: #e0e7ff;
+    color: #6f4bff;
+}
+.coupon-type-badge .badge {
+    background: #f3f6ff;
+    color: #6f4bff;
+    font-weight: 500;
+}
+.btn-admin-gradient {
+    background: linear-gradient(90deg,#a78bfa,#6f4bff);
+    color: #fff;
+    border: none;
+    border-radius: 1.2rem;
+    transition: background .18s, box-shadow .18s;
+    font-weight: 600;
+    box-shadow: 0 0 0 0 #a78bfa, 0 2px 12px 0 #6f4bff33;
+}
+.btn-admin-gradient:hover, .btn-admin-gradient:focus {
+    background: linear-gradient(90deg,#6f4bff,#a78bfa);
+    color: #fff;
+    box-shadow: 0 0 12px 2px #a78bfa88, 0 2px 12px 0 #6f4bff33;
+}
+.shadow-glow {
+    box-shadow: 0 0 0 0 #a78bfa, 0 2px 12px 0 #6f4bff33;
+    transition: box-shadow .18s;
+}
+.shadow-glow:hover {
+    box-shadow: 0 0 12px 2px #a78bfa88, 0 2px 12px 0 #6f4bff33;
+}
+.coupons-empty-state .glass-card {
+    background: rgba(255,255,255,0.82);
+    box-shadow: 0 8px 32px 0 rgba(111,75,255,0.10);
+    border-radius: 2rem;
+    border: 1.5px solid rgba(111,75,255,0.10);
+    animation: fadeIn .7s cubic-bezier(.4,2,.6,1);
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(24px);}
+    to { opacity: 1; transform: none;}
+}
+.animate-coupon-card {
+    animation: fadeInCard .5s cubic-bezier(.4,2,.6,1);
+}
+@keyframes fadeInCard {
+    from { opacity: 0; transform: scale(.96);}
+    to { opacity: 1; transform: scale(1);}
+}
+.top-used-coupons .glass-card {
+    min-width: 180px;
+    border-left: 4px solid #a78bfa;
+    background: rgba(255,255,255,0.92);
+    color: #6f4bff;
+    font-weight: 600;
+}

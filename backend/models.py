@@ -3,6 +3,21 @@ from flask_login import UserMixin
 
 db = SQLAlchemy()
 
+class Coupon(db.Model):
+    __tablename__ = "Coupon"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    code = db.Column(db.String(32), unique=True, nullable=False)
+    discount_type = db.Column(db.String(16), nullable=False)  # 'flat' or 'percentage'
+    discount_value = db.Column(db.Float, nullable=False)
+    min_amount = db.Column(db.Float, nullable=False, default=0)
+    max_discount = db.Column(db.Float, nullable=True)
+    expiry_date = db.Column(db.String, nullable=False)
+    usage_limit = db.Column(db.Integer, nullable=True)
+    used_count = db.Column(db.Integer, nullable=False, default=0)
+    usage_limit_per_user = db.Column(db.Integer, nullable=True)
+    applicable_on = db.Column(db.String(32), nullable=False, default='booking')  # booking/subscription/location
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+
 class Admin(db.Model, UserMixin):
     __tablename__ = "admin"
     id = db.Column(db.Integer, primary_key = True, autoincrement = True)

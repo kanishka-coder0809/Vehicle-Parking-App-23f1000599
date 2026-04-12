@@ -1,36 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/static/js/theme-init.js"></script>
-    <title>FindMySpot | Admin Dashboard Summary</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="/static/css/nav_footer.css">
-    <link rel="stylesheet" href="/static/css/Dark.css">
-    <link rel="stylesheet" href="/static/css/admin_summary.css">
-    <link rel="stylesheet" href="/static/css/toast.css?v=20260411">
-    <link rel="icon" href="/static/images/logo.png" type="image/png">
-</head>
-
-<body>
+{% extends 'admin/base.html' %}
+{% block content %}
     {% include 'admin/_saas_navbar.html' %}
-        {# Modern Toasts: messages block for JS only #}
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div id="toast-messages" style="display:none">
-                    {% for category, message in messages %}
-                        <div data-toast-category="{{ category }}" data-toast-message="{{ message|e }}"></div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-
-        <main class="container admin-summary-page">
+    {# Modern Toasts: messages block for JS only #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="toast-messages" style="display:none">
+                {% for category, message in messages %}
+                    <div data-toast-category="{{ category }}" data-toast-message="{{ message|e }}"></div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <main class="container admin-summary-page">
                 <section class="admin-hero d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
             <div>
                 <h2 class="mb-1 fw-bold">Admin Analytics Dashboard</h2>
@@ -303,7 +284,5 @@
     <script src="/static/js/theme-toggle.js"></script>
     <script id="adminSummaryInitialData" type="application/json">{{ summary_payload|tojson }}</script>
     <script src="/static/js/admin-summary.js"></script>
-</body>
-
     <script src="/static/js/toast.js?v=20260411"></script>
-</html>
+{% endblock %}

@@ -1,21 +1,81 @@
-## Coupon page and related routes removed as per user request. Only keep unrelated imports and helper code below.
-from app import app
-from flask import render_template, request, redirect, flash, url_for, send_file, jsonify, session
-from .models import db, Admin, User, ParkingLot, ParkingSpot, ReservedParkingSpot, ParkingLotReview, FavoriteParkingLot, NotificationLog, SpotAvailabilityAlert, MonthlySubscription, WalletTransaction
-from flask_login import login_user,logout_user, login_required, current_user
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_
 from datetime import datetime, timedelta
+import os
+import csv
+import re
 from collections import Counter
 from calendar import month_name
 from io import BytesIO, StringIO
-import csv
-import os
-import re
-from werkzeug.utils import secure_filename
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pylab as plt
+from flask import (
+    Blueprint, render_template, request, redirect, flash, url_for, send_file, jsonify, session, current_app
+)
+from .models import db, Admin, User, ParkingLot, ParkingSpot, ReservedParkingSpot, ParkingLotReview, FavoriteParkingLot, NotificationLog, SpotAvailabilityAlert, MonthlySubscription, WalletTransaction, Coupon
+from flask_login import login_user, logout_user, login_required, current_user
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import and_
+
+try:
+    from flask_mail import Mail, Message  # type: ignore[import-not-found]
+    MAIL_AVAILABLE = True
+except Exception:
+    MAIL_AVAILABLE = False
+
+try:
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+    PDF_AVAILABLE = True
+except Exception:
+    PDF_AVAILABLE = False
+
+# --- Blueprint Setup ---
+routes = Blueprint("routes", __name__)
+
+# --- ADMIN COUPONS PAGE ---
+@routes.route("/admin/coupons")
+@login_required
+def admin_coupons():
+    # Fetch all coupons
+    coupons = db.session.query(Coupon).all()
+    # Stats
+    total = len(coupons)
+    active = sum(1 for c in coupons if c.is_active and c.expiry_date >= datetime.now().strftime('%Y-%m-%d'))
+    expired = sum(1 for c in coupons if c.expiry_date < datetime.now().strftime('%Y-%m-%d'))
+    most_used = max(coupons, key=lambda c: c.used_count, default=None)
+    # Locations for dropdown (if needed)
+    locations = db.session.query(ParkingLot).all()
+    stats = {
+        "total": total,
+        "active": active,
+        "expired": expired,
+        "most_used": most_used.code if most_used else "-"
+    }
+    return render_template(
+        "admin/coupons.html",
+        coupons=coupons,
+        stats=stats,
+        locations=locations
+    )
+from werkzeug.utils import secure_filename
+
+# --- AI Chatbot Route ---
+@routes.route('/chatbot', methods=['POST'])
+def chatbot_route():
+    data = request.get_json(force=True)
+    msg = (data.get('message') or '').lower()
+    if 'parking' in msg:
+        reply = 'Showing nearby parking options'
+    elif 'booking' in msg:
+        reply = 'Here are your bookings'
+    elif 'wallet' in msg:
+        reply = 'Your wallet balance is ₹1000 (demo)'
+    else:
+        reply = 'I can help with parking, bookings, and wallet info'
+    return jsonify({'reply': reply})
 
 try:
     from flask_mail import Mail, Message  # type: ignore[import-not-found]
@@ -34,7 +94,7 @@ except Exception:
     PDF_AVAILABLE = False
 
 
-mail = Mail(app) if MAIL_AVAILABLE else None
+mail = Mail() if MAIL_AVAILABLE else None
 UPLOAD_DIR = os.path.join("static", "user_profiles")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -92,8 +152,8 @@ def _build_favorite_ids(user_id):
 
 def _resolve_logo_path():
     logo_candidates = [
-        os.path.join(app.root_path, "static", "images", "logo.png"),
-        os.path.join(app.root_path, "static", "images", "Logo.png"),
+        os.path.join(current_app.root_path, "static", "images", "logo.png"),
+        os.path.join(current_app.root_path, "static", "images", "Logo.png"),
     ]
     for path in logo_candidates:
         if os.path.exists(path):
@@ -1012,7 +1072,7 @@ def _build_wallet_distribution_chart(transactions):
             values.append(value)
             colors.append(palette[key])
 
-    chart_dir = os.path.join(app.root_path, 'static', 'user')
+    chart_dir = os.path.join(current_app.root_path, 'static', 'user')
     os.makedirs(chart_dir, exist_ok=True)
 
     def _render_wallet_chart(chart_path, is_dark=False):
@@ -1059,7 +1119,7 @@ def _build_wallet_distribution_chart(transactions):
         'counts': counts,
     }
 
-@app.context_processor
+@routes.app_context_processor
 def inject_header_notifications():
     if not getattr(current_user, "is_authenticated", False):
         return {}
@@ -1095,18 +1155,18 @@ def inject_header_notifications():
             "header_unread_ids": [],
         }
 
-@app.route("/")
+@routes.route("/")
 def index():
     return render_template("home.html")
 
-@app.route("/logout")
+@routes.route("/logout")
 @login_required
 def logout():
     logout_user()
     flash('Logged Out Successfully !!', 'success')
     return redirect(url_for('login'))
 
-@app.route("/register", methods = ["GET", "POST"])
+@routes.route("/register", methods = ["GET", "POST"])
 def register():
     if request.method == "GET": 
         return render_template("register.html")
@@ -1128,7 +1188,7 @@ def register():
             flash('E-mail Registered !!', 'success')
             return redirect(url_for('login'))
 
-@app.route("/login", methods =["GET", "POST"])
+@routes.route("/login", methods =["GET", "POST"])
 def login():
     if request.method == "GET":
         return render_template("login.html")
@@ -1155,13 +1215,13 @@ def login():
             flash('Invalid E-mail !!', 'danger')
             return redirect(url_for('login'))
 
-@app.route("/admin/dashboard")
+@routes.route("/admin/dashboard")
 @login_required
 def admin_dashboard_blank():
     return render_template("/admin/blank_dashboard.html")
 
 
-@app.route("/admin/actions")
+@routes.route("/admin/actions")
 @login_required  
 def admin_dash():
     all_par = db.session.query(ParkingLot).all()
@@ -1183,7 +1243,7 @@ def admin_dash():
     return render_template("/admin/dashboard.html", all_par = all_par, all_users = all_users, user_histories= user_histories)
 
 
-@app.route("/admin/search", methods = ["GET", "POST"])
+@routes.route("/admin/search", methods = ["GET", "POST"])
 @login_required
 def admin_search():
     all_users = db.session.query(User).all()
@@ -1205,14 +1265,14 @@ def admin_search():
             result = db.session.query(ParkingLot).filter(ParkingLot.prime_location_name.ilike(f"%{query}%")).all()
         return render_template("/admin/search.html", results = result, type = type, user_histories= user_histories, request = request)
     
-@app.route("/admin/summary")
+@routes.route("/admin/summary")
 @login_required
 def admin_summary():
     initial_payload = _admin_summary_payload(range_key="30d")
     return render_template("/admin/summary.html", summary_payload=initial_payload)
 
 
-@app.route("/api/admin/summary")
+@routes.route("/api/admin/summary")
 @login_required
 def api_admin_summary():
     range_key = request.args.get("range", "30d")
@@ -1234,7 +1294,7 @@ def api_admin_summary():
     return jsonify(payload)
 
 
-@app.route("/admin/summary/export-csv")
+@routes.route("/admin/summary/export-csv")
 @login_required
 def admin_summary_export_csv():
     payload = _admin_summary_payload(
@@ -1282,7 +1342,7 @@ def admin_summary_export_csv():
     return send_file(csv_bytes, as_attachment=True, download_name="admin_summary.csv", mimetype="text/csv")
 
 
-@app.route("/admin/summary/export-pdf")
+@routes.route("/admin/summary/export-pdf")
 @login_required
 def admin_summary_export_pdf():
     payload = _admin_summary_payload(
@@ -1324,7 +1384,7 @@ def admin_summary_export_pdf():
     return send_file(pdf_buffer, as_attachment=True, download_name="admin_summary.pdf", mimetype="application/pdf")
 
 
-@app.route("/admin/summary/email-report", methods=["POST"])
+@routes.route("/admin/summary/email-report", methods=["POST"])
 @login_required
 def admin_summary_email_report():
     payload = _admin_summary_payload(
@@ -1358,7 +1418,7 @@ def admin_summary_email_report():
     return redirect(url_for("admin_summary"))
 
 
-@app.route("/api/users")
+@routes.route("/api/users")
 @login_required
 def api_users():
     now = datetime.now()
@@ -1381,7 +1441,7 @@ def api_users():
     })
 
 
-@app.route("/api/parking")
+@routes.route("/api/parking")
 @login_required
 def api_parking():
     lots = db.session.query(ParkingLot).all()
@@ -1416,7 +1476,7 @@ def api_parking():
     })
 
 
-@app.route("/api/bookings")
+@routes.route("/api/bookings")
 @login_required
 def api_bookings():
     now = datetime.now()
@@ -1492,7 +1552,7 @@ def api_bookings():
     })
 
 
-@app.route("/api/payments")
+@routes.route("/api/payments")
 @login_required
 def api_payments():
     transactions = db.session.query(WalletTransaction).all()
@@ -1556,7 +1616,7 @@ def api_payments():
         "total_revenue": round(sum(monthly_totals.values()), 2),
     })
 
-@app.route("/user/dashboard")
+@routes.route("/user/dashboard")
 @login_required
 def user_dash():
     # Fetch all lots with at least one available spot
@@ -1619,7 +1679,7 @@ def user_dash():
     )
 
 
-@app.route("/user/profile", methods=["GET", "POST"])
+@routes.route("/user/profile", methods=["GET", "POST"])
 @login_required
 def user_profile():
     if request.method == "GET":
@@ -1684,7 +1744,7 @@ def user_profile():
     return redirect("/user/profile")
 
 
-@app.route("/user/remove-profile-image", methods=["POST"])
+@routes.route("/user/remove-profile-image", methods=["POST"])
 @login_required
 def remove_profile_image():
     if current_user.profile_image and current_user.profile_image != "default.png":
@@ -1699,7 +1759,7 @@ def remove_profile_image():
     return redirect("/user/profile")
 
 
-@app.route("/user/notifications/mark-read", methods=["POST"])
+@routes.route("/user/notifications/mark-read", methods=["POST"])
 @login_required
 def mark_notifications_read():
     latest = db.session.query(NotificationLog.id).filter_by(user_id=current_user.id).order_by(NotificationLog.id.desc()).first()
@@ -1708,7 +1768,7 @@ def mark_notifications_read():
     return jsonify({"success": True, "unread_count": 0})
 
 
-@app.route("/user/subscriptions", methods=["GET"])
+@routes.route("/user/subscriptions", methods=["GET"])
 @login_required
 def user_subscriptions():
     active_subscription = _get_active_subscription(current_user.id)
@@ -1772,7 +1832,7 @@ def user_subscriptions():
     )
 
 
-@app.route("/user/wallet", methods=["GET"])
+@routes.route("/user/wallet", methods=["GET"])
 @login_required
 def user_wallet():
     _sync_booking_wallet_adjustments(current_user.id)
@@ -1818,7 +1878,7 @@ def user_wallet():
     )
 
 
-@app.route("/wallet/add-money", methods=["POST"])
+@routes.route("/wallet/add-money", methods=["POST"])
 @login_required
 def wallet_add_money():
     amount = request.form.get("amount", type=float)
@@ -1832,7 +1892,7 @@ def wallet_add_money():
     return redirect("/user/wallet")
 
 
-@app.route("/wallet/withdraw", methods=["POST"])
+@routes.route("/wallet/withdraw", methods=["POST"])
 @login_required
 def wallet_withdraw():
     amount = request.form.get("amount", type=float)
@@ -1850,7 +1910,7 @@ def wallet_withdraw():
     return redirect("/user/wallet")
 
 
-@app.route("/user/change-password", methods=["POST"])
+@routes.route("/user/change-password", methods=["POST"])
 @login_required
 def change_password():
     old_password = request.form.get("old_password")
@@ -1864,7 +1924,7 @@ def change_password():
     return redirect("/user/profile")
 
 
-@app.route("/subscription/subscribe", methods=["POST"])
+@routes.route("/subscription/subscribe", methods=["POST"])
 @login_required
 def subscribe_monthly_pass():
     tier = request.form.get("tier")
@@ -1874,7 +1934,7 @@ def subscribe_monthly_pass():
     return redirect(url_for("subscription_payment", tier=tier))
 
 
-@app.route("/subscription/payment", methods=["GET"])
+@routes.route("/subscription/payment", methods=["GET"])
 @login_required
 def subscription_payment():
     tier = request.args.get("tier")
@@ -1898,7 +1958,7 @@ def subscription_payment():
     )
 
 
-@app.route("/subscription/activate", methods=["POST"])
+@routes.route("/subscription/activate", methods=["POST"])
 @login_required
 def activate_subscription():
     tier = request.form.get("tier")
@@ -1947,7 +2007,7 @@ def activate_subscription():
     return redirect("/user/subscriptions")
 
 
-@app.route("/subscription/cancel", methods=["POST"])
+@routes.route("/subscription/cancel", methods=["POST"])
 @login_required
 def cancel_subscription():
     active_sub = _get_active_subscription(current_user.id)
@@ -1981,7 +2041,7 @@ def cancel_subscription():
     return redirect("/user/subscriptions")
 
 
-@app.route("/alert/subscribe", methods=["POST"])
+@routes.route("/alert/subscribe", methods=["POST"])
 @login_required
 def subscribe_availability_alert():
     lot_id = request.form.get("lot_id")
@@ -2007,7 +2067,7 @@ def subscribe_availability_alert():
     return redirect(request.referrer or "/user/dashboard")
 
 
-@app.route("/user/favorites")
+@routes.route("/user/favorites")
 @login_required
 def user_favorites():
     favorite_entries = db.session.query(FavoriteParkingLot).filter_by(user_id=current_user.id).all()
@@ -2027,13 +2087,13 @@ def user_favorites():
         favorite_lot_ids=favorite_lot_ids,
     )
 
-@app.route("/user/search", methods = ["GET", "POST"])
+@routes.route("/user/search", methods = ["GET", "POST"])
 @login_required
 def user_search():
     # Search is unified inside the dashboard page.
     return redirect("/user/dashboard")
 
-@app.route('/user/summary')
+@routes.route('/user/summary')
 @login_required
 def user_summary():
     now = datetime.now()
@@ -2124,7 +2184,7 @@ def user_summary():
     )
 
 
-@app.route('/user/summary/export-csv')
+@routes.route('/user/summary/export-csv')
 @login_required
 def user_summary_export_csv():
     bookings = (
@@ -2179,7 +2239,7 @@ def user_summary_export_csv():
     return send_file(output, as_attachment=True, download_name="booking_summary.csv", mimetype="text/csv")
 
 
-@app.route("/parkingLots", methods=["POST"])
+@routes.route("/parkingLots", methods=["POST"])
 def parkingLot():
     if request.args.get("task") == "create":
         par_name = request.form.get("name")
@@ -2239,7 +2299,7 @@ def parkingLot():
             flash('Parking Lot Does not Exist !!', 'warning')
             return redirect('/admin/actions')
 
-@app.route("/booking", methods=["POST"])
+@routes.route("/booking", methods=["POST"])
 @login_required
 def booking():
     lot_id = request.form.get("lot_id", type=int)
@@ -2260,7 +2320,7 @@ def booking():
     return redirect("/user/dashboard")
 
 
-@app.route("/payment/checkout", methods=["GET"])
+@routes.route("/payment/checkout", methods=["GET"])
 @login_required
 def payment_checkout():
     lot_id = request.args.get("lot_id", type=int)
@@ -2296,7 +2356,7 @@ def payment_checkout():
     )
 
 
-@app.route("/payment/checkout/card", methods=["GET"])
+@routes.route("/payment/checkout/card", methods=["GET"])
 @login_required
 def payment_checkout_card():
     lot_id = request.args.get("lot_id", type=int)
@@ -2332,7 +2392,7 @@ def payment_checkout_card():
     )
 
 
-@app.route("/payment/checkout/upi", methods=["GET"])
+@routes.route("/payment/checkout/upi", methods=["GET"])
 @login_required
 def payment_checkout_upi():
     lot_id = request.args.get("lot_id", type=int)
@@ -2369,7 +2429,7 @@ def payment_checkout_upi():
     )
 
 
-@app.route("/payment/checkout/wallet", methods=["GET"])
+@routes.route("/payment/checkout/wallet", methods=["GET"])
 @login_required
 def payment_checkout_wallet():
     lot_id = request.args.get("lot_id", type=int)
@@ -2411,7 +2471,7 @@ def payment_checkout_wallet():
     )
 
 
-@app.route("/payment/confirm/wallet", methods=["POST"])
+@routes.route("/payment/confirm/wallet", methods=["POST"])
 @login_required
 def payment_confirm_wallet():
     payload = request.get_json(silent=True) or {}
@@ -2460,7 +2520,7 @@ def payment_confirm_wallet():
     )
 
 
-@app.route("/payment/checkout/fastag", methods=["GET"])
+@routes.route("/payment/checkout/fastag", methods=["GET"])
 @login_required
 def payment_checkout_fastag():
     lot_id = request.args.get("lot_id", type=int)
@@ -2469,7 +2529,7 @@ def payment_checkout_fastag():
     return redirect(url_for("payment_checkout_wallet", lot_id=lot_id, vehicle_number=vehicle_number, duration_minutes=duration_minutes))
 
 
-@app.route("/payment/confirm", methods=["POST"])
+@routes.route("/payment/confirm", methods=["POST"])
 @login_required
 def payment_confirm():
     payload = request.get_json(silent=True) or {}
@@ -2501,7 +2561,7 @@ def payment_confirm():
         }
     )
 
-@app.route("/release/<int:booking_id>", methods=["POST"])
+@routes.route("/release/<int:booking_id>", methods=["POST"])
 @login_required
 def release_spot(booking_id):
     # Fetch the reservation with the given ID and confirm it belongs to the current user
@@ -2550,7 +2610,7 @@ def release_spot(booking_id):
     return redirect("/user/dashboard")
 
 
-@app.route("/cancel/<int:booking_id>", methods=["POST"])
+@routes.route("/cancel/<int:booking_id>", methods=["POST"])
 @login_required
 def cancel_booking(booking_id):
     reservation = ReservedParkingSpot.query.filter_by(id=booking_id, user_id=current_user.id).first()
@@ -2607,7 +2667,7 @@ def cancel_booking(booking_id):
     return redirect("/user/dashboard")
 
 
-@app.route("/favorite/toggle", methods=["POST"])
+@routes.route("/favorite/toggle", methods=["POST"])
 @login_required
 def toggle_favorite():
     lot_id = request.form.get("lot_id")
@@ -2633,7 +2693,7 @@ def toggle_favorite():
     return redirect(request.referrer or "/user/dashboard")
 
 
-@app.route("/review", methods=["POST"])
+@routes.route("/review", methods=["POST"])
 @login_required
 def submit_review():
     lot_id = request.form.get("lot_id")
@@ -2682,7 +2742,7 @@ def submit_review():
     return redirect(request.referrer or "/user/dashboard")
 
 
-@app.route("/user/receipt/<int:booking_id>")
+@routes.route("/user/receipt/<int:booking_id>")
 @login_required
 def user_receipt_pdf(booking_id):
     booking = db.session.query(ReservedParkingSpot).filter_by(id=booking_id, user_id=current_user.id).first()
@@ -2741,7 +2801,7 @@ def user_receipt_pdf(booking_id):
     )
 
 
-@app.route("/user/monthly-invoice")
+@routes.route("/user/monthly-invoice")
 @login_required
 def user_monthly_invoice():
     now = datetime.now()
@@ -2781,7 +2841,7 @@ def user_monthly_invoice():
     return send_file(pdf_buffer, as_attachment=True, download_name=f"invoice_{now.year}_{now.month}.pdf", mimetype="application/pdf")
 
 
-@app.route("/admin/user-report-pdf/<int:user_id>")
+@routes.route("/admin/user-report-pdf/<int:user_id>")
 @login_required
 def admin_user_report_pdf(user_id):
     user = db.session.query(User).filter_by(id=user_id).first()
@@ -2821,7 +2881,7 @@ def admin_user_report_pdf(user_id):
     return send_file(pdf_buffer, as_attachment=True, download_name=f"user_{user.id}_report.pdf", mimetype="application/pdf")
 
 
-@app.route("/admin/send-reminders", methods=["POST"])
+@routes.route("/admin/send-reminders", methods=["POST"])
 @login_required
 def send_all_booking_reminders():
     all_users = db.session.query(User).all()
@@ -2832,7 +2892,7 @@ def send_all_booking_reminders():
     return redirect("/admin/summary")
 
 
-@app.route("/delete_parking/<int:lot_id>", methods=["POST"])
+@routes.route("/delete_parking/<int:lot_id>", methods=["POST"])
 @login_required
 def delete_parking(lot_id):
     lot = db.session.query(ParkingLot).filter_by(id=lot_id).first()

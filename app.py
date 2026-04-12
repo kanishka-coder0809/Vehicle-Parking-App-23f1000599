@@ -7,7 +7,7 @@ from backend.api import api
 from sqlalchemy import text
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder="templates")
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///vehicle__app_db.sqlite3"
     app.config["SECRET_KEY"] = "thisismayankdhangar"
     app.config["MAIL_SERVER"] = "smtp.gmail.com"
@@ -17,9 +17,14 @@ def create_app():
     app.config["MAIL_PASSWORD"] = ""
     app.config["MAIL_DEFAULT_SENDER"] = "noreply@findmyspot.local"
     app.config["MAIL_SUPPRESS_SEND"] = True
+
     db.init_app(app)
     api.init_app(app)
     login_manager = LoginManager(app)
+
+    # Register Blueprint for all routes
+    from backend.routes import routes
+    app.register_blueprint(routes)
 
     @login_manager.user_loader
     def load_user(email): #taking the id from cookies
@@ -65,7 +70,7 @@ def create_app():
 
 app = create_app()
 
-from backend.routes import *
+## Blueprint is now registered above; do not import *
 from backend.create_data import *
 from backend.api import *
 
