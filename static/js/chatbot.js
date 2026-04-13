@@ -40,29 +40,41 @@ document.addEventListener('DOMContentLoaded', function () {
   const typing = panel.querySelector('#chatbot-typing');
   const suggestionsDiv = panel.querySelector('#chatbot-suggestions');
   const closeBtn = panel.querySelector('.close-btn');
+  // 🔥 Clear Chat Button
+const clearBtn = document.createElement('button');
+clearBtn.innerHTML = '🗑';
+clearBtn.title = "Clear Chat";
+clearBtn.style.marginRight = "8px";
+clearBtn.style.fontSize = "1.2rem";
+clearBtn.style.background = "none";
+clearBtn.style.border = "none";
+clearBtn.style.cursor = "pointer";
+clearBtn.style.color = "#fff";
 
+// header me add karo (close button se pehle)
+const header = panel.querySelector('#chatbot-header');
+header.insertBefore(clearBtn, closeBtn);
+
+// click event
+clearBtn.onclick = () => {
+  messagesDiv.innerHTML = '';
+  addMessage("Hey 👋 How can I help you today?", "bot");
+};
   // --- Suggestions ---
-  const suggestions = [
-    'Find parking',
-    'My bookings',
-    'Wallet balance'
-  ];
-  suggestionsDiv.innerHTML = suggestions.map(
-    s => `<button type="button" class="chatbot-chip">${s}</button>`
-  ).join('');
-  suggestionsDiv.addEventListener('click', e => {
-    if (e.target.classList.contains('chatbot-chip')) {
-      input.value = e.target.textContent;
-      input.focus();
-    }
-  });
+  suggestionsDiv.innerHTML = '';
 
   // --- FAB open/close ---
   function openPanel() {
-    panel.classList.add('open');
-    open = true;
-    setTimeout(() => input.focus(), 350);
+  panel.classList.add('open');
+  open = true;
+
+  // 🔥 First time open pe hello message
+  if (messagesDiv.children.length === 0) {
+    addMessage("Hey 👋 How can I help you today?", "bot");
   }
+
+  setTimeout(() => input.focus(), 350);
+}
   function closePanel() {
     panel.classList.remove('open');
     open = false;

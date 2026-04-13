@@ -1,3 +1,44 @@
+
+# --- Imports ---
+from flask import Blueprint, render_template, request, redirect, flash, url_for, send_file, jsonify, session, current_app
+from flask_login import login_user, logout_user, login_required, current_user
+# --- Blueprint Setup ---
+routes = Blueprint("routes", __name__)
+
+# --- Coupon Application Route (User) ---
+@routes.route("/user/apply-coupon", methods=["POST"])
+@login_required
+def apply_coupon():
+    code = request.json.get("code")
+    if not code:
+        return {"success": False, "message": "No coupon code provided."}, 400
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    coupon = db.session.query(Coupon).filter(
+        Coupon.code == code,
+        Coupon.is_active == True,
+        Coupon.expiry_date >= today_str
+    ).first()
+    if not coupon:
+        return {"success": False, "message": "Invalid or expired coupon."}, 404
+    # Optionally: check usage limits per user here
+    # For demo: apply discount to a dummy amount (e.g., 1000)
+    base_amount = 1000
+    discount = 0
+    if coupon.discount_type == 'flat':
+        discount = min(coupon.discount_value, base_amount)
+    elif coupon.discount_type == 'percentage':
+        discount = (base_amount * coupon.discount_value) / 100.0
+        if coupon.max_discount:
+            discount = min(discount, coupon.max_discount)
+    final_amount = base_amount - discount
+    return {
+        "success": True,
+        "message": f"Coupon '{coupon.code}' applied!",
+        "discount": round(discount, 2),
+        "final_amount": round(final_amount, 2),
+        "base_amount": base_amount
+    }
+
 from datetime import datetime, timedelta
 import os
 import csv
@@ -8,11 +49,9 @@ from io import BytesIO, StringIO
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pylab as plt
-from flask import (
-    Blueprint, render_template, request, redirect, flash, url_for, send_file, jsonify, session, current_app
-)
+
 from .models import db, Admin, User, ParkingLot, ParkingSpot, ReservedParkingSpot, ParkingLotReview, FavoriteParkingLot, NotificationLog, SpotAvailabilityAlert, MonthlySubscription, WalletTransaction, Coupon
-from flask_login import login_user, logout_user, login_required, current_user
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
@@ -22,41 +61,48 @@ try:
 except Exception:
     MAIL_AVAILABLE = False
 
-try:
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib import colors
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.units import inch
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
-    PDF_AVAILABLE = True
-except Exception:
-    PDF_AVAILABLE = False
-
-# --- Blueprint Setup ---
-routes = Blueprint("routes", __name__)
-
 # --- ADMIN COUPONS PAGE ---
 @routes.route("/admin/coupons")
 @login_required
 def admin_coupons():
     # Fetch all coupons
     coupons = db.session.query(Coupon).all()
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    # Add status property to each coupon
+    coupons_data = []
+    for c in coupons:
+        status = "Active" if c.is_active and c.expiry_date >= today_str else "Expired"
+        coupons_data.append({
+            "id": c.id,
+            "code": c.code,
+            "discount_type": c.discount_type,
+            "discount_value": c.discount_value,
+            "min_amount": c.min_amount,
+            "max_discount": c.max_discount,
+            "expiry_date": c.expiry_date,
+            "usage_limit": c.usage_limit,
+            "used_count": c.used_count,
+            "usage_limit_per_user": c.usage_limit_per_user,
+            "applicable_on": c.applicable_on,
+            "is_active": c.is_active,
+            "status": status
+        })
     # Stats
-    total = len(coupons)
-    active = sum(1 for c in coupons if c.is_active and c.expiry_date >= datetime.now().strftime('%Y-%m-%d'))
-    expired = sum(1 for c in coupons if c.expiry_date < datetime.now().strftime('%Y-%m-%d'))
-    most_used = max(coupons, key=lambda c: c.used_count, default=None)
+    total = len(coupons_data)
+    active = sum(1 for c in coupons_data if c["status"] == "Active")
+    expired = sum(1 for c in coupons_data if c["status"] == "Expired")
+    most_used = max(coupons_data, key=lambda c: c["used_count"], default=None)
     # Locations for dropdown (if needed)
     locations = db.session.query(ParkingLot).all()
     stats = {
         "total": total,
         "active": active,
         "expired": expired,
-        "most_used": most_used.code if most_used else "-"
+        "most_used": most_used["code"] if most_used else "-"
     }
     return render_template(
         "admin/coupons.html",
-        coupons=coupons,
+        coupons=coupons_data,
         stats=stats,
         locations=locations
     )
@@ -65,24 +111,183 @@ from werkzeug.utils import secure_filename
 # --- AI Chatbot Route ---
 @routes.route('/chatbot', methods=['POST'])
 def chatbot_route():
+    from flask import session, request, jsonify
+
     data = request.get_json(force=True)
-    msg = (data.get('message') or '').lower()
-    if 'parking' in msg:
-        reply = 'Showing nearby parking options'
-    elif 'booking' in msg:
-        reply = 'Here are your bookings'
-    elif 'wallet' in msg:
-        reply = 'Your wallet balance is ₹1000 (demo)'
-    else:
-        reply = 'I can help with parking, bookings, and wallet info'
-    return jsonify({'reply': reply})
+    msg = (data.get('message') or '').lower().strip()
 
-try:
-    from flask_mail import Mail, Message  # type: ignore[import-not-found]
-    MAIL_AVAILABLE = True
-except Exception:
-    MAIL_AVAILABLE = False
+    # -------------------------
+    # CLEAN TEXT
+    # -------------------------
+    msg = msg.replace("?", "").replace(".", "")
+    words = msg.split()
 
+    # -------------------------
+    # BASIC GROUPS
+    # -------------------------
+    greetings = ["hi", "hello", "hey", "hii", "yo"]
+    thanks = ["thanks", "thank", "thx"]
+    followups = ["how", "kaise", "steps", "process", "kaha", "where"]
+
+    # -------------------------
+    # GREETING
+    # -------------------------
+    if any(w in words for w in greetings):
+        session["last_intent"] = None
+        return jsonify({"reply": "Hey 👋 How can I help you today?"})
+
+    if any(w in words for w in thanks):
+        return jsonify({"reply": "You're welcome 😊"})
+
+    # -------------------------
+    # STRONG INTENT DETECTION 🔥
+    # -------------------------
+
+    # PLANS PRIORITY
+    if any(x in msg for x in ["plan", "plans", "pricing", "subscription"]):
+        session["last_intent"] = "plans"
+        return jsonify({
+            "reply": "We offer 3 plans:\n\nBasic – ₹1188/year\nAdvanced – ₹4788/year\nPremium – ₹29988/year\n\nAsk about any plan for details."
+        })
+
+    if "basic" in msg:
+        return jsonify({
+            "reply": "Basic Plan (₹1188/year):\n• 5% discount\n• Faster checkout\n• Wallet cashback\n\nBest for occasional users."
+        })
+
+    if "advanced" in msg:
+        return jsonify({
+            "reply": "Advanced Plan (₹4788/year):\n• 1 hr free parking daily\n• Discounted extra hours\n• Priority booking\n• FASTag billing\n\nBest for daily users."
+        })
+
+    if "premium" in msg:
+        return jsonify({
+            "reply": "Premium Plan (₹29988/year):\n• Unlimited parking\n• Reserved slots\n• No surge pricing\n• Fast entry/exit\n\nBest for heavy usage."
+        })
+
+    # -------------------------
+    # INTENT DEFINITIONS
+    # -------------------------
+
+    intents = [
+
+        {
+            "name": "parking",
+            "keywords": ["parking", "park", "spot", "nearby", "kaha milega"],
+            "response": "You can find parking from Dashboard → Available Parking 🚗",
+            "followup": "Search location → click Book Now."
+        },
+
+        {
+            "name": "booking",
+            "keywords": ["book", "booking", "reserve", "slot"],
+            "response": "Click 'Book Now' on any parking card to book ✅",
+            "followup": "Select location → click Book Now → pay."
+        },
+
+        {
+            "name": "history",
+            "keywords": ["history", "past", "previous", "bookings", "records"],
+            "response": "Check booking history in Dashboard → Parking History 📜",
+            "followup": "Open Dashboard → Parking History tab."
+        },
+
+        {
+            "name": "favorites",
+            "keywords": ["favorite", "saved", "liked", "wishlist"],
+            "response": "Saved locations are in 'Saved / Favorites' ❤️",
+            "followup": "Go to Dashboard → Favorites."
+        },
+
+        {
+            "name": "map",
+            "keywords": ["map", "location map", "map view"],
+            "response": "Switch to Map view to see parking locations 🗺️",
+            "followup": "Click 'Map' on dashboard."
+        },
+
+        {
+            "name": "wallet",
+            "keywords": ["wallet", "balance", "money", "amount"],
+            "response": "Your wallet balance is in Wallet section 💰",
+            "followup": "Go to Wallet → view balance."
+        },
+
+        {
+            "name": "wallet_actions",
+            "keywords": ["add money", "withdraw", "deposit", "transaction"],
+            "response": "You can add/withdraw money in Wallet 💳",
+            "followup": "Go to Wallet → choose action."
+        },
+
+        {
+            "name": "summary",
+            "keywords": ["summary", "analytics", "report", "stats"],
+            "response": "View analytics in Summary Dashboard 📊",
+            "followup": "Go to Summary → see charts."
+        },
+
+        {
+            "name": "profile",
+            "keywords": ["profile", "account", "details", "edit profile"],
+            "response": "Manage profile in Profile section 👤",
+            "followup": "Go to Profile → update details."
+        },
+
+        {
+            "name": "coupon",
+            "keywords": ["coupon", "discount code", "promo"],
+            "response": "Coupons can be redeemed in Profile 🎟️",
+            "followup": "Redeem → apply during payment."
+        },
+
+        {
+            "name": "payment",
+            "keywords": ["payment", "pay", "upi", "card", "checkout"],
+            "response": "You can pay via Card, UPI or Wallet 💳",
+            "followup": "Choose method → confirm payment."
+        },
+
+        {
+            "name": "subscription",
+            "keywords": ["subscription", "membership"],
+            "response": "Check plans in Subscriptions section 💼",
+            "followup": "Compare Basic, Advanced, Premium."
+        }
+    ]
+
+    # -------------------------
+    # SMART MATCH (SCORING 🔥)
+    # -------------------------
+    best_match = None
+    best_score = 0
+
+    for intent in intents:
+        score = sum(1 for k in intent["keywords"] if k in msg)
+        if score > best_score:
+            best_score = score
+            best_match = intent
+
+    if best_match:
+        session["last_intent"] = best_match["name"]
+        return jsonify({"reply": best_match["response"]})
+
+    # -------------------------
+    # FOLLOW-UP
+    # -------------------------
+    if any(f in words for f in followups):
+        last = session.get("last_intent")
+        if last:
+            for intent in intents:
+                if intent["name"] == last:
+                    return jsonify({"reply": intent["followup"]})
+
+    # -------------------------
+    # FALLBACK
+    # -------------------------
+    return jsonify({
+        "reply": "I can help with parking, booking, wallet, plans, coupons or payments 😊"
+    })
 try:
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
@@ -1164,7 +1369,7 @@ def index():
 def logout():
     logout_user()
     flash('Logged Out Successfully !!', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('routes.login'))
 
 @routes.route("/register", methods = ["GET", "POST"])
 def register():
@@ -1186,7 +1391,7 @@ def register():
             db.session.add(new_user)
             db.session.commit()
             flash('E-mail Registered !!', 'success')
-            return redirect(url_for('login'))
+            return redirect(url_for('routes.login'))
 
 @routes.route("/login", methods =["GET", "POST"])
 def login():
@@ -1210,10 +1415,10 @@ def login():
                     return redirect(f"/user/dashboard")
             else:
                 flash('Invalid password !!', 'danger')
-                return redirect(url_for('login'))
+                return redirect(url_for('routes.login'))
         else:
             flash('Invalid E-mail !!', 'danger')
-            return redirect(url_for('login'))
+            return redirect(url_for('routes.login'))
 
 @routes.route("/admin/dashboard")
 @login_required
@@ -1695,6 +1900,26 @@ def user_profile():
             plan = _get_subscription_plan(active_subscription.tier)
             active_features = plan.get("features", []) if plan else []
             active_cycle = _subscription_cycle_from_record(active_subscription)
+
+        # Fetch all active coupons (not expired, is_active)
+        today_str = datetime.now().strftime('%Y-%m-%d')
+        user_coupons = db.session.query(Coupon).filter(
+            Coupon.is_active == True,
+            Coupon.expiry_date >= today_str
+        ).all()
+
+        # Prepare coupon dicts for template
+        user_coupons_data = []
+        for c in user_coupons:
+            user_coupons_data.append({
+                "id": c.id,
+                "code": c.code,
+                "discount_type": c.discount_type,
+                "discount": int(c.discount_value) if c.discount_type == 'flat' else int(c.discount_value),
+                "expiry_date": c.expiry_date,
+                "status": "Active" if c.is_active and c.expiry_date >= today_str else "Inactive",
+            })
+
         return render_template(
             "/user/profile.html",
             user_notifications=user_notifications,
@@ -1703,6 +1928,8 @@ def user_profile():
             active_subscription=active_subscription,
             active_features=active_features,
             active_cycle=active_cycle,
+            user_coupons=user_coupons_data,
+            coupons_loading=False,
         )
 
     current_user.name = request.form.get("name")
@@ -2343,6 +2570,15 @@ def payment_checkout():
     pricing_breakdown = _build_pricing_breakdown(lot.price, duration_minutes, active_subscription)
     payable_amount = pricing_breakdown["final_amount"]
 
+    # Fetch all active coupons for user display
+    from backend.models import Coupon
+    import datetime
+    today = datetime.date.today().isoformat()
+    coupons = Coupon.query.filter(
+        Coupon.is_active == True,
+        (Coupon.expiry_date == None) | (Coupon.expiry_date >= today)
+    ).all()
+
     return render_template(
         "/user/payment_options.html",
         lot=lot,
@@ -2353,6 +2589,7 @@ def payment_checkout():
         pricing_breakdown=pricing_breakdown,
         refund_rules=refund_rules,
         active_booking=active_booking,
+        coupons=coupons,
     )
 
 

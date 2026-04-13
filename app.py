@@ -1,6 +1,6 @@
 #for initializing project
 
-from flask import Flask
+from flask import Flask, session, redirect, request, url_for
 from backend.models import db, Admin, User
 from flask_login import LoginManager
 from backend.api import api
@@ -17,6 +17,12 @@ def create_app():
     app.config["MAIL_PASSWORD"] = ""
     app.config["MAIL_DEFAULT_SENDER"] = "noreply@findmyspot.local"
     app.config["MAIL_SUPPRESS_SEND"] = True
+
+    @app.route('/set_language/<lang>')
+    def set_language(lang):
+        if lang in ['en', 'hi']:
+            session['lang'] = lang
+        return redirect(request.referrer or url_for('routes.login'))
 
     db.init_app(app)
     api.init_app(app)
@@ -69,7 +75,7 @@ def create_app():
     return app
 
 app = create_app()
-
+app.secret_key = "my_super_secret_key_123"
 ## Blueprint is now registered above; do not import *
 from backend.create_data import *
 from backend.api import *

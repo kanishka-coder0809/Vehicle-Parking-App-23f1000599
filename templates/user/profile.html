@@ -1192,6 +1192,7 @@
                         {% endif %}
                     </div>
 
+
                     <div class="stack-card">
                         <div class="section-head">
                             <h5 class="section-title"><i class="bi bi-shield-lock"></i>Security</h5>
@@ -1269,10 +1270,15 @@
                             </div>
                             <div class="pref-box">
                                 <label for="profileLanguage" class="form-label mb-1">Language</label>
-                                <select id="profileLanguage" class="form-select form-select-sm" disabled>
+                                <select id="profileLanguage" class="form-select form-select-sm" onchange="changeLanguage(this.value)">
                                     <option value="en" {% if lang_guess == 'en' %}selected{% endif %}>English</option>
                                     <option value="hi" {% if lang_guess == 'hi' %}selected{% endif %}>Hindi</option>
                                 </select>
+                                <script>
+                                function changeLanguage(lang) {
+                                    window.location.href = '/set_language/' + lang;
+                                }
+                                </script>
                             </div>
                         </div>
                     </div>

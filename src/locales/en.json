@@ -1,0 +1,11 @@
+{
+  "profile": "Profile",
+  "language": "Language",
+  "saved_locations": "Saved Locations",
+  "active_alerts": "Active Availability Alerts",
+  "quick_access": "Quick Access",
+  "open_favorites": "Open Favorites",
+  "danger_zone": "Danger Zone",
+  "delete_account": "Delete Account",
+  "delete_warning": "Deleting account permanently removes access to profile, wallet history, and saved data."
+}

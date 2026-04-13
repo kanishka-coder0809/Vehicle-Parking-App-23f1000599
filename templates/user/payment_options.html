@@ -66,6 +66,66 @@
                                     <p>Pay instantly from your wallet balance.</p>
                                 </a>
                             </div>
+
+                            <!-- User Coupons Grid (above Apply Coupon) -->
+                            <div class="col-12 mt-2">
+                                <section class="section-card p-3 mb-3">
+                                    <h5 class="sub-heading"><i class="bi bi-ticket-perforated"></i> Available Coupons</h5>
+                                    <div class="row g-2">
+                                        {% if coupons and coupons|length > 0 %}
+                                            {% for coupon in coupons %}
+                                            <div class="col-md-4 col-sm-6">
+                                                <div class="coupon-card animate-coupon-card h-100 d-flex flex-column" style="padding:14px;border-radius:16px;gap:8px;font-size:14px;">
+                                                    <div class="coupon-card-header mb-1" style="margin-bottom:4px;">
+                                                        <div class="coupon-title" style="font-size:15px;font-weight:600;">{{ coupon.code }}</div>
+                                                    </div>
+                                                    <div class="coupon-info-grid" style="gap:6px 10px;margin-bottom:2px;">
+                                                        <div class="coupon-info-box" style="border-radius:7px;padding:4px 10px;min-height:22px;">
+                                                            <div class="coupon-info-label" style="font-size:11px;">Discount</div>
+                                                            <div class="coupon-info-value coupon-discount-main" style="font-size:13px;font-weight:600;">
+                                                                {% if coupon.discount_type == 'flat' %}
+                                                                    ₹{{ coupon.discount_value }} OFF
+                                                                {% else %}
+                                                                    {{ coupon.discount_value }}% OFF
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                        <div class="coupon-info-box" style="border-radius:7px;padding:4px 10px;min-height:22px;">
+                                                            <div class="coupon-info-label" style="font-size:11px;">Min Spend</div>
+                                                            <div class="coupon-info-value" style="font-size:13px;font-weight:600;">₹{{ coupon.min_amount }}</div>
+                                                        </div>
+                                                        <div class="coupon-info-box" style="border-radius:7px;padding:4px 10px;min-height:22px;">
+                                                            <div class="coupon-info-label" style="font-size:11px;">Type</div>
+                                                            <div class="coupon-info-value" style="font-size:13px;font-weight:600;">{{ coupon.discount_type|title }}</div>
+                                                        </div>
+                                                        <div class="coupon-info-box" style="border-radius:7px;padding:4px 10px;min-height:22px;">
+                                                            <div class="coupon-info-label" style="font-size:11px;">Expiry</div>
+                                                            <div class="coupon-info-value" style="font-size:13px;font-weight:600;">{{ coupon.expiry_date }}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="coupon-card-actions mt-auto" style="gap:6px;margin-top:2px;display:flex;align-items:center;">
+                                                        <button class="btn btn-admin-gradient copy-coupon-btn" type="button" data-coupon="{{ coupon.code }}">Copy Code</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="col-12 text-center text-muted">No coupons available.</div>
+                                        {% endif %}
+                                    </div>
+                                </section>
+                            </div>
+                            <!-- Coupon Card Inserted Below Payment Methods -->
+                            <div class="col-12 mt-2">
+                                <section class="section-card p-3 mt-3">
+                                    <h5 class="sub-heading"><i class="bi bi-ticket-perforated"></i> Apply Coupon</h5>
+                                    <div class="coupon-row d-flex gap-2 align-items-center">
+                                        <input type="text" class="form-control" id="couponInput" placeholder="Apply coupon" style="max-width: 320px;">
+                                        <button type="button" class="btn-gradient" id="applyCouponBtn">Apply</button>
+                                    </div>
+                                    <p class="coupon-preview mt-2 mb-0" id="couponPreview">Enter a coupon to see discount preview.</p>
+                                </section>
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-5">
@@ -101,12 +161,31 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
-        crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="/static/js/theme-toggle.js?v=20260410a"></script>
-    <script src="/static/js/saas-navbar.js?v=20260410c"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+                crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <script src="/static/js/theme-toggle.js?v=20260410a"></script>
+        <script src="/static/js/saas-navbar.js?v=20260410c"></script>
+        <script src="/static/js/coupon-apply.js?v=20260413"></script>
+        <script>
+        // Coupon Copy Button: change text to Copied! on click
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.copy-coupon-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var code = btn.getAttribute('data-coupon');
+                    navigator.clipboard.writeText(code);
+                    var oldText = btn.textContent;
+                    btn.textContent = 'Copied!';
+                    btn.disabled = true;
+                    setTimeout(function() {
+                        btn.textContent = oldText;
+                        btn.disabled = false;
+                    }, 1200);
+                });
+            });
+        });
+        </script>
 </body>
 
 </html>

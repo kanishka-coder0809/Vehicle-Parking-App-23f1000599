@@ -157,11 +157,11 @@
 
     <script>
         window.checkoutContext = {
-            lotId: {{ lot.id }},
+            lotId: {{ lot.id|tojson }},
             lotName: {{ lot.prime_location_name|tojson }},
             vehicleNumber: {{ vehicle_number|tojson }},
-            amount: {{ payable_amount }},
-            durationMinutes: {{ duration_minutes }},
+            amount: {{ payable_amount|tojson }},
+            durationMinutes: {{ duration_minutes|tojson }},
             hasActiveBooking: {{ (active_booking is not none)|tojson }}
         };
     </script>
