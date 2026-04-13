@@ -75,7 +75,7 @@ def create_app():
     return app
 
 app = create_app()
-app.secret_key = "my_super_secret_key_123"
+
 ## Blueprint is now registered above; do not import *
 from backend.create_data import *
 from backend.api import *
